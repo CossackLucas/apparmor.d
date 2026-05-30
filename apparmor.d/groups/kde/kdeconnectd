@@ -1,0 +1,127 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2025 You <your@email>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/4.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/kdeconnectd{,-sms}
+profile kdeconnectd @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/graphics>
+  include <abstractions/kde-strict>
+  include <abstractions/nameservice-strict>
+  include <abstractions/ssl_certs>
+  include <abstractions/user-read>
+
+  # ports 1714-1764
+  network tcp port=1714-1764,
+  network inet dgram port=1714-1764,
+  network inet6 dgram port=1714-1764,
+  network bluetooth stream,
+  network netlink dgram,
+  network netlink raw,
+
+  signal send set=term peer=kioworker,
+  signal send set=kill peer=sshfs,
+
+  # changes in local/kioworker
+  #aa:exec kioworker
+  @{bin}/fusermount rCx -> fusermount,
+  #@{bin}/kdeconnect-sms rix,
+  # changes in local/sshfs and sshfs_fusermount
+  @{bin}/sshfs rPx,
+
+  /etc/fstab r,
+  /etc/pulse/client.conf r,
+
+  / r,
+
+  owner @{user_cache_dirs}/kdeconnect.daemon/kdeconnect/albumart/ r,
+  owner @{user_cache_dirs}/kdeconnect.sms/qmlcache/*.qmlc r,
+  owner @{user_cache_dirs}/kdeconnect.sms/qtpipelinecache-@{arch}-little_endian-lp64/#@{int} rw,
+  owner @{user_cache_dirs}/kdeconnect.sms/qtpipelinecache-@{arch}-little_endian-lp64/qqpc_opengl rw,
+  owner @{user_cache_dirs}/kdeconnect.sms/qtpipelinecache-@{arch}-little_endian-lp64/qqpc_opengl.@{word6} rw,
+
+  owner link @{user_cache_dirs}/kdeconnect.sms/qtpipelinecache-@{arch}-little_endian-lp64/qqpc_opengl.@{word6} -> @{user_cache_dirs}/kdeconnect.sms/qtpipelinecache-@{arch}-little_endian-lp64/#@{int},
+
+  owner @{user_config_dirs}/kdeconnect/@{hex32}/config r,
+  owner @{user_config_dirs}/kdeconnect/@{hex32}/kdeconnect_sendnotifications/config r,
+  owner @{user_config_dirs}/kdeconnect/@{hex32}/kdeconnect_sendnotifications/ rw,
+  owner @{user_config_dirs}/kdeconnect/@{hex32}/kdeconnect_sendnotifications/#@{int} rw,
+  owner @{user_config_dirs}/kdeconnect/@{hex32}/kdeconnect_sendnotifications/config w,
+  owner @{user_config_dirs}/kdeconnect/@{hex32}/kdeconnect_sendnotifications/config.lock rwk,
+  owner @{user_config_dirs}/kdeconnect/#@{int} rw,
+  owner @{user_config_dirs}/kdeconnect/certificate.pem r,
+  owner @{user_config_dirs}/kdeconnect/config r,
+  owner @{user_config_dirs}/kdeconnect/privateKey.pem r,
+  owner @{user_config_dirs}/kdeconnect/trusted_devices rw,
+  owner @{user_config_dirs}/kdeconnect/trusted_devices.lock rwk,
+  owner @{user_config_dirs}/kdeconnect/trusted_devices.@{word6} rw,
+  owner @{user_config_dirs}/kdedefaults/plasmarc r,
+  owner @{user_config_dirs}/plasmarc r,
+  owner @{user_config_dirs}/pulse/cookie rk,
+
+  owner link @{user_config_dirs}/kdeconnect/trusted_devices.@{word6} -> @{user_config_dirs}/kdeconnect/#@{int},
+  owner link @{user_config_dirs}/kdeconnect/@{hex32}/kdeconnect_sendnotifications/config.@{word6} -> @{user_config_dirs}/kdeconnect/@{hex32}/kdeconnect_sendnotifications/#@{int},
+
+  owner @{user_share_dirs}/kpeople/persondb rwk,
+  owner @{user_share_dirs}/kpeoplevcard/ r,
+  owner @{user_share_dirs}/kpeoplevcard/kdeconnect-@{hex32}/ r,
+  owner @{user_share_dirs}/kpeoplevcard/kdeconnect-@{hex32}/*.vcf r,
+  owner @{user_share_dirs}/user-places.xbel rw,
+  owner @{user_share_dirs}/user-places.xbel.bak w,
+  owner @{user_share_dirs}/user-places.xbel.@{word6} rw,
+  owner @{user_share_dirs}/user-places.xbel.tbcache w,
+  owner @{user_share_dirs}/user-places.xbel.tbcache.@{word6} rw,
+
+  owner link @{user_share_dirs}/user-places.xbel.bak -> @{user_share_dirs}/#@{int6},
+  owner link @{user_share_dirs}/user-places.xbel.@{word6} -> @{user_share_dirs}/#@{int6},
+  owner link @{user_share_dirs}/user-places.xbel.tbcache.@{word6} -> @{user_share_dirs}/#@{int6},
+
+  owner /tmp/plasma-browser-integration_artwork_@{word6}.jpg r,
+
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/@{hex32}/ rw,
+  owner @{run}/user/@{uid}/kdeconnect.daemon@{word6}.@{u8}.kioworker.socket w,
+  owner @{run}/user/@{uid}/pulse/ r,
+        @{run}/udev/data/* r,
+
+  owner link @{run}/user/@{uid}/kdeconnect.daemon@{word6}.@{u8}.kioworker.socket -> @{run}/user/@{uid}/#@{int},
+
+        /dev/shm/ r,
+  owner /dev/shm/pulse-shm-@{int} r,
+
+  @{sys}/bus/ r,
+  @{sys}/bus/usb/devices/ r,
+  #@{sys}/devices/virtual/input/input@{u8}/event@{u8}/uevent r,
+  #@{sys}/devices/virtual/input/input@{u8}/uevent r,
+  #@{sys}/devices/virtual/sound/seq/uevent r,
+  #@{sys}/devices/virtual/sound/timer/uevent r,
+  #@{sys}/devices/virtual/misc/uhid/@{hex4}:@{hex4}:@{hex4}.@{hex4}/input/input@{u8}{,/event@{u8},/js@{u8},/mouse@{u8}}/uevent r,
+  #@{sys}/devices/virtual/misc/uhid/0005:045E:0B13.0009/input/input36/uevent r,
+  @{sys}/devices/virtual/**/uevent r,
+
+
+  owner @{PROC}/@{pid}/mountinfo r,
+
+        /dev/tty r,
+
+  profile fusermount {
+    include <abstractions/base>
+    include <abstractions/app/fusermount>
+
+    network bluetooth stream,
+    network inet dgram,
+    network inet6 dgram,
+
+    umount @{run}/user/@{uid}/@{hex32}/,
+
+    include if exists <local/kdeconnectd_fusermount>
+  }
+
+  include if exists <local/kdeconnectd>
+}
+
+# vim:syntax=apparmor
