@@ -80,6 +80,8 @@ profile konsole @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{tmp}/#@{int} rw,
   owner @{tmp}/konsole.@{rand6} rw,
 
+  @{run}/mount/utab r,
+
   owner @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/app.slice/app-org.kde.konsole-@{int}.scope/** rw,
 
         @{PROC}/@{pid}/task/@{tid}/children r,

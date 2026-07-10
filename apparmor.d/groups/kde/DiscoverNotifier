@@ -59,12 +59,11 @@ profile DiscoverNotifier @{exec_path} flags=(attach_disconnected,mediate_deleted
   owner @{user_config_dirs}/PlasmaDiscoverUpdates.lock rwk,
 
   owner @{user_share_dirs}/flatpak/{,**} rw,
-  owner @{user_state_dirs}/discovernotifierstaterc r,
-  owner @{user_state_dirs}/discovernotifierstaterc.@{rand6} rwlk,
-
+  owner @{user_state_dirs}/#@{int6} rw,
   owner @{user_state_dirs}/discovernotifierstaterc rw,
-  owner @{user_state_dirs}/discovernotifierstaterc.@{rand6} rwlk,
-  owner link @{user_state_dirs}/discovernotifierstaterc -> @{user_state_dirs}/#@{int},
+  owner @{user_state_dirs}/discovernotifierstaterc.@{rand6} rwk,
+  owner link @{user_state_dirs}/discovernotifierstaterc.@{rand6} -> @{user_state_dirs}/#@{int},
+  owner @{user_state_dirs}/discovernotifierstaterc.lock rwk,
 
   owner @{tmp}/ostree-gpg-@{rand6}/ rw,
   owner @{tmp}/ostree-gpg-@{rand6}/pubring.gpg rw,
