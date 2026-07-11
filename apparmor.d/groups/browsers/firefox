@@ -94,6 +94,8 @@ profile firefox @{exec_path} flags=(attach_disconnected) {
   owner @{tmp}/MozillaBackgroundTask-*/{**,} rw,
   owner @{tmp}/Mozillato-be-removed-cachePurge-{@{hex15},@{hex16}} rwk,
 
+  owner /var/tmp/dbTemp.@{rand6}/ rw,
+
   owner @{run}/user/@{uid}/app/ w,
   owner @{run}/user/@{uid}/app/org.keepassxc.KeePassXC/ w,
   owner @{run}/user/@{uid}/org.keepassxc.KeePassXC.BrowserServer w,
