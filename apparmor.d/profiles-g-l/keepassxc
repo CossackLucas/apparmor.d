@@ -32,6 +32,7 @@ profile keepassxc @{exec_path} {
 
   # Allowed apps to open
   @{bin}/geany           rPUx,
+  @{bin}/wl-copy         rCx -> wl-copy,
   @{lib}/firefox/firefox rPx,
   @{open_path}           rPx -> child-open,
 
@@ -81,6 +82,8 @@ profile keepassxc @{exec_path} {
   owner @{run}/user/@{uid}/org.keepassxc.KeePassXC.BrowserServer w,
   owner @{run}/user/@{uid}/org.keepassxc.KeePassXC/ w,
 
+  @{sys}/devices/@{pci_bus}/uevent r,
+
         @{PROC}/@{pid}/comm r,
         @{PROC}/@{pid}/stat r,
         @{PROC}/modules r,
@@ -96,6 +99,14 @@ profile keepassxc @{exec_path} {
 
   # Silencer
   deny @{user_share_dirs}/gvfs-metadata/* r,
+
+  profile wl-copy {
+      include <abstractions/base>
+
+      @{bin}/wl-copy r,
+
+      include if exists <local/keepassxc_wl-copy>
+  }
 
   include if exists <local/keepassxc>
 }
