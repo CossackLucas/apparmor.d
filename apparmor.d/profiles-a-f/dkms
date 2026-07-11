@@ -87,6 +87,7 @@ profile dkms @{exec_path} flags=(attach_disconnected) {
   /var/lib/shim-signed/mok/** r,
 
   / r,
+  /opt/ r,
   @{lib}/modules/*/updates/ rw,
   @{lib}/modules/*/updates/dkms/{,*,*/,**.ko.xz,**.ko.zst} rw,
   @{lib}/modules/*/kernel/drivers/{,*,*/,**.ko.xz,**.ko.zst} rw,
@@ -99,6 +100,7 @@ profile dkms @{exec_path} flags=(attach_disconnected) {
 
   /var/lib/dkms/ r,
   /var/lib/dkms/** rw,
+  /var/lib/dkms/**/.tmp_@{int}/tmp.gcno k,
 
   /var/lib/rpm/ r,
   /var/lib/rpm/** rw,
@@ -110,6 +112,10 @@ profile dkms @{exec_path} flags=(attach_disconnected) {
   /usr/src/linux-headers-*/scripts/**              rix,
   /usr/src/linux-headers-*/scripts/gcc-plugins/*.so mr,
   /usr/src/linux-headers-*/tools/**                rix,
+
+  /usr/share/file/misc/magic.mgc r,
+  /usr/share/gettext-1.0/its/{,**.loc} r,
+  /usr/share/gettext/its/{,**.loc} r,
 
   # For autosign modules
   owner /etc/kernel_key/*.crt r,
@@ -124,6 +130,7 @@ profile dkms @{exec_path} flags=(attach_disconnected) {
   @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/cpu.max r,
   @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/cpu.max r,
   @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/*.slice/cpu.max r,
+  @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/*.slice/**/cpu.max r,
 
         /tmp/@{word8} rw,
         /tmp/@{word8}/{,*} rw,
@@ -133,6 +140,7 @@ profile dkms @{exec_path} flags=(attach_disconnected) {
   owner @{tmp}/tmp.@{rand10} rw,
   audit owner @{tmp}/dkms.*/ rw,
   audit owner @{tmp}/sh-thd.* rw,
+  @{tmp}/conftest-*.o.tmp rw,
 
         @{PROC}/@{pid}/cgroup r,
         @{PROC}/@{pid}/mountinfo r,
