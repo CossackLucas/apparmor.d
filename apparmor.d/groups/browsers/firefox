@@ -43,6 +43,7 @@ profile firefox @{exec_path} flags=(attach_disconnected) {
   @{lib_dirs}/crashhelper rPx -> firefox//&firefox-crashhelper,
   @{lib_dirs}/glxtest     rPx -> firefox//&firefox-glxtest,
   @{lib_dirs}/vaapitest   rPx -> firefox//&firefox-vaapitest,
+  @{lib_dirs}/gfxtest     rPUx -> firefox//&firefox-gfxtest,
 
   #aa:only apparmor<5.0
   # glycin-loaders sandboxed profile stack
@@ -88,11 +89,14 @@ profile firefox @{exec_path} flags=(attach_disconnected) {
   owner @{tmp}/@{rand8}.* rw,  # file downloads (to anywhere)
   owner @{tmp}/@{uuid}.zip{,.tmp} rw,
   owner @{tmp}/crashreporter@{int}-request@{int}.json r,
+  owner @{tmp}/tmpaddon-1 w,   # ToDo: check if it's a matter of installing a new extension
   owner @{tmp}/Mozilla@{uuid}-cachePurge-{@{hex15},@{hex16}} rwk,
   owner @{tmp}/Mozilla\{@{uuid}\}-cachePurge-{@{hex15},@{hex16}} rwk,
   owner @{tmp}/MozillaBackgroundTask-*/.parentlock k,
   owner @{tmp}/MozillaBackgroundTask-*/{**,} rw,
   owner @{tmp}/Mozillato-be-removed-cachePurge-{@{hex15},@{hex16}} rwk,
+
+  owner /var/tmp/dbTemp.@{rand6}/ rw,
 
   owner @{run}/user/@{uid}/app/ w,
   owner @{run}/user/@{uid}/app/org.keepassxc.KeePassXC/ w,
