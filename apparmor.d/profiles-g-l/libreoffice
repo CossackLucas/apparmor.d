@@ -65,7 +65,7 @@ profile libreoffice @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   @{bin}/gpgsm      rPx,
   #aa:exec kioworker
 
-  @{lib}/jvm/java*/bin/java               rix,
+  @{lib}/jvm/java*/{,jre/}bin/java        rix,
   @{lib}/jvm/java*/lib/** rm,
   @{lib}/libreoffice/program/javaldx      rix,
   @{lib}/libreoffice/program/oosplash     rix,
@@ -90,6 +90,8 @@ profile libreoffice @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   /etc/fstab r,
   /etc/krb5.conf.d/{,**} r,
   /etc/libreoffice/{,**} r,
+  /etc/OpenCL/vendors/ r,
+  /etc/OpenCL/vendors/nvidia.icd r,
   /etc/papersize r,
   /etc/paperspecs r,
   /etc/samba/smb.conf r,
@@ -129,6 +131,7 @@ profile libreoffice @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{tmp}/@{rand6} rwk,
   owner @{tmp}/@{u64} rw,
   owner @{tmp}/*.tmp/{,**} rwk,
+  owner @{tmp}/dep-@{rand6}.d rw,
   owner @{tmp}/hsperfdata_@{user}/  rw,
   owner @{tmp}/hsperfdata_@{user}/@{int} rwk,
   owner @{tmp}/OSL_PIPE_@{uid}_SingleOfficeIPC_@{hex} rw,
@@ -137,6 +140,7 @@ profile libreoffice @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{run}/user/@{uid}/soffice.*.socket rwl -> @{run}/user/@{uid}/#@{int},
   owner @{run}/user/@{uid}/gvfsd/socket-@{rand8} rw,
 
+        @{sys}/devices/@{pci}/**/block/sda/queue/rotational r,
         @{sys}/devices/system/cpu/cpu@{int}/microcode/version r,
         @{sys}/devices/virtual/block/**/queue/rotational r,
         @{sys}/kernel/mm/hugepages/ r,
@@ -148,6 +152,7 @@ profile libreoffice @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{PROC}/@{pid}/coredump_filter rw,
   owner @{PROC}/@{pid}/mountinfo r,
   owner @{PROC}/@{pid}/mounts r,
+  owner @{PROC}/@{pid}/task/@{tid}/comm w,
 
   /dev/tty rw,
 
