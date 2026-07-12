@@ -44,7 +44,7 @@ profile pacman-hook-mkinitcpio @{exec_path} flags=(attach_disconnected) {
 
   @{sys}/fs/cgroup/user.slice/cpu.max r,
   @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/cpu.max r,
-  @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/app.slice/cpu.max r,
+  @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/app.slice/{,**/}cpu.max r,
   @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/cpu.max r,
 
   @{PROC}/@{pid}/cgroup r,
@@ -78,8 +78,8 @@ profile pacman-hook-mkinitcpio @{exec_path} flags=(attach_disconnected) {
     @{HOME}/@{XDG_GPG_DIR}/*.conf r,
 
     # Inherit Silencer
-    deny network inet6 stream,
-    deny network inet stream,
+    deny network stream,
+    deny network dgram,
 
     include if exists <local/pacman-hook-mkinitcpio_pacman>
   }
