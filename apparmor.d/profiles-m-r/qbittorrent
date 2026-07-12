@@ -24,6 +24,7 @@ profile qbittorrent @{exec_path} {
   include <abstractions/ssl_certs>
   include <abstractions/user-download-strict>
 
+  signal send set=term peer=kioworker,
   signal send set=(term, kill) peer=qbittorrent//python,
 
   network inet dgram,
@@ -43,6 +44,7 @@ profile qbittorrent @{exec_path} {
   @{bin}/geany           rPx,
   @{bin}/mpv             rPx,
   @{bin}/nautilus        rPx,
+  @{bin}/net             rPx,
   @{bin}/qpdfview        rPx,
   @{bin}/smplayer        rPx,
   @{bin}/spacefm         rPx,
@@ -50,17 +52,35 @@ profile qbittorrent @{exec_path} {
   @{bin}/vlc             rPx,
   @{browsers_path}       rPx,
 
+  #aa:exec kioworker
+
   /usr/share/GeoIP/GeoIP.dat r,
   /usr/share/gvfs/remote-volume-monitors/{,*} r,
+  /usr/share/thumbnailers/{,*} r,
 
   owner @{user_cache_dirs}/qBittorrent/{,**} rw,
 
+  owner @{user_config_dirs}/kdeglobals rw,
+  owner @{user_config_dirs}/kdeglobals.@{rand6} rw,
+  owner link @{user_config_dirs}/kdeglobals.@{rand6} -> @{user_config_dirs}/#@{int6},
+  owner @{user_config_dirs}/kdeglobals.lock rwk,
+  owner @{user_config_dirs}/kioslaverc r,
+  owner @{user_config_dirs}/klanguageoverridesrc r,
+  owner @{user_config_dirs}/kservicemenurc r,
+
   owner @{user_config_dirs}/qBittorrent/ rw,
   owner @{user_config_dirs}/qBittorrent/** rwkl -> @{user_config_dirs}/qBittorrent/#@{int},
+  owner @{user_config_dirs}/qBittorrentrc.lock rwk,
 
   owner @{user_share_dirs}/{,data/}qBittorrent/ rw,
   owner @{user_share_dirs}/{,data/}qBittorrent/** rwl -> @{user_share_dirs}/{,data/}qBittorrent/**/#@{int},
   owner @{user_share_dirs}/data/ rw,
+  owner @{user_share_dirs}/user-places.xbel r,
+
+  owner @{user_state_dirs}/qBittorrentstaterc rw,
+  owner @{user_state_dirs}/qBittorrentstaterc.@{rand6} rw,
+  owner link @{user_state_dirs}/qBittorrentstaterc.@{rand6} -> @{user_state_dirs}/#@{int6},
+  owner @{user_state_dirs}/qBittorrentstaterc.lock rwk,
 
   owner @{user_torrents_dirs}/ r,
   owner @{user_torrents_dirs}/** rw,
@@ -74,6 +94,19 @@ profile qbittorrent @{exec_path} {
   owner @{tmp}/qtsingleapp-qBitto-* rw,
   owner @{tmp}/qtsingleapp-qBitto-*-lockfile rwk,
   owner @{tmp}/tmp* rw,
+
+  @{run}/udev/data/+*:* r,                # Identifies all subsystems
+  @{run}/udev/data/c@{int}:@{int} r,      # Identifies all character devices
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/gvfs/ r,
+  owner @{run}/user/@{uid}/qBittorrent@{rand6}.@{int}.kioworker.socket rw,
+  owner link @{run}/user/@{uid}/qBittorrent@{rand6}.@{int}.kioworker.socket -> @{run}/user/@{uid}/#@{int},
+
+  @{sys}/block/ r,
+  @{sys}/bus/ r,
+  @{sys}/bus/usb/devices/ r,
+  @{sys}/devices/**/dev r,
+  @{sys}/devices/**/uevent r,
 
   owner @{PROC}/@{pids}/cmdline r,
   owner @{PROC}/@{pids}/comm r,
