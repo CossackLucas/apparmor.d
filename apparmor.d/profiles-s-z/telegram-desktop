@@ -53,6 +53,9 @@ profile telegram-desktop @{exec_path} {
 
   owner @{tmp}/@{hex32}-?@{uuid}? rwk,
   owner @{tmp}/*-TD-webview-@{pid} rw,
+  owner @{tmp}/@{hex32}-?@{uuid}?.rmlock rwk, 
+  owner @{tmp}/@{word}-@{word}-TD-webview-@{int} rw,
+
   audit owner /dev/shm/#@{int} rw,
 
   owner @{run}/user/@{uid}/*-TD-webview-@{pid}-wayland rw,
@@ -63,7 +66,10 @@ profile telegram-desktop @{exec_path} {
   owner @{PROC}/@{pid}/fd/ r,
   owner @{PROC}/@{pid}/mountinfo r,
   owner @{PROC}/@{pid}/mounts r,
+  owner @{PROC}/@{pid}/stat r,
   owner @{PROC}/@{pid}/task/@{tid}/comm rw,
+
+  /dev/tty r,
 
   include if exists <local/telegram-desktop>
 }
