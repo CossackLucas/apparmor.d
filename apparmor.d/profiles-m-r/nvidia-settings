@@ -12,6 +12,7 @@ profile nvidia-settings @{exec_path} flags=(attach_disconnected) {
   include <abstractions/dconf-write>
   include <abstractions/desktop>
   include <abstractions/gstreamer>
+  include <abstractions/nameservice-strict>
   include <abstractions/nvidia-strict>
 
   @{exec_path} mr,
@@ -20,20 +21,25 @@ profile nvidia-settings @{exec_path} flags=(attach_disconnected) {
 
   owner @{HOME}/.nvidia-settings-rc rw,
 
-  @{sys}/bus/pci/devices/ r,
-  @{sys}/devices/@{pci}/config r,
-  @{sys}/devices/system/node/ r,
-  @{sys}/devices/system/node/node@{int}/cpumap r,
+  @{run}/systemd/userdb/ r,
+
+        @{sys}/bus/pci/devices/ r,
+        @{sys}/devices/@{pci}/config r,
+        @{sys}/devices/system/node/ r,
+        @{sys}/devices/system/node/node@{int}/cpumap r,
+  owner @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/app.slice/app-nvidia\x2dsettings@@{hex32}.service/cpu.max r,
 
         @{PROC}/devices r,
         @{PROC}/driver/nvidia/capabilities/mig/config r,
         @{PROC}/driver/nvidia/capabilities/mig/monitor r,
+        @{PROC}/sys/kernel/random/boot_id r,
+  owner @{PROC}/@{pid}/cgroup r,
   owner @{PROC}/@{pid}/cmdline r,
   owner @{PROC}/@{pid}/task/@{tid}/comm rw,
 
   /dev/char/@{dynamic}:@{int} w,          # For dynamic assignment range 234 to 254, 384 to 511
   /dev/nvidia-caps/ rw,
-  /dev/nvidia-caps/nvidia-cap@{int} r,
+  /dev/nvidia-caps/nvidia-cap@{int} rw,
 
   include if exists <local/nvidia-settings>
 }
