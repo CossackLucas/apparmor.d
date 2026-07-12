@@ -9,6 +9,8 @@ include <tunables/global>
 @{exec_path} = /usr/share/libalpm/scripts/mkinitcpio
 profile pacman-hook-mkinitcpio @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>
+  include <abstractions/cgroup-limits>
+  include <abstractions/consoles>
   include <abstractions/nameservice-strict>
 
   capability dac_read_search,
@@ -41,16 +43,6 @@ profile pacman-hook-mkinitcpio @{exec_path} flags=(attach_disconnected) {
   @{efi}/initramfs-*-fallback.img rw,
   @{efi}/initramfs-*.img rw,
   @{efi}/vmlinuz-* rw,
-
-  @{sys}/fs/cgroup/user.slice/cpu.max r,
-  @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/cpu.max r,
-  @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/app.slice/cpu.max r,
-  @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/cpu.max r,
-
-  @{PROC}/@{pid}/cgroup r,
-
-  /dev/tty rw,
-  owner /dev/pts/@{u16} rw,
 
   # Inherit Silencer
   deny network inet6 stream,

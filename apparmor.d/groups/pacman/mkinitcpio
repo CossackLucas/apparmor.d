@@ -9,6 +9,7 @@ include <tunables/global>
 @{exec_path} = @{bin}/mkinitcpio
 profile mkinitcpio @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>
+  include <abstractions/cgroup-limits>
   include <abstractions/consoles>
   include <abstractions/fonts>
   include <abstractions/nameservice-strict>
@@ -110,12 +111,6 @@ profile mkinitcpio @{exec_path} flags=(attach_disconnected) {
   @{sys}/class/block/ r,
   @{sys}/devices/{,**} r,
   @{sys}/firmware/efi/fw_platform_size r,
-  @{sys}/fs/cgroup/user.slice/cpu.max r,
-  @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/cpu.max r,
-  @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/session-@{int}.scope/cpu.max r,
-  @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/app.slice/cpu.max r,
-  @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/cpu.max r,
-  @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/session.slice/cpu.max r,
 
         @{PROC}/@{pid}/cgroup r,
   owner @{PROC}/@{pid}/mountinfo r,
