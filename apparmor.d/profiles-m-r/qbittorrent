@@ -8,14 +8,16 @@ abi <abi/5.0>,
 include <tunables/global>
 
 @{exec_path} = @{bin}/qbittorrent
-profile qbittorrent @{exec_path} {
+profile qbittorrent @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   include <abstractions/base>
+  include <abstractions/audio-client>
   include <abstractions/consoles>
   include <abstractions/dconf-write>
   include <abstractions/desktop>
   include <abstractions/fontconfig-cache-read>
   include <abstractions/graphics>
   include <abstractions/ibus-strict>
+  include <abstractions/kde-globals-write>
   include <abstractions/nameservice-strict>
   include <abstractions/private-files-strict>
   include <abstractions/qt>
@@ -43,29 +45,43 @@ profile qbittorrent @{exec_path} {
   @{bin}/geany           rPx,
   @{bin}/mpv             rPx,
   @{bin}/nautilus        rPx,
+  @{bin}/net             rPx,
   @{bin}/qpdfview        rPx,
   @{bin}/smplayer        rPx,
   @{bin}/spacefm         rPx,
+  @{bin}/testparm        rPx,
   @{bin}/viewnior       rPUx,
   @{bin}/vlc             rPx,
   @{browsers_path}       rPx,
 
+  #aa:exec kioworker
+
+  /etc/fstab r,
+
   /usr/share/GeoIP/GeoIP.dat r,
   /usr/share/gvfs/remote-volume-monitors/{,*} r,
+  /usr/share/thumbnailers/{,*} r,
+
+  @{MOUNTS}/ r,
 
   owner @{user_cache_dirs}/qBittorrent/{,**} rw,
 
+  owner @{user_config_dirs}/kioslaverc r,
+  owner @{user_config_dirs}/kservicemenurc r,
   owner @{user_config_dirs}/qBittorrent/ rw,
   owner @{user_config_dirs}/qBittorrent/** rwlk -> @{user_config_dirs}/qBittorrent/#@{int},
+  owner @{user_config_dirs}/qBittorrentrc@{atomic} rwlk,
 
   owner @{user_share_dirs}/{,data/}qBittorrent/ rw,
   owner @{user_share_dirs}/{,data/}qBittorrent/** rwl -> @{user_share_dirs}/{,data/}qBittorrent/**/#@{int},
   owner @{user_share_dirs}/data/ rw,
+  owner @{user_share_dirs}/user-places.xbel r,
+
+  owner @{user_state_dirs}/qBittorrentstaterc@{atomic} rwlk -> @{user_state_dirs}/#@{int},
 
   owner @{user_torrents_dirs}/ r,
   owner @{user_torrents_dirs}/** rw,
 
-  owner /dev/shm/#@{int} rw,
   owner @{tmp}/.*/{,s} rw,
   owner @{tmp}/.qBittorrent/ rw,
   owner @{tmp}/.qBittorrent/* rwl -> /tmp/.qBittorrent/*,
@@ -75,12 +91,26 @@ profile qbittorrent @{exec_path} {
   owner @{tmp}/qtsingleapp-qBitto-*-lockfile rwk,
   owner @{tmp}/tmp* rw,
 
+  @{att}/systemd/journal/stdout rw,
+
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/qBittorrent@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
+
+  owner /dev/shm/#@{int} rw,
+
+  @{sys}/block/ r,
+  @{sys}/bus/ r,
+  @{sys}/bus/usb/devices/ r,
+  @{sys}/devices/**/dev r,
+  @{sys}/devices/**/uevent r,
+
   owner @{PROC}/@{pids}/cmdline r,
   owner @{PROC}/@{pids}/comm r,
   owner @{PROC}/@{pids}/fd/ r,
   owner @{PROC}/@{pids}/mountinfo r,
   owner @{PROC}/@{pids}/mounts r,
 
+        /dev/disk/by-label/ r,
   owner /dev/tty@{u8} rw,
 
   profile python {
@@ -96,8 +126,6 @@ profile qbittorrent @{exec_path} {
     network inet stream,
     network inet6 stream,
     network netlink raw,
-
-    @{python_path} r,
 
     owner @{user_share_dirs}/{,data/}qBittorrent/nova@{int}/{,**} rw,
 
