@@ -69,6 +69,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
 
   @{etc_ro}/login.defs r,
   /etc/fstab r,
+  /etc/plasmalogin.conf r,
   /etc/sddm.conf.d/{,**} r,
   /etc/sysconfig/displaymanager r,
   /etc/xdg/* r,
@@ -141,16 +142,27 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{run}/udev/data/c13:@{int} r,          # for /dev/input/*
   @{run}/udev/data/c@{dynamic}:@{int} r,  # For dynamic assignment range 234 to 254, 384 to 511
   @{run}/udev/data/n@{int} r,             # For network interfaces
+  @{run}/udev/data/+usb:* r,              # ToDo: comment
+  @{run}/udev/data/c@{int}@{busname} r,   # ToDo: comment
 
   @{sys}/bus/ r,
   @{sys}/bus/acpi/devices/ r,
   @{sys}/bus/cpu/devices/ r,
+  @{sys}/bus/usb/devices/ r,
   @{sys}/class/ r,
   @{sys}/class/hidraw/ r,
   @{sys}/class/input/ r,
   @{sys}/class/video4linux/ r,
-  @{sys}/devices/**/uevent r,
+  @{sys}/devices/**/bConfigurationValue r,
+  @{sys}/devices/**/bInterfaceNumber r,
+  @{sys}/devices/**/busnum r,
+  @{sys}/devices/**/descriptors r,
+  @{sys}/devices/**/devnum r,
+  @{sys}/devices/**/manufacturer r,
   @{sys}/devices/**/report_descriptor r,
+  @{sys}/devices/**/speed r,
+  @{sys}/devices/**/uevent r,
+  @{sys}/devices/@{pci}/sound/**/properties r,
   @{sys}/firmware/acpi/pm_profile r,
 
         @{PROC}/interrupts r,
@@ -162,6 +174,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /dev/ r,
   /dev/bus/usb/ r,
   /dev/input/ r,
+  /dev/input/event@{u8} rw,
   /dev/rfkill r,
   /dev/tty r,
 
