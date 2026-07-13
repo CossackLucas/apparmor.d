@@ -21,8 +21,12 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   include <abstractions/qt5-shader-cache>
   include <abstractions/sys/input>
   include <abstractions/thumbnails-cache-write>
+  include <abstractions/user-read-strict>
+  include <abstractions/user-write-strict>
 
   network netlink raw,
+
+  ptrace read peer=plasmashell,
 
   signal send set=term peer=kioworker,
 
@@ -32,6 +36,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{exec_path} mrix,
 
   @{sh_path} rix,
+  audit @{bin}/baloo_filemetadata_temp_extractor rix,
   @{bin}/cat rix,
   @{bin}/eglinfo rPUx,
   audit @{bin}/firewall-cmd rPx, # ToDo: check!
@@ -48,6 +53,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{bin}/plasmashell rPx,
   audit @{sbin}/ss           rPx,
   audit @{bin}/systemctl    rCx, #-> systemctl,
+  @{bin}/update-mime-database rPx,
   audit @{bin}/xdg-open      rPUx,
   @{bin}/xdpyinfo rPUx,
   @{lib}/qt{5,6}/bin/qdbus rPx,
@@ -56,12 +62,15 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
 
   /usr/share/i18n/locales/{,*} r,
   /usr/share/accounts/** r,
+  /usr/share/color-schemes/ r,
+  /usr/share/color-schemes/*.colors r,
   /usr/share/iso-codes/json/*.json r,
   /usr/share/kcm_networkmanagement/{,**} r,
   /usr/share/kcm_recentFiles/{,**} r,
   /usr/share/kcmkeys/{,*.kksrc} r,
   /usr/share/kglobalaccel/* r,
   /usr/share/kinfocenter/{,**} r,
+  /usr/share/knotifications6/ r,
   /usr/share/kpackage/{,**} r,
   /usr/share/kservices{5,6}/{,**} r,
   /usr/share/kservicetypes5/{,**} r,
@@ -82,6 +91,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /etc/sddm.conf.d/{,**} r,
   /etc/sysconfig/displaymanager r,
   /etc/xdg/* r,
+  /etc/xdg/menus/plasma-applications.menu r,
   /etc/xdg/plasmanotifyrc r,
   /etc/xdg/ui/ui_standards.rc r,
 
@@ -121,8 +131,15 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_config_dirs}/bluedevilglobalrc.lock rw,
   owner @{user_config_dirs}/device_automounter_kcmrc.lock rwk,
   owner @{user_config_dirs}/emaildefaults r,
+  owner @{user_config_dirs}/filetypesrc rw,
+  owner @{user_config_dirs}/filetypesrc.@{rand6} rw,
+  owner link @{user_config_dirs}/filetypesrc.@{rand6} -> @{user_config_dirs}/#@{int6},
   owner @{user_config_dirs}/libaccounts-glib/ rw,
   owner @{user_config_dirs}/libaccounts-glib/accounts.db{,-shm,-wal,-journal} rwk,
+  owner @{user_config_dirs}/mimeapps.list rw,
+  owner @{user_config_dirs}/mimeapps.list.@{rand6} rw,
+  owner link @{user_config_dirs}/mimeapps.list.@{rand6} -> @{user_config_dirs}/#@{int6},
+  owner @{user_config_dirs}/mimeapps.list.lock rw,
   owner @{user_config_dirs}/plasma*/{,**} r,
   owner @{user_config_dirs}/powerdevilrc.lock rwk,
   owner @{user_config_dirs}/powerdevilrc{,.@{rand6}} rwl -> @{user_config_dirs}/#@{int},
@@ -143,6 +160,12 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_share_dirs}/[kK]*/** rwlk -> @{user_share_dirs}/[kK]*/**,
   owner @{user_share_dirs}/#@{int} rwk,
   owner @{user_share_dirs}/baloo/index r,
+  owner @{user_share_dirs}/color-schemes/ r,
+  owner @{user_share_dirs}/color-schemes/*.colors r,
+  owner @{user_share_dirs}/mime/packages/*.xml w,
+  owner @{user_share_dirs}/plasma/look-and-feel/ r,
+  owner @{user_share_dirs}/plasma/look-and-feel/*/metadata.json r,
+  owner @{user_share_dirs}/plasma/look-and-feel/*/contents/defaults r,
   owner @{user_share_dirs}/solid/ rw,
   owner @{user_share_dirs}/solid/actions/ rw,
   owner @{user_share_dirs}/solid/actions/#@{int6} rw,
