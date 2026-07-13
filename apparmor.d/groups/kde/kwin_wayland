@@ -124,6 +124,11 @@ profile kwin_wayland @{exec_path} flags=(attach_disconnected,mediate_deleted) {
 
   owner @{user_config_dirs}/#@{int} rwl,
   owner @{user_config_dirs}/breezerc r,
+  owner @{user_config_dirs}/kaccessrc r,
+  owner @{user_config_dirs}/kcminputrc rw,
+  owner @{user_config_dirs}/kcminputrc.@{rand6} rw,
+  owner link @{user_config_dirs}/kcminputrc.@{rand6} -> @{user_config_dirs}/#@{int6},
+  owner @{user_config_dirs}/kcminputrc.lock rwk,
   owner @{user_config_dirs}/kdedefaults/* r,
   owner @{user_config_dirs}/kglobalshortcutsrc.lock rwk,
   owner @{user_config_dirs}/kglobalshortcutsrc{,.@{rand6}} rwl,
@@ -187,8 +192,8 @@ profile kwin_wayland @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   @{run}/udev/data/c13:@{int}  r,         # for /dev/input/*
   @{run}/udev/data/c189:@{int} r,         # for /dev/bus/usb/**
 
-  owner @{run}/user/@{uid}/kwin-xwayland-eis-socket.@{int4} w,
-  owner @{run}/user/@{uid}/kwin-xwayland-eis-socket.@{int4}.lock rwk,
+  owner @{run}/user/@{uid}/kwin-xwayland-eis-socket.@{int} w,
+  owner @{run}/user/@{uid}/kwin-xwayland-eis-socket.@{int}.lock rwk,
   owner @{run}/user/@{uid}/pulse/ r,
 
         /dev/shm/ r,

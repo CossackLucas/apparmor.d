@@ -54,6 +54,7 @@ profile startplasma @{exec_path} {
   owner @{user_cache_dirs}/plasma-svgelements rw,
 
   owner @{user_config_dirs}/gtkrc{,*} rwlk,
+  owner @{user_config_dirs}/gtkrc* lk -> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/kdedefaults/ rw,
   owner @{user_config_dirs}/kdedefaults/** rwkl -> @{user_config_dirs}/kdedefaults/**,
   owner @{user_config_dirs}/ksplashrc r,

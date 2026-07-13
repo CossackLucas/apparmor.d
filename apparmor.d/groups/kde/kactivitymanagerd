@@ -38,7 +38,10 @@ profile kactivitymanagerd @{exec_path} flags=(attach_disconnected,mediate_delete
   owner @{user_config_dirs}/breezerc r,
   owner @{user_config_dirs}/kactivitymanagerdrc.lock rwk,
   owner @{user_config_dirs}/kactivitymanagerdrc{,.@{rand6}} rwl -> @{user_config_dirs}/#@{int},
-  owner @{user_config_dirs}/kactivitymanagerd-pluginsrc r,
+  owner @{user_config_dirs}/kactivitymanagerd-pluginsrc rw,
+  owner @{user_config_dirs}/kactivitymanagerd-pluginsrc.@{rand6} rw,
+  owner link @{user_config_dirs}/kactivitymanagerd-pluginsrc.@{rand6} -> @{user_config_dirs}/#@{int6},
+  owner @{user_config_dirs}/kactivitymanagerd-pluginsrc.lock rwk,
   owner @{user_config_dirs}/libreoffice/**.xcu r,
   owner @{user_config_dirs}/menus/{,**} r,
 

@@ -134,6 +134,8 @@ profile kioworker @{exec_path} {
     /usr/share/ghostscript/{,**} r,
     /usr/share/org.kde.syntax-highlighting/{,**} r,
 
+    /etc/paperspecs r,
+
     #aa:lint ignore=too-wide
     @{MOUNTS}/** r,
     owner @{HOME}/** r,

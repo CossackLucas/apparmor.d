@@ -27,6 +27,7 @@ profile kwalletd @{exec_path} {
   @{bin}/gpgconf rCx -> gpg,
   @{bin}/gpg{,2} rCx -> gpg,
   @{bin}/gpgsm   rCx -> gpg,
+  @{bin}/kstart  rPx,
 
   /usr/share/color-schemes/{,**} r,
 
