@@ -12,6 +12,7 @@ profile paccache @{exec_path} flags=(attach_disconnected) {
   include <abstractions/consoles>
   include <abstractions/nameservice-strict>
 
+  capability dac_override,
   capability dac_read_search,
   capability mknod,
 
@@ -21,15 +22,18 @@ profile paccache @{exec_path} flags=(attach_disconnected) {
   @{bin}/{m,g,}awk    rix,
   @{bin}/cat          rix,
   @{bin}/date         rix,
+  @{bin}/find         rix,
   @{bin}/gettext      rix,
   @{bin}/gpg{,2}      rix,
   @{bin}/gpgconf      rix,
   @{bin}/gpgsm        rix,
+  @{bin}/mv           rix,
   @{bin}/pacman       rix,
   @{bin}/pacman-conf  rix,
   @{bin}/pacsort      rix,
   @{bin}/rm           rix,
   @{bin}/stat         rix,
+  @{bin}/sudo         rCx -> sudo,
   @{bin}/tput         rix,
   @{bin}/xargs        rix,
 
@@ -41,6 +45,7 @@ profile paccache @{exec_path} flags=(attach_disconnected) {
   /etc/pacman.d/gnupg/** rwlk -> /etc/pacman.d/gnupg/**,
 
   /var/cache/pacman/pkg/{,*} rw,
+  /var/cache/pacman/pkg/download-@{rand6}/ r,
   /var/lib/pacman/{,**} r,
 
   @{HOME}/@{XDG_GPG_DIR}/gpg.conf r,
@@ -48,7 +53,25 @@ profile paccache @{exec_path} flags=(attach_disconnected) {
 
   owner @{PROC}/@{pid}/fd/ r,
 
-  /dev/tty rw,
+  profile sudo {
+    include <abstractions/base>
+    include <abstractions/consoles>
+    include <abstractions/app/sudo>
+
+    capability sys_ptrace,
+
+    ptrace read,
+
+    @{bin}/mv    rix,
+    @{bin}/rm    rix,
+    @{bin}/xargs rix,
+
+    /var/cache/pacman/pkg/** rw,
+
+    @{PROC}/@{pid}/fd/ r,
+
+    include if exists <local/paccache_sudo>
+  }
 
   include if exists <local/paccache>
 }
