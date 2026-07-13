@@ -34,6 +34,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{sh_path} rix,
   @{bin}/cat rix,
   @{bin}/eglinfo rPUx,
+  audit @{bin}/kaccess rPx,   # ToDo: check!
   @{bin}/kcminit rPx,
   @{bin}/lspci rPx,
   @{bin}/openssl rix,
@@ -58,6 +59,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /usr/share/kservices{5,6}/{,**} r,
   /usr/share/kservicetypes5/{,**} r,
   /usr/share/kwin/{,**} r,
+  /usr/share/kwin-wayland/{,**} r,
   /usr/share/kxmlgui5/systemsettings/systemsettingsui.rc r,
   /usr/share/libwacom/{,**} r,
   /usr/share/plasma/{,**} r,
@@ -100,8 +102,10 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_config_dirs}/[kK]* rwlk -> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/[kK]*/ rw,
   owner @{user_config_dirs}/[kK]*/** rwlk -> @{user_config_dirs}/[kK]*/**,
-  owner @{user_config_dirs}/{P,p}lasma* r,
+  owner @{user_config_dirs}/[Pp]lasma* rw,
+  owner link @{user_config_dirs}/[Pp]* -> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/*rc r,
+  owner @{user_config_dirs}/*.lock k,
   owner @{user_config_dirs}/#@{int} rwk,
   owner @{user_config_dirs}/autostart/ r,
   owner @{user_config_dirs}/device_automounter_kcmrc.lock rwk,
@@ -115,6 +119,9 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_config_dirs}/session/** rwlk,
   owner @{user_config_dirs}/systemsettingsrc.lock rwk,
   owner @{user_config_dirs}/systemsettingsrc{,.@{rand6}} rwl -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/wireplumber/ w,
+  owner @{user_config_dirs}/wireplumber/wireplumber.conf.d/ w,
+  owner @{user_config_dirs}/wireplumber/wireplumber.conf.d/*.conf rw,
 
   owner @{user_share_dirs}/[kK]* rwlk -> @{user_share_dirs}/#@{int},
   owner @{user_share_dirs}/[kK]*/ rw,
@@ -143,7 +150,9 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{run}/udev/data/c@{dynamic}:@{int} r,  # For dynamic assignment range 234 to 254, 384 to 511
   @{run}/udev/data/n@{int} r,             # For network interfaces
   @{run}/udev/data/+usb:* r,              # ToDo: comment
-  @{run}/udev/data/c@{int}@{busname} r,   # ToDo: comment
+  @{run}/udev/data/b8@{busname} r,        # ToDo: comment
+  @{run}/udev/data/c189@{busname} r,   # ToDo: comment
+  @{run}/udev/data/c189:@{int} r,   # ToDo: comment
 
   @{sys}/bus/ r,
   @{sys}/bus/acpi/devices/ r,
@@ -153,12 +162,14 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{sys}/class/hidraw/ r,
   @{sys}/class/input/ r,
   @{sys}/class/video4linux/ r,
+  @{sys}/devices/**/bcdDevice r,
   @{sys}/devices/**/bConfigurationValue r,
   @{sys}/devices/**/bInterfaceNumber r,
   @{sys}/devices/**/busnum r,
   @{sys}/devices/**/descriptors r,
   @{sys}/devices/**/devnum r,
   @{sys}/devices/**/manufacturer r,
+  @{sys}/devices/**/product r,
   @{sys}/devices/**/report_descriptor r,
   @{sys}/devices/**/speed r,
   @{sys}/devices/**/uevent r,
