@@ -34,6 +34,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{sh_path} rix,
   @{bin}/cat rix,
   @{bin}/eglinfo rPUx,
+  audit @{bin}/firewall-cmd rPx, # ToDo: check!
   audit @{bin}/kaccess rPx,   # ToDo: check!
   @{bin}/kcminit rPx,
   @{bin}/lspci rPx,
@@ -43,12 +44,15 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{bin}/pactl rPx,
   audit @{bin}/plasma-discover rPx,
   @{bin}/plasmashell rPx,
+  audit @{sbin}/ss           rPx,
+  audit @{bin}/systemctl    rCx, #-> systemctl,
   @{bin}/xdpyinfo rPUx,
   @{lib}/qt{5,6}/bin/qdbus rPx,
   @{lib}/bup/cmd/bup rPUx,
   #aa:exec kioworker
 
   /usr/share/i18n/locales/{,*} r,
+  /usr/share/accounts/** r,
   /usr/share/iso-codes/json/*.json r,
   /usr/share/kcm_networkmanagement/{,**} r,
   /usr/share/kcm_recentFiles/{,**} r,
@@ -188,6 +192,13 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /dev/input/event@{u8} rw,
   /dev/rfkill r,
   /dev/tty r,
+
+  profile systemctl {
+    include <abstractions/base>
+    include <abstractions/app/systemctl>
+
+    include if exists <local/systemsettings_systemctl>
+  }
 
   include if exists <local/systemsettings>
 }
