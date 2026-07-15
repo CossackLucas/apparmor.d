@@ -33,17 +33,39 @@ profile telegram-desktop @{exec_path} {
   network netlink dgram,
   network netlink raw,
 
+  signal send set=term peer=kioworker,
+
   @{exec_path} mrix,
 
   @{sh_path}   rix,
   @{open_path} rPx -> child-open-strict,
+  @{bin}/net    rix,
   @{bin}/systemd-detect-virt rPx,
 
+  #aa:exec kioworker
+
+  owner @{user_share_dirs}/user-places.xbel r,
   owner @{user_share_dirs}/TelegramDesktop/ rw,
+  owner @{user_state_dirs}/TelegramDesktopstaterc r,
   owner @{user_share_dirs}/TelegramDesktop/** rwlk -> @{user_share_dirs}/TelegramDesktop/**,
 
+  owner @{user_config_dirs}/#@{int6} rw,
   owner @{user_config_dirs}/autostart/telegramdesktop.desktop rw,
   owner @{user_config_dirs}/autostart/org.telegram.desktop._@{hex32}.desktop{,.@{rand6}} rw,
+  owner @{user_config_dirs}/kdeglobals w,
+  owner @{user_config_dirs}/kdeglobals.@{rand6} rw,
+  owner link @{user_config_dirs}/kdeglobals.@{rand6} -> @{user_config_dirs}/#@{int6},
+  owner @{user_config_dirs}/kdeglobals.lock rwk,
+  owner @{user_config_dirs}/kioslaverc r,
+  owner @{user_config_dirs}/kservicemenurc r,
+  owner @{user_config_dirs}/TelegramDesktoprc.lock rwk,
+
+
+  owner @{user_state_dirs}/#@{int6} rw,
+  owner @{user_state_dirs}/TelegramDesktopstaterc rw,
+  owner @{user_state_dirs}/TelegramDesktopstaterc.@{rand6} rw,
+  owner link @{user_state_dirs}/TelegramDesktopstaterc.@{rand6} -> @{user_state_dirs}/#@{int6},
+  owner @{user_state_dirs}/TelegramDesktopstaterc.lock rwk,
 
   owner @{tmp}/@{hex32}-?@{uuid}? rwk,
   owner @{tmp}/@{hex32}-?@{uuid}?.rmlock rwk, 
@@ -53,8 +75,17 @@ profile telegram-desktop @{exec_path} {
   owner @{run}/user/@{uid}/@{word}-@{word}-TD-webview-@{int}-wayland.lock rwk,
   owner @{run}/user/@{uid}/qtwayland-@{rand6} rw,
 
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/gvfs/ r,
+  owner @{run}/user/@{uid}/TelegramDesktop@{rand6}.@{u8}.kioworker.socket w,
+  owner link @{run}/user/@{uid}/TelegramDesktop@{rand6}.@{u8}.kioworker.socket -> @{run}/user/@{uid}/#@{int},
+
   audit owner /dev/shm/#@{int} rw,
 
+  @{sys}/class/power_supply/ r,
+  @{sys}/devices/virtual/dmi/id/bios_vendor r,
+
+  owner @{PROC}/@{pid}/cgroup r,
   owner @{PROC}/@{pid}/cmdline r,
   owner @{PROC}/@{pid}/fd/ r,
   owner @{PROC}/@{pid}/mountinfo r,
