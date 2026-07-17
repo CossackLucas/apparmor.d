@@ -24,76 +24,202 @@ profile plasma-discover @{exec_path} {
   network netlink dgram,
   network netlink raw,
 
+  ptrace (read) peer=systemsettings,
+
   signal (send) set=(term) peer=kioworker,
+  signal (receive) set=(kill) peer=systemsettings,
 
   @{exec_path} mr,
 
-  @{sh_path}                        rix,
-  @{bin}/kreadconfig{,5}            rPx,
+  @{sh_path}                           rix,
+  @{bin}/kreadconfig{,5}               rPx,
 
-  @{bin}/gpg                        rCx -> gpg,
-  @{bin}/gpgconf                    rCx -> gpg,
-  @{bin}/gpgsm                      rCx -> gpg,
+  @{bin}/fusermount{,3}                Px,
+  @{bin}/gpg                           rCx -> gpg,
+  @{bin}/gpgconf                       rCx -> gpg,
+  @{bin}/gpgsm                         rCx -> gpg,
+  @{bin}/krunner-plugininstaller       rPx,
+  @{bin}/plasma-apply-colorscheme      Px,
+  @{bin}/plasma-apply-cursortheme      Px,
+  @{bin}/plasma-apply-desktoptheme     Px,
+  @{bin}/plasma-apply-lookandfeel      Px,
+  @{bin}/plasma-apply-wallpaperimage   Px,
+  @{bin}/sddmthemeinstaller            Px,
+  @{bin}/servicemenuinstaller          Cx -> servicemenuinstaller,
+  @{bin}/xdg-open                      Cx -> xdg-open,
 
   #aa:exec kio_http_cache_cleaner
   #aa:exec kioworker
+  #aa:exec knshandler
 
+  @{lib}/kwin-applywindowdecoration       Px,
+  @{lib}/plasma-apply-aurorae             Px,
+  @{lib}/plasma-changeicons               Px,
+  @{lib}/revokefs-fuse                    Cx -> revokefs,
+
+  @{bin}/ r,
+
+  /usr/ r,
+  /usr/share/color-schemes/{,*.colors} r,
+  /usr/share/flatpak/triggers/{,*} r,
+  /usr/share/kf6/searchproviders/{,*.desktop} r,
+  /usr/share/kf6/purpose/{,*.qml} r,
   /usr/share/knsrcfiles/{,*} r,
   /usr/share/kservices{5,6}/{,*} r,
   /usr/share/kservicetypes5/{,*} r,
   /usr/share/libdiscover/** r,
+  /usr/share/flatpak/remotes.d/ r,
+  /usr/share/metainfo/{,*.xml} r,
+  /usr/share/plasma/look-and-feel/{,**} r,
+  /usr/share/swcatalog/xml/{,*.xml.gz} r,
+  /usr/share/swcatalog/icons/{,**} r,
+
+  /usr/share/hunspell/ r,
+  /usr/share/myspell/{,dicts/} r,
 
   /etc/appstream.conf r,
   /etc/flatpak/remotes.d/{,**} r,
   /etc/machine-id r,
-  /etc/xdg/ r,
+  /etc/sysconfig/proxy r,
   /etc/xdg/accept-languages.codes r,
+  /etc/xdg/plasmarc r,
+  @{etc_ro}/xdg/ r,
 
   /var/tmp/flatpak-cache-*/ rw,
   /var/tmp/flatpak-cache-*/** rwlk,
   /var/tmp/#@{int} rw,
 
-  /var/cache/swcatalog/ rw,
+        /var/cache/swcatalog/ rw,
+        /var/cache/swcatalog/cache/*-os-catalog.xb r,
+        /var/cache/swcatalog/cache/*-flatpak-flathub-@{arch}.xb r,
+        /var/cache/swcatalog/icons/{,**} r,
+        /var/cache/swcatalog/xml/{,**} r,
+  owner /var/cache/swcatalog/cache/{,user/} w,
 
   /var/lib/flatpak/repo/{,**} r,
   /var/lib/flatpak/appstream/{,**} r,
+  /var/lib/flatpak/app/{,**/} r,
+  /var/lib/flatpak/app/**/{deploy,metadata} r,
+  /var/lib/flatpak/runtime/{,**/} r,
+  /var/lib/flatpak/runtime/**/{deploy,metadata,*xml.gz} r,
+  /var/lib/flatpak/runtime/**/hunspell/*.{dic,aff} r,
+
+  /var/lib/swcatalog/icons/** r,
 
   /var/log/pacman.log r,
 
-  owner @{user_cache_dirs}/appstream/ r,
-  owner @{user_cache_dirs}/appstream/*.xb rw,
+  owner @{HOME}/.icons/{,**} w,
+  owner @{HOME}/.themes/{,**} w,
+
+  owner @{user_cache_dirs}/appstream/{,user/} rw,
+  owner @{user_cache_dirs}/appstream/{,user/}*.xb rw,
+  owner @{user_cache_dirs}/appstream/{,user/}.goutputstream-@{rand6} rw,
   owner @{user_cache_dirs}/discover/{,**} rwlk,
+  owner @{user_cache_dirs}/flatpak/{,.changed} w,
   owner @{user_cache_dirs}/flatpak/system-cache/{,**} rw,
   owner @{user_cache_dirs}/kio_http/ w,
 
   owner @{user_config_dirs}/ r,
   owner @{user_config_dirs}/#@{int} rwl,
-  owner @{user_config_dirs}/discoverrc rwl,
-  owner @{user_config_dirs}/discoverrc.lock rwk,
+  owner @{user_config_dirs}/discoverrc* rw,
+  owner link @{user_config_dirs}/discoverrc{,.@{rand6}} -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/discoverrc.lock k,
   owner @{user_config_dirs}/kde.org/{,**} rwlk,
+  owner @{user_config_dirs}/KDE/ w,
   owner @{user_config_dirs}/KDE/* r,
-  owner @{user_config_dirs}/kdedefaults/plasmarc r,
+  owner @{user_config_dirs}/KDE/#@{int} w,
+  owner @{user_config_dirs}/KDE/UserFeedback.conf* w,
+  owner link @{user_config_dirs}/KDE/UserFeedback.conf{,.@{rand6}} -> @{user_config_dirs}/KDE/#@{int},
+  owner @{user_config_dirs}/KDE/UserFeedback.conf.lock k,
+  owner @{user_config_dirs}/kioslaverc r,
   owner @{user_config_dirs}/libaccounts-glib/ rw,
   owner @{user_config_dirs}/libaccounts-glib/accounts.db{,-shm,-wal,-journal} rwk,
+  owner @{user_config_dirs}/PlasmaUserFeedback r,
 
-  owner @{user_share_dirs}/flatpak/repo/{,**} rw,
+  owner @{user_share_dirs}/aurorae/{,**} rw,
+  owner @{user_share_dirs}/baloo/index r,
+  owner @{user_share_dirs}/carddecks/{,**} rw,
+  owner @{user_share_dirs}/color-schemes/{,**} rw,
+  owner @{user_share_dirs}/color-schemes/** l,
+  owner @{user_share_dirs}/discover/{,**/} w,
+  owner @{user_share_dirs}/discover/kuserfeedback/audit/@{int8}-@{int}.log w,
+  owner @{user_share_dirs}/flatpak/.removed/{,**} rw,
+  owner @{user_share_dirs}/flatpak/app{,stream}/{,**} rw,
+  owner @{user_share_dirs}/flatpak/exports/{,**} rw,
+  owner @{user_share_dirs}/flatpak/lock rwk,
+  owner @{user_share_dirs}/flatpak/repo/ rw,
+  owner @{user_share_dirs}/flatpak/repo/** rwlk,
+  owner @{user_share_dirs}/flatpak/repo-lock rwk,
+  owner @{user_share_dirs}/flatpak/runtime/ r,
+  owner @{user_share_dirs}/flatpak/runtime/** rwl,
+  owner link @{user_share_dirs}/flatpak/{app{,stream},runtime}/*/@{arch}/** -> @{user_share_dirs}/flatpak/repo/objects/*/@{hex}.file,
+  owner @{user_share_dirs}/icons/{,**} rw,
   owner @{user_share_dirs}/knewstuff3/{,*} rw,
+  owner @{user_share_dirs}/konversation/{,**} rw,
+  owner @{user_share_dirs}/korganizer/{,*} w,
+  owner @{user_share_dirs}/kpat/{,**} rw,
+  owner @{user_share_dirs}/krunner-sources/{,**} rw,
+  owner @{user_share_dirs}/krunner-sources/** l,
+  owner @{user_share_dirs}/ksysguard/ w,
+  owner @{user_share_dirs}/ksysguard/sensorfaces/{,**} rw,
+  owner @{user_share_dirs}/ksysguard/sensorfaces/*/** l,
   owner @{user_share_dirs}/kwin/ rw,
   owner @{user_share_dirs}/kwin/** rwlk -> @{user_share_dirs}/kwin/**,
+  owner @{user_share_dirs}/messageviewer/{,**} rw,
+  owner @{user_share_dirs}/plasma/ w,
+  owner @{user_share_dirs}/plasma/comics/ w,
+  owner @{user_share_dirs}/plasma/comics/** rw,
+  owner @{user_share_dirs}/plasma/comics/*/** l,
+  owner @{user_share_dirs}/plasma/desktoptheme/{,**} rw,
+  owner @{user_share_dirs}/plasma/desktoptheme/*/** l,
+  owner @{user_share_dirs}/plasma/look-and-feel/{,**} rw,
+  owner @{user_share_dirs}/plasma/look-and-feel/*/** l,
+  owner @{user_share_dirs}/plasma/plasmoids/{,**} rw,
+  owner @{user_share_dirs}/plasma/plasmoids/*/** l,
+  owner @{user_share_dirs}/plasma/wallpapers/{,**} rw,
+  owner @{user_share_dirs}/plasma/wallpapers/*/** l,
+  owner @{user_share_dirs}/plasma-systemmonitor/ rw,
+  owner @{user_share_dirs}/plasma-systemmonitor/** rwl,
+  owner @{user_share_dirs}/servicemenu-download/ rw,
+  owner @{user_share_dirs}/servicemenu-download/** rwl,
+  owner @{user_share_dirs}/wallpapers/{,**} rw,
+  owner link @{user_share_dirs}/wallpapers/*.@{image_ext} -> @{user_share_dirs}/wallpapers/#@{int},
 
-  owner @{tmp}/*.kwinscript rwl -> /tmp/#@{int},
+  owner @{user_state_dirs}/discoverstaterc* rw,
+  owner link @{user_state_dirs}/discoverstaterc{,.@{rand6}} -> @{user_state_dirs}/#@{int},
+  owner @{user_state_dirs}/discoverstaterc.lock k,
+  owner @{user_state_dirs}/UserFeedback.org.kde.discover* rw,
+  owner link @{user_state_dirs}/UserFeedback.org.kde.discover{,.@{rand6}} -> @{user_state_dirs}/#@{int},
+  owner @{user_state_dirs}/UserFeedback.org.kde.discover.lock k,
+
+  owner @{HOME}/.var/app/{app,com,io,net,org}.*/{,**} rw, # flatpak apps user data
+
+        @{tmp}/ r,
   owner @{tmp}/#@{int} rw,
-  owner @{tmp}/discover-@{rand6}/{,**} rw,
+  owner @{tmp}/discover.@{rand6} rw,
+  owner link @{tmp}/discover.@{rand6} -> @{tmp}/#@{int},
+  owner @{tmp}/discover-@{rand6}/{,**} rwl,
   owner @{tmp}/ostree-gpg-@{rand6}/ rw,
-  owner @{tmp}/ostree-gpg-@{rand6}/** rwlk -> /tmp/ostree-gpg-@{rand6}/**,
+  owner @{tmp}/ostree-gpg-@{rand6}/** rwlk -> @{tmp}/ostree-gpg-@{rand6}/**,
+  owner @{tmp}/@{rand6}-* rw,
+  owner link @{tmp}/@{rand6}-* -> @{tmp}/#@{int},
+  owner @{tmp}/*.@{archive_ext} w,
 
+  # following links:
+  owner @{tmp}/discover-flatpak-temporary-*/ rw,
+  owner @{tmp}/discover-flatpak-temporary-*/** rwlk,
+  owner @{tmp}/*.flatpak{ref,repo} rw,
+
+  owner @{run}/user/@{uid}/#@{int} rw,
   owner @{run}/user/@{uid}/.flatpak-cache rw,
   owner @{run}/user/@{uid}/.flatpak/{,**} rw,
-  owner @{run}/user/@{uid}/.flatpak/**/*.ref rwk,
-  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/.flatpak/**/*.ref k,
   owner @{run}/user/@{uid}/discover@{rand6}.* rwl ->  @{run}/user/@{uid}/#@{int},
 
+  owner @{PROC}/@{pid}/cgroup r,
+  owner @{PROC}/@{pid}/fdinfo/@{int} r,
   owner @{PROC}/@{pid}/mountinfo r,
+  owner @{PROC}/@{pid}/stat r,
 
   /dev/tty r,
 
@@ -104,12 +230,97 @@ profile plasma-discover @{exec_path} {
     @{bin}/gpgconf mr,
     @{bin}/gpgsm   mr,
 
+    @{bin}/gpg-agent rPx,
+
     @{HOME}/@{XDG_GPG_DIR}/*.conf r,
 
     owner @{tmp}/ostree-gpg-@{rand6}/ r,
     owner @{tmp}/ostree-gpg-@{rand6}/** rwlk -> /tmp/ostree-gpg-@{rand6}/**,
 
+    owner @{run}/user/@{uid}/gnupg/ w,
+    owner @{run}/user/@{uid}/gnupg/d.@{rand}/ w,
+
+    owner @{PROC}/@{pid}/fd/ r,
+
     include if exists <local/plasma-discover_gpg>
+  }
+
+  profile revokefs {
+    include <abstractions/base>
+
+    mount fstype=fuse.revokefs-fuse options=(rw nodev nosuid) revokefs-fuse -> /var/tmp/flatpak-cache-@{rand6}/*/,
+
+    @{lib}/revokefs-fuse r,
+
+    @{bin}/fusermount{,3} Px,
+
+    /var/lib/flatpak/repo/tmp/flatpak-cache-@{rand6}/{,**} r,
+
+    /dev/fuse rw,
+
+    include if exists <local/plasma-discover_revokefs>
+  }
+
+  profile servicemenuinstaller {
+    include <abstractions/base>
+    include <abstractions/audio-client>
+    include <abstractions/graphics>
+    include <abstractions/kde-strict>
+    include <abstractions/nameservice-strict>
+
+    @{bin}/servicemenuinstaller r,
+
+    @{bin}/kdialog     rix, # Popular among plugin installers
+    @{terminal_path}   rPx, # ToDo: limit it by using profile stacking?
+    @{bin}/{un,g}zip   rix,
+    @{bin}/tar         rix,
+
+    /etc/machine-id r,
+
+    / r,
+
+    /usr/share/desktop-base/kf5-settings/kdeglobals r,
+
+    /var/lib/flatpak/exports/share/icons/*/icon-theme.cache r,
+    /var/lib/flatpak/exports/share/icons/*/index.theme r,
+
+    owner @{HOME}/.icons/ r,
+
+    owner @{user_config_dirs}/ r,
+    owner @{user_config_dirs}/plasma_workspace.notifyrc r,
+
+    owner @{user_share_dirs}/icons/{,**} r,
+    owner @{user_share_dirs}/kio/ w,
+    owner @{user_share_dirs}/kio/servicemenus/ w,
+    owner @{user_share_dirs}/kio/servicemenus/** rw,
+    owner link @{user_share_dirs}/kio/servicemenus/*.desktop -> @{user_share_dirs}/kio/servicemenus/#@{int},
+    owner @{user_share_dirs}/servicemenu-download/* r,
+    owner @{user_share_dirs}/servicemenu-download/*-dir/{,**} rw,
+    audit owner @{user_share_dirs}/servicemenu-download/*-dir/** PUx, # ToDo: running installing scripts, for now must suffice
+
+    @{run}/systemd/userdb/ r,
+
+    @{PROC}/sys/kernel/random/boot_id r,
+    @{PROC}/sys/kernel/core_pattern r,
+
+    /dev/tty r,
+
+    include if exists <local/plasma-discover_servicemenuinstaller>
+  }
+
+  profile xdg-open {
+    include <abstractions/base>
+    include <abstractions/app/open>
+
+    @{bin}/xdg-open r,
+
+    @{bin}/basename rix,
+    @{bin}/cat      rix,
+    @{bin}/printenv rix,
+    @{bin}/sed      rix,
+    @{bin}/tr       rix,
+
+    include if exists <local/plasma-discover_xdg-open>
   }
 
   include if exists <local/plasma-discover>
