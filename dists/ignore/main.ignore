@@ -17,4 +17,3 @@ apparmor.d/groups/cosmic
 apparmor.d/groups/steam
 claude
 dunst
-plasma-discover
