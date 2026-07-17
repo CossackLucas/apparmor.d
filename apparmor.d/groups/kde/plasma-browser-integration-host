@@ -17,13 +17,20 @@ profile plasma-browser-integration-host @{exec_path} {
   capability sys_ptrace,
 
   ptrace (read) peer={chromium,brave,chrome,opera,firefox},
+  ptrace (read) peer=kded,
   ptrace (read) peer=plasmashell,
 
   @{exec_path} mr,
 
   /usr/share/kservices{5,6}/{,**} r,
 
+  /etc/xdg/menus/plasma-applications.menu r,
   /etc/xdg/taskmanagerrulesrc r,
+
+  owner @{user_cache_dirs}/#@{int} rw,
+  owner @{user_cache_dirs}/ksycoca{5,6}_* rwk,
+  owner link @{user_cache_dirs}/ksycoca{5,6}_* -> @{user_cache_dirs}/#@{int},
+  owner @{user_config_dirs}/menus/applications-kmenuedit.menu r,
 
   owner @{user_share_dirs}/kservices{5,6}/ r,
   owner @{user_share_dirs}/kservices{5,6}/ServiceMenus/ r,

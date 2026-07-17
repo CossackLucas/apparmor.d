@@ -145,9 +145,9 @@ profile kded @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{HOME}/.var/app/**/plasma-browser-integration-host w,
   owner @{HOME}/.var/app/org.mozilla.firefox/**/ w,
 
-  owner @{user_cache_dirs}/#@{int} rw,
-  owner @{user_cache_dirs}/ksycoca{5,6}_* rwlk,
-  owner link @{user_cache_dirs}/ksycoca{5,6}_* -> @{user_cache_dirs}/#@{int6},
+  owner @{user_cache_dirs}/#@{int} rwk,
+  owner @{user_cache_dirs}/ksycoca{5,6}_* rwk,
+  owner link @{user_cache_dirs}/ksycoca{5,6}_* -> @{user_cache_dirs}/#@{int},
   owner @{user_cache_dirs}/plasmashell/ rw,
   owner @{user_cache_dirs}/plasmashell/** rwlk ->  @{user_cache_dirs}/plasmashell/**,
   owner @{user_cache_dirs}/update-manager-core/meta-release* rw,
