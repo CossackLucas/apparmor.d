@@ -127,12 +127,14 @@ profile kioworker @{exec_path} {
 
   profile gs {
     include <abstractions/base>
+    include <abstractions/fonts-strict>
 
     @{bin}/gs{,.bin} mr,
     @{lib}/ghostscript/**  mr,
 
     /usr/share/ghostscript/{,**} r,
     /usr/share/org.kde.syntax-highlighting/{,**} r,
+    /usr/share/poppler/{,**} r,
 
     /etc/paperspecs r,
 
