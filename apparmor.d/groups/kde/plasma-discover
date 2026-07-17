@@ -38,10 +38,16 @@ profile plasma-discover @{exec_path} {
   #aa:exec kio_http_cache_cleaner
   #aa:exec kioworker
 
+  @{bin}/ r,
+
+  /usr/share/color-schemes/ r,
+  /usr/share/color-schemes/*.colors r,
   /usr/share/knsrcfiles/{,*} r,
   /usr/share/kservices{5,6}/{,*} r,
   /usr/share/kservicetypes5/{,*} r,
   /usr/share/libdiscover/** r,
+  /usr/share/flatpak/remotes.d/ r,
+  /usr/share/metainfo/{,*.xml} r,
 
   /etc/appstream.conf r,
   /etc/flatpak/remotes.d/{,**} r,
@@ -54,14 +60,21 @@ profile plasma-discover @{exec_path} {
   /var/tmp/#@{int} rw,
 
   /var/cache/swcatalog/ rw,
+  /var/cache/swcatalog/cache/*-os-catalog.xb r,
 
   /var/lib/flatpak/repo/{,**} r,
   /var/lib/flatpak/appstream/{,**} r,
+  /var/lib/flatpak/app/ r,
+  /var/lib/flatpak/app/**/ r,
+  /var/lib/flatpak/app/**/{deploy,metadata} r,
+  /var/lib/flatpak/runtime/{,**/} r,
+  /var/lib/flatpak/runtime/**/{deploy,metadata} r,
 
   /var/log/pacman.log r,
 
   owner @{user_cache_dirs}/appstream/ r,
   owner @{user_cache_dirs}/appstream/*.xb rw,
+  owner @{user_cache_dirs}/appstream/.goutputstream-@{rand6} rw,
   owner @{user_cache_dirs}/discover/{,**} rwlk,
   owner @{user_cache_dirs}/flatpak/system-cache/{,**} rw,
   owner @{user_cache_dirs}/kio_http/ w,
@@ -72,20 +85,34 @@ profile plasma-discover @{exec_path} {
   owner @{user_config_dirs}/discoverrc.lock rwk,
   owner @{user_config_dirs}/kde.org/{,**} rwlk,
   owner @{user_config_dirs}/KDE/* r,
+  owner @{user_config_dirs}/kioslaverc r,
   owner @{user_config_dirs}/kdedefaults/plasmarc r,
   owner @{user_config_dirs}/libaccounts-glib/ rw,
   owner @{user_config_dirs}/libaccounts-glib/accounts.db{,-shm,-wal,-journal} rwk,
+  owner @{user_config_dirs}/plasmarc r,
+  owner @{user_config_dirs}/PlasmaUserFeedback r,
 
+  owner @{user_share_dirs}/color-schemes/ r,
+  owner @{user_share_dirs}/color-schemes/*.colors r,
   owner @{user_share_dirs}/flatpak/repo/{,**} rw,
+  owner @{user_share_dirs}/icons/**{/,.svg}   rw, 
+  owner @{user_share_dirs}/icons/*/{index.theme,icon-theme.cache} w,
   owner @{user_share_dirs}/knewstuff3/{,*} rw,
   owner @{user_share_dirs}/kwin/ rw,
   owner @{user_share_dirs}/kwin/** rwlk -> @{user_share_dirs}/kwin/**,
+
+  owner @{user_state_dirs}/discoverstaterc r,
+  owner @{user_state_dirs}/UserFeedback.org.kde.discover rw,
+  owner @{user_state_dirs}/UserFeedback.org.kde.discover.@{rand6} rw,
+  owner link @{user_state_dirs}/UserFeedback.org.kde.discover.@{rand6} -> @{user_state_dirs}/#@{int6},
+  owner @{user_state_dirs}/UserFeedback.org.kde.discover.lock rwk,
 
   owner @{tmp}/*.kwinscript rwl -> /tmp/#@{int},
   owner @{tmp}/#@{int} rw,
   owner @{tmp}/discover-@{rand6}/{,**} rw,
   owner @{tmp}/ostree-gpg-@{rand6}/ rw,
   owner @{tmp}/ostree-gpg-@{rand6}/** rwkl -> /tmp/ostree-gpg-@{rand6}/**,
+  owner @{tmp}/@{rand6}-*.tar.xz w,
 
   owner @{run}/user/@{uid}/.flatpak-cache rw,
   owner @{run}/user/@{uid}/.flatpak/{,**} rw,
