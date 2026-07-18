@@ -24,35 +24,42 @@ profile kdeconnectd @{exec_path} {
   network netlink raw,
 
   signal send set=term peer=kioworker,
-  signal send set=kill peer=sshfs,
+  signal send set=kill peer=kdeconnectd//sshfs,
 
   # changes in local/kioworker
   #aa:exec kioworker
-  @{bin}/fusermount rCx -> fusermount,
+  audit @{bin}/fusermount Cx -> fusermount,
   #@{bin}/kdeconnect-sms rix,
-  # changes in local/sshfs and sshfs_fusermount
-  @{bin}/sshfs rPx,
+  @{bin}/sshfs Cx -> sshfs,
+
+  audit @{lib}/bluetooth/bluetoothd   Px,
+  @{lib}/gstreamer-1.0/gst-plugin-scanner  Cx -> gstreamer,
 
   /etc/fstab r,
+  /etc/pipewire/client.conf.d/ r,
   /etc/pulse/client.conf r,
+
+  /usr/share/pipewire/client.conf r,
 
   / r,
 
+  owner @{user_cache_dirs}/gstreamer-1.0/registry.@{arch}.bin w,
+  owner @{user_cache_dirs}/gstreamer-1.0/registry.@{arch}.bin.@{rand6} rw,
   owner @{user_cache_dirs}/kdeconnect.daemon/kdeconnect/albumart/ r,
   owner @{user_cache_dirs}/kdeconnect.sms/qmlcache/*.qmlc r,
   owner @{user_cache_dirs}/kdeconnect.sms/qtpipelinecache-@{arch}-little_endian-lp64/#@{int} rw,
   owner @{user_cache_dirs}/kdeconnect.sms/qtpipelinecache-@{arch}-little_endian-lp64/qqpc_opengl rw,
   owner @{user_cache_dirs}/kdeconnect.sms/qtpipelinecache-@{arch}-little_endian-lp64/qqpc_opengl.@{word6} rw,
-
   owner link @{user_cache_dirs}/kdeconnect.sms/qtpipelinecache-@{arch}-little_endian-lp64/qqpc_opengl.@{word6} -> @{user_cache_dirs}/kdeconnect.sms/qtpipelinecache-@{arch}-little_endian-lp64/#@{int},
 
   owner @{user_config_dirs}/kdeconnect/ w,
   owner @{user_config_dirs}/kdeconnect/@{hex32}/config r,
-  owner @{user_config_dirs}/kdeconnect/@{hex32}/kdeconnect_sendnotifications/config r,
+  owner @{user_config_dirs}/kdeconnect/@{hex32}/kdeconnect_findthisdevice/ w,
+  owner @{user_config_dirs}/kdeconnect/@{hex32}/kdeconnect_sendnotifications/config rw,
   owner @{user_config_dirs}/kdeconnect/@{hex32}/kdeconnect_sendnotifications/ rw,
   owner @{user_config_dirs}/kdeconnect/@{hex32}/kdeconnect_sendnotifications/#@{int} rw,
-  owner @{user_config_dirs}/kdeconnect/@{hex32}/kdeconnect_sendnotifications/config w,
   owner @{user_config_dirs}/kdeconnect/@{hex32}/kdeconnect_sendnotifications/config.lock rwk,
+  owner @{user_config_dirs}/kdeconnect/@{hex32}/kdeconnect_sendnotifications/config.@{rand6} rw,
   owner @{user_config_dirs}/kdeconnect/#@{int} rw,
   owner @{user_config_dirs}/kdeconnect/certificate.pem r,
   owner @{user_config_dirs}/kdeconnect/config rwl,
@@ -66,6 +73,7 @@ profile kdeconnectd @{exec_path} {
   owner link @{user_config_dirs}/kdeconnect/config.@{rand6} -> @{user_config_dirs}/kdeconnect/#@{int},
   owner link @{user_config_dirs}/kdeconnect/config -> @{user_config_dirs}/kdeconnect/#@{int},
   owner @{user_config_dirs}/kdedefaults/plasmarc r,
+  owner @{user_config_dirs}/kioslaverc r,
   owner @{user_config_dirs}/plasmarc r,
   owner @{user_config_dirs}/pulse/cookie rk,
 
@@ -92,7 +100,7 @@ profile kdeconnectd @{exec_path} {
   owner @{run}/user/@{uid}/@{hex32}/ rw,
   owner @{run}/user/@{uid}/kdeconnect.daemon@{word6}.@{u8}.kioworker.socket w,
   owner @{run}/user/@{uid}/pulse/ r,
-        @{run}/udev/data/* r,
+        @{run}/udev/data/* r,        # should be commented or narrowed down
 
   owner link @{run}/user/@{uid}/kdeconnect.daemon@{word6}.@{u8}.kioworker.socket -> @{run}/user/@{uid}/#@{int},
 
@@ -109,8 +117,8 @@ profile kdeconnectd @{exec_path} {
   #@{sys}/devices/virtual/misc/uhid/0005:045E:0B13.0009/input/input36/uevent r,
   @{sys}/devices/virtual/**/uevent r,
 
-
   owner @{PROC}/@{pid}/mountinfo r,
+  owner @{PROC}/@{pid}/task/@{tid}/comm w,
 
         /dev/tty r,
 
@@ -125,6 +133,61 @@ profile kdeconnectd @{exec_path} {
     umount @{run}/user/@{uid}/@{hex32}/,
 
     include if exists <local/kdeconnectd_fusermount>
+  }
+
+  profile gstreamer {
+    include <abstractions/base>
+    include <abstractions/fonts-strict>
+    include <abstractions/gstreamer>
+
+    /etc/gnutls/config r,
+    owner @{user_cache_dirs}/nvidia/ r,
+    owner @{user_cache_dirs}/nvidia/GLCache/ r,
+    owner @{user_cache_dirs}/nvidia/GLCache/@{hex32}/ rw,
+    owner @{user_cache_dirs}/nvidia/GLCache/@{hex32}/@{hex16}/ rw,
+    owner @{user_cache_dirs}/nvidia/GLCache/@{hex32}/@{hex16}/@{hex16}.bin rwk,
+    owner @{user_cache_dirs}/nvidia/GLCache/@{hex32}/@{hex16}/@{hex16}.toc rwk,
+    owner @{user_config_dirs}/fontconfig/fonts.conf r,
+    owner @{user_share_dirs}/vulkan/implicit_layer.d/ r,
+    owner @{user_share_dirs}/vulkan/implicit_layer.d/steamfossilize_@{arch}.json r,
+    owner @{user_share_dirs}/vulkan/implicit_layer.d/steamoverlay_@{arch}.json r,
+
+    owner @{run}/user/@{uid}/orcexec.@{rand6} mrw,
+    owner @{run}/user/@{uid}/xauth_@{rand6}   r,
+
+    include if exists <local/kdeconnectd_gstreamer>
+  }
+
+  profile sshfs {
+      include <abstractions/base>
+
+      #capability setuid,   # fusermount
+
+      network bluetooth stream,
+      network inet dgram,
+      network inet6 dgram,
+
+      mount fstype=fuse.sshfs options=(rw nodev nosuid) kdeconnect@192.168.*.*:/ -> @{run}/user/@{uid}/@{hex32}/,
+
+      signal receive set=kill peer=kdeconnectd,
+
+      unix (connect, send, receive) type=stream peer=(label="fusermount"),
+
+      @{bin}/sshfs mr,
+
+      @{bin}/ssh            rPx,
+      audit @{bin}/fusermount{,3} Cx -> kdeconnectd//fusermount,
+      # fusermount
+      #mount fstype=fuse.sshfs options=(rw nodev nosuid) kdeconnect@192.168.*.*:/ -> @{run}/user/@{uid}/@{hex32}/,
+      #network bluetooth stream, # file_inherit  failed af match
+      #network inet dgram,
+      #network inet6 dgram,
+
+            /dev/fuse rw,
+            /dev/ptmx rw,
+      owner /dev/pts/@{u8} rw,
+
+      include if exists <local/kdeconnectd_sshfs>
   }
 
   include if exists <local/kdeconnectd>
