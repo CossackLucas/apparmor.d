@@ -74,7 +74,7 @@ profile kscreenlocker_greet @{exec_path} {
   owner @{user_pictures_dirs}/{,**} r,
 
   owner @{user_cache_dirs}/ rw,
-  owner @{user_cache_dirs}/#@{int} rw,
+  owner @{user_cache_dirs}/#@{int} rwk,
   owner @{user_cache_dirs}/kscreenlocker_greet/ w,
   owner @{user_cache_dirs}/kscreenlocker_greet/** rwlk,
   owner @{user_cache_dirs}/ksvg-elements rw,

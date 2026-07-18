@@ -8,7 +8,7 @@ include <tunables/global>
 
 @{exec_path}  = @{bin}/baloo_file @{lib}/{,kf6/}baloo_file
 @{exec_path} += @{lib}/@{multiarch}/{,libexec/}baloo_file
-profile baloo @{exec_path} flags=(attach_disconnected) {
+profile baloo @{exec_path} flags=(attach_disconnected, mediate_deleted) {
   include <abstractions/base>
   include <abstractions/bus/system/org.freedesktop.UDisks2>
   include <abstractions/deny-sensitive-home>
@@ -39,6 +39,7 @@ profile baloo @{exec_path} flags=(attach_disconnected) {
 
   owner @{user_config_dirs}/baloofilerc rwl,
   owner @{user_config_dirs}/baloofilerc.lock rwkl,
+  owner link @{user_config_dirs}/baloofilerc -> @{user_config_dirs}/#@{int},
 
   owner @{user_share_dirs}/baloo/{,**} rwk,
 

@@ -19,6 +19,7 @@ profile plasmalogin-shell @{exec_path} {
   @{bin}/find          rix,
   @{bin}/tr            rix,
   @{bin}/tty           rix,
+  @{bin}/vapoursynth   Cx -> vapoursynth,
   @{bin}/xargs         rix,
 
   @{bin}/pidof          Px,
@@ -34,6 +35,16 @@ profile plasmalogin-shell @{exec_path} {
 
   /etc/debuginfod/{,*} r,
 
+  owner @{user_cache_dirs}/fish/ w,
+
+  # ToDo: should it be for all shells?
+  owner @{user_config_dirs}/fish/ w,
+  owner @{user_config_dirs}/fish/completions/ w,
+  owner @{user_config_dirs}/fish/conf.d/ w,
+  owner @{user_config_dirs}/fish/config.fish w,
+  owner @{user_config_dirs}/fish/functions/ w,
+
+  owner @{user_share_dirs}/fish/ w,
   owner @{user_share_dirs}/plasmalogin/wayland-session.log w,
 
   owner /tmp/xsess-env-@{rand6} w,
@@ -49,6 +60,21 @@ profile plasmalogin-shell @{exec_path} {
     owner @{user_share_dirs}/plasmalogin/wayland-session.log w,
 
     include if exists <local/plasmalogin-shell_flatpak>
+  }
+
+  profile vapoursynth {
+    include <abstractions/base>
+    include <abstractions/consoles>
+    include <abstractions/python>
+
+    @{bin}/ r,
+    @{bin}/vapoursynth r,
+
+    owner @{user_share_dirs}/plasmalogin/wayland-session.log w,
+
+    owner @{PROC}/@{pid}/mounts r,
+
+    include if exists <local/plasmalogin-shell_vapoursynth>
   }
 
   include if exists <local/plasmalogin-shell>

@@ -137,15 +137,17 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_templates_dirs}/ r,
 
   owner @{user_cache_dirs}/ r,
-  owner @{user_cache_dirs}/#@{int} rwk,
+  owner @{user_cache_dirs}/#@{int} rwkl,
   owner @{user_cache_dirs}/appstream/ rw,
   owner @{user_cache_dirs}/appstream/*.xb rw,
   owner @{user_cache_dirs}/bookmarksrunner/ rw,
   owner @{user_cache_dirs}/bookmarksrunner/** rwkl -> @{user_cache_dirs}/bookmarksrunner/#@{int},
   owner @{user_cache_dirs}/kcrash-metadata/plasmashell.*.ini w,
   owner @{user_cache_dirs}/ksvg-elements rw,
+  owner link @{user_cache_dirs}/ksvg-elements -> @{user_cache_dirs}/#@{int},
   owner @{user_cache_dirs}/ksvg-elements.@{rand6} rwlk -> @{user_cache_dirs}/#@{int},
   owner @{user_cache_dirs}/ksvg-elements.lock rwlk,
+  owner @{user_cache_dirs}/ksvg-elements.lock.rmlock rwk,
   owner @{user_cache_dirs}/org.kde.dirmodel-qml.kcache rw,
   owner @{user_cache_dirs}/plasma_engine_potd/{,**} rw,
   owner @{user_cache_dirs}/plasma_theme_*.kcache rw,
@@ -156,6 +158,7 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_cache_dirs}/plasmashell/** rwkl -> @{user_cache_dirs}/plasmashell/**,
   owner @{user_cache_dirs}/org.kde.*/ rw,
   owner @{user_cache_dirs}/org.kde.*/** rwlk,
+
 
   owner @{user_config_dirs}/{KDE,kde.org}/ rw,
   owner @{user_config_dirs}/{KDE,kde.org}/** rwkl -> @{user_config_dirs}/{KDE,kde.org}/#@{int},
@@ -227,9 +230,10 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_share_dirs}/knotifications6/apdatifier.notifyrc r,
   owner @{user_share_dirs}/TelegramDesktop/tdata/audio_cache/TD_Default.wav r,
 
-  owner @{user_state_dirs}/#@{int} rw,
+  owner @{user_state_dirs}/#@{int} rwkl,
   owner @{user_state_dirs}/kickerstaterc rw,
-  owner @{user_state_dirs}/kickerstaterc.@{rand6} rw,
+  owner @{user_state_dirs}/kickerstaterc.@{rand6} rwl,
+  owner link @{user_state_dirs}/kickerstaterc -> @{user_state_dirs}/#@{int},
   owner link @{user_state_dirs}/kickerstaterc.@{rand6} -> @{user_state_dirs}/#@{int},
   owner @{user_state_dirs}/kickerstaterc.lock rwk,
   owner @{user_state_dirs}/plasma/* r,
@@ -278,7 +282,7 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{PROC}/@{pid}/task/@{tid}/comm rw,
 
   /dev/ptmx rw,
-  /dev/rfkill r,
+  /dev/rfkill rw,   # w required to control bluetooth
 
   include if exists <local/plasmashell>
 }

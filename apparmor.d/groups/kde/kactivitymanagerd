@@ -49,7 +49,9 @@ profile kactivitymanagerd @{exec_path} flags=(attach_disconnected,mediate_delete
   owner @{user_share_dirs}/kservices{5,6}/{,**} r,
   owner @{user_share_dirs}/user-places.xbel r,
 
-  owner @{user_state_dirs}/kactivitymanagerdstaterc r,
+  owner @{user_state_dirs}/kactivitymanagerdstaterc rw,
+  owner link @{user_state_dirs}/kactivitymanagerdstaterc -> @{user_state_dirs}/#@{int},
+  owner @{user_state_dirs}/kactivitymanagerdstaterc.lock rwk,
 
   owner @{tmp}/kmail2.@{rand6} r,
 

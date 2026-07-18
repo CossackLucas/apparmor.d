@@ -53,6 +53,7 @@ profile startplasma @{exec_path} {
   owner @{user_cache_dirs}/kcrash-metadata/ rw,
   owner @{user_cache_dirs}/plasma-svgelements rw,
 
+  owner @{user_config_dirs}/#@{int} rwk,
   owner @{user_config_dirs}/gtkrc{,*} rwlk,
   owner @{user_config_dirs}/gtkrc* lk -> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/kdedefaults/ rw,
@@ -82,6 +83,8 @@ profile startplasma @{exec_path} {
   owner @{run}/user/@{uid}/ r,
 
   @{PROC}/sys/kernel/random/boot_id r,
+
+  owner @{PROC}/@{pid}/mountinfo r,
 
   /dev/tty rw,
   /dev/tty@{u8} rw,
