@@ -41,6 +41,8 @@ profile ksplashqml @{exec_path} flags=(attach_disconnected,mediate_deleted) {
 
   owner @{user_share_dirs}/plasma/look-and-feel/*/metadata.json r,
 
+  /dev/tty r,
+
   include if exists <local/ksplashqml>
 }
 

@@ -108,7 +108,7 @@ profile kwin_wayland @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{sddm_state_dirs}/kglobalshortcutsstaterc.lock rwk,
 
   owner @{user_cache_dirs}/ r,
-  owner @{user_cache_dirs}/#@{int} rw,
+  owner @{user_cache_dirs}/#@{int} rwk,
   owner @{user_cache_dirs}/ksvg-elements rw,
   owner @{user_cache_dirs}/ksvg-elements.@{rand6} rwl -> @{user_cache_dirs}/#@{int},
   owner @{user_cache_dirs}/ksvg-elements.lock rwk,
