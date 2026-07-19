@@ -97,6 +97,8 @@ profile grub-mkconfig @{exec_path} flags=(attach_disconnected) {
   /tmp/grub-*.@{rand10}/{,**} rw,
 
   @{sys}/firmware/efi/efivars/OsIndicationsSupported-@{uuid} r,
+  @{sys}/fs/cgroup/user.slice/{,**/}cpu.max r,
+  @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/cpu.max r,
 
   @{PROC}/@{pids}/cgroup r,
   @{PROC}/@{pids}/mountinfo r,

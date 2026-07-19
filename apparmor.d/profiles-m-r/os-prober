@@ -63,6 +63,7 @@ profile os-prober @{exec_path} flags=(attach_disconnected) {
   /var/lib/os-prober/{,**} rw,
 
   @{MOUNTS}/ r,
+  @{MOUNTS}/[Bb]oot/* r,
   / r,
   @{efi}/ r,
   @{efi}/EFI/ r,
