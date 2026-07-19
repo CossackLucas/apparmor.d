@@ -19,6 +19,8 @@ profile pidof @{exec_path} flags=(attach_disconnected) {
 
   /app/lib/libzypak-preload-host*.so rm,
 
+  owner @{user_share_dirs}/plasmalogin/wayland-session.log w,
+
   @{sys}/devices/system/node/ r,
   @{sys}/devices/system/node/node@{int}/meminfo r,
 
