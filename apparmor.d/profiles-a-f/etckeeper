@@ -32,8 +32,10 @@ profile etckeeper @{exec_path} {
   @{bin}/hostname       rix,
   @{bin}/mkdir          rix,
   @{bin}/mktemp         rix,
+  @{bin}/pacman         rPx,
   @{bin}/perl           rix,
   @{bin}/ps             rPx,
+  @{bin}/rev            rix,
   @{bin}/rm             rix,
   @{bin}/sed            rix,
   @{bin}/sort           rix,
@@ -43,6 +45,8 @@ profile etckeeper @{exec_path} {
   @{bin}/whoami         rix,
   @{bin}/xargs          rix,
   @{lib}/git{,-core}/git*  rix,
+
+  /usr/share/perl5/core_perl/*.pm r,
 
   /etc/.git/hooks/*     rix,
   /etc/etckeeper/*.d/*  rix,
@@ -54,13 +58,16 @@ profile etckeeper @{exec_path} {
 
   /var/cache/etckeeper/{,**} rw,
 
-  owner @{HOME}/.gitconfig* r,
+  @{HOME}/.gitconfig* r,
   owner @{HOME}/.netrc r,
   owner @{user_config_dirs}/git/{,*} rw,
 
   owner @{tmp}/etckeeper-git* rw,
 
+  @{sys}/fs/cgroup/user.slice/{,**/}cpu.max r,
+
   owner @{PROC}/@{pid}/fd/ r,
+  @{PROC}/@{pid}/cgroup r,
 
   profile gpg {
     include <abstractions/base>
