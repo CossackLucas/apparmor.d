@@ -19,6 +19,8 @@ profile systemd-sleep @{exec_path} flags=(attach_disconnected) {
   capability sys_resource,
   capability perfmon,
 
+  ptrace read peer=unconfined,
+
   unix bind type=stream addr=@@{udbus}/bus/systemd-sleep/,
   unix bind type=stream addr=@@{udbus}/bus/systemd-sleep/system,
 
