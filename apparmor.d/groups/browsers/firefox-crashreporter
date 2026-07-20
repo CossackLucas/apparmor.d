@@ -37,6 +37,7 @@ profile firefox-crashreporter @{exec_path} flags=(attach_disconnected) {
   @{bin}/mv   rix,
 
   @{firefox_path}               rPx,
+  @{lib_dirs}/@{name}           rPx,
   @{lib_dirs}/minidump-analyzer rPx,
 
   owner @{config_dirs}/firefox/*.*/crashes/{,**} rw,
@@ -52,6 +53,7 @@ profile firefox-crashreporter @{exec_path} flags=(attach_disconnected) {
   owner @{config_dirs}/firefox/Profile*/*.sqlite-shm r,
 
   owner @{cache_dirs}/firefox/*.*/** r,
+  owner @{cache_dirs}/firefox/*.*/cache2/entries/@{hex} w,
 
         /tmp/ r,
     /var/tmp/ r,
@@ -61,8 +63,11 @@ profile firefox-crashreporter @{exec_path} flags=(attach_disconnected) {
 
   owner /dev/shm/org.mozilla.ipc.@{int}.@{int} r,
 
+  owner @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/app.slice/app-firefox*@{hex32}.service/cpu.max r,
+
   owner @{PROC}/@{pid}/cgroup r,
   owner @{PROC}/@{pid}/cmdline r,
+  owner @{PROC}/@{pid}/fd/ r,
   owner @{PROC}/@{pid}/mountinfo r,
 
   /dev/dri/card@{int} rw,
