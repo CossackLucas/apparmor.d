@@ -1,0 +1,108 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/4.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/paru
+profile paru @{exec_path} flags=(complain) {
+  include <abstractions/base>
+  include <abstractions/consoles>
+  include <abstractions/nameservice-strict>
+  include <abstractions/ssl_certs>
+
+  network inet dgram,
+  network inet6 dgram,
+  network inet stream,
+  network inet6 stream,
+  network netlink raw,
+
+  @{exec_path} mr,
+
+  @{sh_path}         rix,
+  @{bin}/bat         rix,
+  @{bin}/git         Cx -> git,
+  @{bin}/gpg{,2}     Cx -> gpg,
+  @{bin}/gpgconf     Cx -> gpg,
+  @{bin}/gpgsm       Cx -> gpg,
+  audit @{bin}/less        Px -> child-pager,  # should be changed to pager_path?
+  @{bin}/makepkg     Px,
+  @{bin}/pacman      Px,
+  @{bin}/pacman-conf Px,
+  @{bin}/sudo        Cx -> sudo,
+
+  /var/lib/pacman/** r,
+
+  owner @{user_cache_dirs}/paru/clone/{,**} rw,
+  owner @{user_cache_dirs}/paru/packages.aur r,
+
+  owner @{user_config_dirs}/paru/paru.conf r,
+
+  owner @{user_state_dirs}/paru/{,**}   rw,
+
+  @{sys}/fs/cgroup/user.slice/{,**/}cpu.max r,
+
+  owner @{PROC}/@{pid}/cgroup  r,
+
+  profile git {
+    include <abstractions/base>
+    include <abstractions/consoles>
+    include <abstractions/nameservice-strict>
+    include <abstractions/ssl_certs>
+
+    network inet dgram,
+    network inet6 dgram,
+    network inet stream,
+    network inet6 stream,
+    network netlink raw,
+
+    @{bin}/git*              mrix,
+    @{lib}/git{,-core}/git*  mrix,
+
+    owner @{HOME}/.gitconfig r,
+
+    owner @{user_cache_dirs}/paru/clone/** rw,
+    owner @{user_cache_dirs}/paru/clone/*/.git/** l,
+
+    include if exists <local/paru_git>
+  }
+
+  profile gpg {
+    include <abstractions/base>
+    include <abstractions/consoles>
+
+    @{bin}/gpg{,2}    r,
+    @{bin}/gpgconf   r,
+    @{bin}/gpgsm  r,
+
+    /etc/pacman.d/gnupg/gpg.conf r,
+    /etc/pacman.d/gnupg/pubring.gpg r,
+    /etc/pacman.d/gnupg/trustdb.gpg rw,
+
+    owner @{HOME}/@{XDG_GPG_DIR}/ rw,
+    owner @{HOME}/@{XDG_GPG_DIR}/** rwkl -> @{HOME}/@{XDG_GPG_DIR}/**,
+
+    owner /etc/pacman.d/gnupg/.*  w,
+
+    include if exists <local/paru_gpg>
+  }
+
+  profile sudo flags=(attach_disconnected) {
+    include <abstractions/base>
+    include <abstractions/app/sudo>
+    include <abstractions/nameservice-strict>
+
+    network inet dgram,
+    network inet6 dgram,
+
+    @{bin}/pacman Px,
+
+    include if exists <local/paru_sudo>
+  }
+
+  include if exists <local/paru>
+}
+
+# vim:syntax=apparmor
