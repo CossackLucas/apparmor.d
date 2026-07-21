@@ -1,0 +1,64 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/arch-nspawn
+profile arch-nspawn @{exec_path} flags=(attach_disconnected) {
+  include <abstractions/base>
+  include <abstractions/consoles>
+
+  capability dac_read_search,
+  capability sys_admin,
+
+  @{exec_path} mr,
+
+  @{sh_path} r,
+
+  @{bin}/cat           rix,
+  @{bin}/cp            rix,
+  @{bin}/gettext       rix,
+  @{bin}/gpg           rix,
+  @{bin}/{,e}grep      rix,
+  @{bin}/mkdir         rix,
+  @{bin}/pacman-conf   rix,
+  @{bin}/pacman-key    rix,
+  @{bin}/readlink      rix,
+  @{bin}/sed           rix,
+  @{bin}/setarch       rix,
+  @{bin}/systemd-escape rix,
+  @{bin}/systemd-nspawn Px,
+  @{bin}/tput          rix,
+  @{bin}/unshare       rix,
+
+  /usr/share/devtools/lib/*.sh r,
+  /usr/share/makepkg/util.sh r,
+  /usr/share/makepkg/util/{,*.sh} r,
+  /usr/share/terminfo/** r,
+
+  /etc/makepkg.conf r,
+  /etc/makepkg.conf.d/{,**} r,
+  /etc/pacman.conf r,
+  /etc/pacman.d/{,*-}mirrorlist r,
+  /etc/pacman.d/gnupg/gpg.conf r,
+  /etc/pacman.d/gnupg/pubring.gpg r,
+  /etc/pacman.d/gnupg/trustdb.gpg rw,
+
+  /var/cache/pacman/pkg r,
+
+  /var/lib/aurbuild/@{arch}/@{user}/.arch-chroot r,
+  /var/lib/aurbuild/@{arch}/@{user}.lock w,
+  /var/lib/aurbuild/@{arch}/@{user}/etc/** rw,
+  /var/lib/aurbuild/@{arch}/@{user}/etc/pacman.d/gnupg/** rwlk,
+
+  @{tmp}/.tmp@{rand6} r,
+
+  /dev/pts/@{u8} rw,
+
+  include if exists <local/arch-nspawn>
+}
+
+# vim:syntax=apparmor

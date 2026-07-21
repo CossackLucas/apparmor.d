@@ -131,6 +131,9 @@ profile pacman @{exec_path} flags=(attach_disconnected) {
 
   owner /dev/pts/@{u16} rw,
 
+  # Inherit Silencer
+  deny @{user_share_dirs}/sounds/** r,
+
   profile gpg {
     include <abstractions/base>
     include <abstractions/nameservice-strict>

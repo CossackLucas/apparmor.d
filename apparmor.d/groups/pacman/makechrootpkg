@@ -1,0 +1,90 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/makechrootpkg
+profile makechrootpkg @{exec_path} flags=(attach_disconnected) {
+  include <abstractions/base>
+  include <abstractions/consoles>
+  include <abstractions/cgroup-limits>
+  include <abstractions/nameservice-strict>
+
+  capability chown,
+  capability dac_override,
+  capability dac_read_search,
+  capability fowner,
+  capability fsetid,
+  capability sys_admin,
+
+  @{exec_path} mr,
+
+  @{sh_path} rix,
+  @{coreutils_path} rix,
+
+  @{bin}/arch-nspawn Px,
+  @{sbin}/btrfs     rix,
+  @{bin}/flock      rix,
+  @{bin}/getent     rix,
+  @{bin}/gettext    rix,
+  @{bin}/mountpoint rix,
+  @{bin}/pacman-conf Px,
+  @{bin}/pacman-key  Px,
+  @{bin}/sudo        Cx -> sudo,
+  @{bin}/tput       rix,
+
+  /usr/share/devtools/lib/**.sh r,
+  /usr/share/makepkg/util.sh r,
+  /usr/share/makepkg/util/{,*.sh} r,
+  /usr/share/terminfo/** r,
+
+  /etc/makepkg.conf r,
+  /etc/makepkg.conf.d/{,**} r,
+
+  /var/lib/aurbuild/@{arch}/ r,
+  /var/lib/aurbuild/@{arch}/@{user}/{,**} r,
+  /var/lib/aurbuild/@{arch}/@{user}.lock wk,
+  /var/lib/aurbuild/@{arch}/@{user}/build/ rw,
+  /var/lib/aurbuild/@{arch}/@{user}/chrootbuild w,
+  /var/lib/aurbuild/@{arch}/@{user}/etc/** w,
+  /var/lib/aurbuild/@{arch}/@{user}/logdest/{,*.log} w,
+  /var/lib/aurbuild/@{arch}/@{user}/pkgdest/ w,
+  /var/lib/aurbuild/@{arch}/@{user}/srcdest/ w,
+  /var/lib/aurbuild/@{arch}/@{user}/srcpkgdest/ w,
+  /var/lib/aurbuild/@{arch}/@{user}/startdir/ w,
+
+  @{user_cache_dirs}/paru/clone/*/ r,
+  @{user_cache_dirs}/paru/clone/*/*.log w,
+
+  @{tmp}/makechrootpkg.@{rand10}/{,**/} rw,
+
+  @{PROC}/@{pids}/cgroup r,
+  @{PROC}/@{pids}/mountinfo r,
+
+  /dev/pts/@{u8} rw,
+
+  profile sudo flags=(attach_disconnected) {
+    include <abstractions/base>
+    include <abstractions/app/sudo>
+
+    capability chown,
+
+    @{sh_path}           ix,
+    @{bin}/env           ix,
+    @{bin}/makechrootpkg Px,
+    @{bin}/makepkg       Px,
+
+    /var/lib/aurbuild/@{arch}/@{user}.lock w, # file_inherit
+
+    owner @{user_cache_dirs}/paru/clone/*/PKGBUILD r,
+
+    include if exists <local/makechrootpkg_sudo>
+  }
+
+  include if exists <local/makechrootpkg>
+}
+
+# vim:syntax=apparmor
