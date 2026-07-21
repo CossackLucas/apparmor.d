@@ -1,0 +1,183 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/profile-sync-daemon
+profile psd @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/cgroup-limits>
+  include <abstractions/consoles>
+  include <abstractions/nameservice-strict>
+
+  @{exec_path} mrix,
+
+  @{sh_path}              r,
+  # chmod,chown,cut,date,find,gawk,grep,id,install,ln,mv,readlink,rm,sed,sort,stat,touch,unlink,uname,wc
+  @{coreutils_path}       rix,
+  @{bin}/fuse-overlayfs    Cx -> fuse-overlayfs,
+  @{bin}/fusermount{,3}    Cx -> fusermount,
+  @{bin}/gdbus             Cx -> bus,
+  @{bin}/getent           rix,
+  @{bin}/logger           rix,
+  @{bin}/mountpoint       rix,
+  @{bin}/pgrep             Cx -> pkill,
+  @{bin}/pkill             Cx -> pkill,
+  @{bin}/psd-suspend-sync rix,
+  @{bin}/rsync             Cx -> rsync,
+  @{bin}/systemctl        rCx -> systemctl,
+  @{bin}/systemd-inhibit   Px,
+  @{bin}/tput             rix,
+
+  /usr/share/psd/** r,
+  /usr/share/terminfo/{,**} r,
+
+  / r,
+  @{HOMEDIRS}/ r,
+
+  owner @{HOME}/.mozilla/ r,
+  owner @{user_config_dirs}/mozilla/ r,
+
+  owner @{HOME}/ r,
+  owner @{HOME}/.mozilla/firefox/ r,
+  owner @{HOME}/.mozilla/firefox/@{rand8}.*{,/} rw,
+  owner @{HOME}/.mozilla/firefox/@{rand8}.*/** r,
+  owner @{HOME}/.mozilla/firefox/@{rand8}.*-back*/** rw,
+  owner @{HOME}/.mozilla/firefox/profiles.ini r,
+  owner @{user_config_dirs}/mozilla/firefox/ r,
+  owner @{user_config_dirs}/mozilla/firefox/@{rand8}.*{,/} rw,
+  owner @{user_config_dirs}/mozilla/firefox/@{rand8}.*/** r,
+  owner @{user_config_dirs}/mozilla/firefox/@{rand8}.*-back*/** rw,
+  owner @{user_config_dirs}/mozilla/firefox/profiles.ini r,
+
+  # chromium-based
+  owner @{user_config_dirs}/{chromium,vivaldi} w,
+  owner @{user_config_dirs}/{chromium,vivaldi}/ rw,
+  owner @{user_config_dirs}/{chromium,vivaldi}-back*/{,**} rw,
+
+  owner @{DESKTOP_HOME}/ r,
+  owner @{desktop_config_dirs}/ r,
+  owner @{desktop_config_dirs}/psd/.psd.conf rw,
+  owner @{desktop_config_dirs}/psd/psd.conf r,
+  owner @{user_config_dirs}/ r,
+  owner @{user_config_dirs}/psd/ w,
+  owner @{user_config_dirs}/psd/.psd.conf rw,
+  owner @{user_config_dirs}/psd/psd.conf rw,
+
+  owner @{user_share_dirs}/ r, # ToDo: deny?
+
+  owner @{run}/user/@{uid}/psd.pid w,
+  owner @{run}/user/@{uid}/psd/ rw,
+  owner @{run}/user/@{uid}/psd/{,.}@{user}-*/{,**} rw,
+
+  owner @{PROC}/@{pid}/mountinfo r,
+
+  profile bus {
+    include <abstractions/base>
+
+    signal receive set=term peer=psd,
+
+    @{bin}/gdbus r,
+
+    include if exists <local/psd_bus>
+  }
+
+  profile fuse-overlayfs {
+    include <abstractions/base>
+
+    # ToDo: could be different with firejail! check with /usr/share/psd/psd.conf
+    mount fstype=fuse.fuse-overlayfs options=(rw noatime nodev nosuid) fuse-overlayfs -> @{run}/user/@{uid}/psd/@{user}-*/,
+
+    @{bin}/fuse-overlayfs r,
+    @{bin}/fusermount{,3} Px -> psd//fusermount,
+
+    owner @{HOME}/.mozilla/firefox/@{rand8}.*-backup/{,**} r,
+    owner @{user_config_dirs}/mozilla/firefox/@{rand8}.*-backup/{,**} r,
+
+    owner @{user_config_dirs}/{chromium,vivaldi}-backup/{,**} r,
+
+    owner @{run}/user/@{uid}/psd/@{user}-*/ r,
+    owner @{run}/user/@{uid}/psd/@{user}-*/** rw,
+
+    owner @{run}/user/@{uid}/psd/.@{user}-*/work/ rw,
+    owner @{run}/user/@{uid}/psd/.@{user}-*/work/@{int}{,/} rw,
+    owner @{run}/user/@{uid}/psd/.@{user}-*/work/@{int}/* w,
+
+    @{sys}/devices/system/node/ r,
+
+    @{PROC}/sys/fs/pipe-max-size r,
+    @{PROC}/sys/kernel/overflowgid r,
+    @{PROC}/sys/kernel/overflowuid r,
+
+    /dev/fuse rw,
+
+    include if exists <local/psd_fuse-overlayfs>
+  }
+
+  profile fusermount {
+    include <abstractions/base>
+    include <abstractions/app/fusermount>
+
+    capability setuid,
+
+    mount fstype=fuse.fuse-overlayfs options=(rw noatime nodev nosuid) fuse-overlayfs -> @{run}/user/@{uid}/psd/@{user}-*/,
+
+    umount @{run}/user/@{uid}/psd/@{user}-*/,
+
+    @{run}/user/@{uid}/psd/@{user}-*/ r,
+
+    # Inherit Silencer
+    deny @{HOME}/.mozilla/firefox/** rw,
+    deny @{user_config_dirs}/mozilla/firefox/** rw,
+    deny @{user_config_dirs}/{chromium,vivaldi}-backup/ r,
+
+    deny @{run}/user/@{uid}/psd/@{user}-*/** rw,
+    deny @{run}/user/@{uid}/psd/.@{user}-*/work/ r,
+
+    include if exists <local/psd_fusermount>
+  }
+
+  profile pkill {
+    include <abstractions/base>
+    include <abstractions/app/pgrep>
+    include <abstractions/nameservice-strict>
+
+    signal send set=kill peer={chromium,firefox,vivaldi},
+    signal send set=term peer=psd,
+
+    include if exists <local/psd_pkill>
+  }
+
+  profile rsync {
+    include <abstractions/base>
+    include <abstractions/nameservice-strict>
+
+    @{bin}/rsync r,
+
+    owner @{HOME}/.mozilla/firefox/@{rand8}.*-back-ovfs/{,**} rw,
+    owner @{HOME}/.mozilla/firefox/@{rand8}.*-backup/{,**}   rw,
+    owner @{user_config_dirs}/mozilla/firefox/@{rand8}.*-back-ovfs/{,**} rw,
+    owner @{user_config_dirs}/mozilla/firefox/@{rand8}.*-backup/{,**}   rw,
+
+    owner @{user_config_dirs}/{chromium,vivaldi}-back-ovfs/{,**} rw,
+    owner @{user_config_dirs}/{chromium,vivaldi}-backup/{,**} rw,
+
+    owner @{run}/user/@{uid}/psd/@{user}-*/{,**} r,
+
+    include if exists <local/psd_rsync>
+  }
+
+  profile systemctl {
+    include <abstractions/base>
+    include <abstractions/app/systemctl>
+
+    include if exists <local/psd_systemctl>
+  }
+
+  include if exists <local/psd>
+}
+
+# vim:syntax=apparmor
