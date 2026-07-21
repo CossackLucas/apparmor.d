@@ -18,6 +18,7 @@ profile ssh @{exec_path} flags=(attach_disconnected) {
 
   capability dac_override,
 
+  network bluetooth stream,
   network inet stream,
   network inet6 stream,
   network inet dgram,
@@ -47,6 +48,8 @@ profile ssh @{exec_path} flags=(attach_disconnected) {
   owner @{HOME}/@{XDG_SSH_DIR}/{,*} r,
   owner @{HOME}/@{XDG_SSH_DIR}/known_hosts{,.*} rwl,
   owner @{HOME}/@{XDG_SSH_DIR}/ssh_control_*_*_* wl,
+
+  owner @{user_config_dirs}/kdeconnect/privateKey.pem r,
 
   owner @{user_projects_dirs}/**/ssh/{,*} r,
   owner @{user_projects_dirs}/**/config r,
