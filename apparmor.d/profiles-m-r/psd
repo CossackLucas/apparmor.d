@@ -1,0 +1,137 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/4.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/profile-sync-daemon
+profile psd @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/nameservice-strict>
+
+  #capability sys_ptrace, # pgrep related?
+
+  audit deny network,
+
+  #unix (send receive connect) type=stream peer=(addr=/run/systemd/userdb/io.systemd.DynamicUser), # failed af match
+  #unix (send receive connect) type=stream peer=(addr=/run/systemd/userdb/io.systemd.Multiplexer), # failed af match
+  #unix (send receive) type=stream, # failed af match
+  #unix create type=stream, # failed af match
+  # ToDo: do it properly
+  unix,
+
+  @{exec_path} mr,
+
+  # chmod,chown,cut,date,find,gawk,grep,id,install,ln,mv,readlink,rm,sed,sort,stat,touch,unlink,uname,wc
+  @{coreutils_path}     rix,
+  @{bin}/fuse-overlayfs Cx -> fuse-overlayfs,
+  @{bin}/fusermount{,3} Cx -> fusermount,
+  @{bin}/getent         rix,
+  @{bin}/mountpoint     rix,
+  @{bin}/pgrep          Cx -> pgrep,
+  @{bin}/rsync          rix,
+
+  /usr/share/psd/** r,
+
+  owner @{user_config_dirs}/psd/.psd.conf rw,
+  owner @{user_config_dirs}/psd/psd.conf r,
+
+  owner @{HOME}/ r,
+  owner @{HOME}/.mozilla/firefox/ r,
+  owner @{HOME}/.mozilla/firefox/@{rand8}.*{,/} rw,
+  owner @{HOME}/.mozilla/firefox/profiles.ini r,
+  # required by rsync
+  owner @{HOME}/.mozilla/firefox/@{rand8}.*-back{up,-ovfs}/     r,
+  owner @{HOME}/.mozilla/firefox/@{rand8}.*-back{up,-ovfs}/**   rw,
+
+  @{run}/systemd/userdb/ r, # required by rsync
+
+  owner @{run}/user/@{uid}/psd.pid w,
+  owner @{run}/user/@{uid}/psd/ rw,
+  owner @{run}/user/@{uid}/psd/{,.}@{user}-firefox-@{rand8}.*/{,**} rw,
+  #owner @{run}/user/@{uid}/psd/@{user}-firefox-@{rand8}.*/{,**} r, # required by rsync
+
+  # @{sys}/devices/system/node/ r, #pgrep related?
+  @{sys}/fs/cgroup/user.slice/cpu.max r,
+  @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/{,**/}cpu.max r,
+
+  @{PROC}/sys/kernel/random/boot_id r,
+
+  owner @{PROC}/@{pid}/cgroup r,
+  owner @{PROC}/@{pid}/mountinfo r,
+
+  /dev/tty rw,
+
+  profile fuse-overlayfs {
+    include <abstractions/base>
+
+    mount fstype=fuse.fuse-overlayfs options=(rw noatime nodev nosuid) fuse-overlayfs -> @{run}/user/@{uid}/psd/@{user}-firefox-@{rand8}.*/,
+
+    @{bin}/fuse-overlayfs     r,
+    @{bin}/fusermount{,3}     Px -> psd//fusermount,
+
+    owner @{HOME}/.mozilla/firefox/@{rand8}.*-backup/{,**} r,
+
+    owner @{run}/user/@{uid}/psd/@{user}-firefox-@{rand8}.*/ r,
+    owner @{run}/user/@{uid}/psd/@{user}-firefox-@{rand8}.*/** rw,
+
+    owner @{run}/user/@{uid}/psd/.@{user}-firefox-@{rand8}.*/work/ rw,
+    owner @{run}/user/@{uid}/psd/.@{user}-firefox-@{rand8}.*/work/@{int}{,/} rw,
+    owner @{run}/user/@{uid}/psd/.@{user}-firefox-@{rand8}.*/work/@{int}/* w,
+
+    @{PROC}/sys/fs/pipe-max-size r,
+    @{PROC}/sys/kernel/overflowgid r,
+    @{PROC}/sys/kernel/overflowuid r,
+
+    /dev/fuse rw,
+
+    include if exists <local/psd_fuse-overlayfs>
+  }
+
+  profile fusermount {
+    include <abstractions/base>
+    include <abstractions/app/fusermount>
+
+    capability setuid,
+
+    mount fstype=fuse.fuse-overlayfs options=(rw noatime nodev nosuid) fuse-overlayfs -> @{run}/user/@{uid}/psd/@{user}-firefox-@{rand8}.*/,
+
+    umount @{run}/user/@{uid}/psd/@{user}-firefox-@{rand8}.*/,
+
+    owner @{HOME}/.mozilla/firefox/@{rand8}.*-backup/ r,
+
+    @{run}/user/@{uid}/psd/@{user}-firefox-@{rand8}.*/ r,
+    @{run}/user/@{uid}/psd/.@{user}-firefox-@{rand8}.*/work/ r,
+
+    include if exists <local/psd_fusermount>
+  }
+
+  profile pgrep {
+    include <abstractions/base>
+    include <abstractions/nameservice-strict>
+    include <abstractions/app/pgrep>
+
+    #capability sys_ptrace,
+
+    ptrace read,
+
+    @{sys}/devices/system/node/ r,
+
+    @{PROC}/ r,
+    @{PROC}/@{pid}/ r,
+    @{PROC}/@{pid}/cgroup r,
+    @{PROC}/@{pid}/cmdline r,
+    @{PROC}/@{pid}/stat r,
+    @{PROC}/tty/drivers r,
+
+    owner @{PROC}/@{pid}/environ r,
+
+    include if exists <local/psd_pgrep>
+  }
+
+  include if exists <local/psd>
+}
+
+# vim:syntax=apparmor
