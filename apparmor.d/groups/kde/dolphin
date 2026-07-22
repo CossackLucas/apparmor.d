@@ -26,6 +26,7 @@ profile dolphin @{exec_path} {
 
   signal send set=hup peer=@{p_systemd},
   signal send set=term peer=kioworker,
+  signal receive set=(abrt kill) peer=kwin_wayland,
 
   ptrace read peer=@{p_systemd},
   ptrace read peer=okular,
