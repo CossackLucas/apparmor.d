@@ -1,0 +1,69 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/kdeconnect-{sms,app,cli,handler,indicator}
+profile kdeconnect @{exec_path} flags=(mediate_deleted) {
+  include <abstractions/base>
+  include <abstractions/common/kde>
+  include <abstractions/consoles>
+  include <abstractions/disks-read>
+  include <abstractions/kde-globals-write>
+  include <abstractions/kde-sonnet>
+  include <abstractions/nameservice-strict>
+  include <abstractions/qt-settings-write>
+  include <abstractions/ssl_certs>
+  include <abstractions/thumbnails-cache-write>
+  include <abstractions/user-read-strict>
+
+  network bluetooth stream,
+  network inet dgram,
+  network inet6 dgram,
+  network netlink raw,
+
+  @{exec_path} mr,
+
+  @{open_path}     Px -> child-open-help,
+  @{bin}/net      rPx,
+  @{bin}/testparm rPx,
+
+  /etc/fstab r,
+
+  @{bin}/ r,
+
+  @{HOMEDIRS}/ r,
+
+  /usr/share/thumbnailers/{,*} r,
+
+  owner @{user_cache_dirs}/kdeconnect.{app,sms}/ w,
+  owner @{user_cache_dirs}/kdeconnect.{app,sms}/** rwlk,
+  owner @{user_cache_dirs}/kdeconnect.daemon/** r,
+
+  owner @{user_config_dirs}/kdeconnect/** rwlk,
+  owner @{user_config_dirs}/kdeconnect.{app,handler,sms}rc@{atomic} rwlk,
+  owner @{user_config_dirs}/kioslaverc r,
+  owner @{user_config_dirs}/kservicemenurc r,
+
+  owner @{user_share_dirs}/kpeople/persondb rwk,
+  owner @{user_share_dirs}/kpeoplevcard/ r,
+  owner @{user_share_dirs}/kpeoplevcard/kdeconnect-@{hex32}/{,*.vcf} r,
+  owner @{user_share_dirs}/user-places.xbel r,
+
+  owner @{user_state_dirs}/kdeconnect.{app,handler,sms}staterc@{atomic} rwlk -> @{user_state_dirs}/#@{int},
+
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/kdeconnect.{app,handler,sms}@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
+
+        @{sys}/bus/usb/devices/ r,
+
+  owner @{PROC}/@{pid}/mountinfo r,
+  owner @{PROC}/@{pid}/task/@{tid}/comm w,
+
+  include if exists <local/kdeconnect>
+}
+
+# vim:syntax=apparmor
