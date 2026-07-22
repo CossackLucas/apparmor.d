@@ -1,0 +1,83 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2025 You <your@email>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/4.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/kdeconnect-sms
+profile kdeconnect-sms @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/fonts-strict>
+  include <abstractions/graphics>
+  include <abstractions/kde-strict>
+
+  #network inet dgram port=57117,
+  #network inet6 dgram port=38791,
+  network inet dgram,
+  network inet6 dgram,
+
+  @{exec_path} mr,
+
+  @{bin}/xdg-open   Px,
+
+  @{bin}/  r,
+
+  /usr/share/mime/mime.cache r,
+  /usr/share/mime/types r,
+  /usr/share/qt6/translations/qt*.qm r,
+  /usr/share/hunspell/ r,
+  #/usr/share/hunspell/de_DE.dic r,
+  #/usr/share/hunspell/en_GB-large.aff r,
+  #/usr/share/hunspell/en_GB-large.dic r,
+  #/usr/share/hunspell/en_US-large.aff r,
+  /usr/share/hunspell/*.{aff,dicv} r,
+  /usr/share/myspell/ r,
+  /usr/share/myspell/dicts/ r,
+
+  /var/lib/flatpak/exports/share/icons/hicolor/index.theme r,
+  /var/lib/flatpak/runtime/org.kde.Platform.Locale/ r,
+  /var/lib/flatpak/runtime/org.kde.Platform.Locale/**/ r,
+  /var/lib/flatpak/runtime/org.kde.Platform.Locale/**hunspell/*.{aff,dic} r,
+  #/var/lib/flatpak/runtime/org.kde.Platform.Locale/@{arch}/6.10/@{hex64}-pl/files/pl/share/pl/hunspell/pl_PL.aff r,
+  #/var/lib/flatpak/runtime/org.kde.Platform.Locale/@{arch}/6.10/@{hex64}-pl/files/pl/share/pl/hunspell/pl_PL.dic r,
+
+  owner @{user_cache_dirs}/kdeconnect.sms/qmlcache/@{hex}.qmlc r,
+  owner @{user_cache_dirs}/kdeconnect.sms/qtpipelinecache-@{arch}-little_endian-lp64/qqpc_opengl r,
+  owner @{user_cache_dirs}/kdeconnect.sms/qtpipelinecache-@{arch}-little_endian-lp64/#@{int} rw,
+  owner @{user_cache_dirs}/kdeconnect.sms/qtpipelinecache-@{arch}-little_endian-lp64/qqpc_opengl rw,
+  owner @{user_cache_dirs}/kdeconnect.sms/qtpipelinecache-@{arch}-little_endian-lp64/qqpc_opengl.@{rand6} rw,
+  owner link @{user_cache_dirs}/kdeconnect.sms/qtpipelinecache-@{arch}-little_endian-lp64/qqpc_opengl.@{rand6} -> @{user_cache_dirs}/kdeconnect.sms/qtpipelinecache-@{arch}-little_endian-lp64/#@{int},
+  owner @{user_cache_dirs}/qtshadercache-@{arch}-little_endian-lp64/@{hex} r,
+
+  owner @{user_config_dirs}/kcminputrc r,
+  owner @{user_config_dirs}/KDE/Sonnet.conf r,
+  owner @{user_config_dirs}/kdedefaults/kcminputrc r,
+  owner @{user_config_dirs}/kdedefaults/kdeglobals r,
+  owner @{user_config_dirs}/kdedefaults/plasmarc r,
+  owner @{user_config_dirs}/kdeglobals r,
+  owner @{user_config_dirs}/plasmarc r,
+
+  owner @{user_share_dirs}/icons/*/index.theme r,
+  #owner @{user_share_dirs}/icons/Fluent-dark/16/actions/edit-find.svg r,
+  #owner @{user_share_dirs}/icons/Fluent-dark/symbolic/actions/application-menu-symbolic.svg r,
+  #owner @{user_share_dirs}/icons/Fluent/scalable/apps/desktop-environment-kde.svg r,
+  owner @{user_share_dirs}/icons/**.svg r,
+  owner @{user_share_dirs}/kpeople/persondb rwk,
+  owner @{user_share_dirs}/kpeoplevcard/ r,
+  owner @{user_share_dirs}/kpeoplevcard/kdeconnect-@{hex32}/ r,
+  owner @{user_share_dirs}/kpeoplevcard/kdeconnect-@{hex32}/*.vcf r,
+  owner @{user_share_dirs}/mime/mime.cache r,
+  owner @{user_share_dirs}/mime/types r,
+
+  owner @{user_state_dirs}/kdeconnect.smsstaterc r,
+
+  owner @{PROC}/@{pid}/mountinfo r,
+
+  /dev/tty r,
+
+  include if exists <local/kdeconnect-sms>
+}
+
+# vim:syntax=apparmor
