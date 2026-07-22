@@ -176,6 +176,7 @@ kcminit complain
 kconf_update complain
 kde-powerdevil complain
 kde-systemd-start-condition complain
+kdeconnectd complain
 kded complain
 kdestroy complain
 kdump_mem_estimator complain
@@ -247,6 +248,7 @@ nvidia-persistenced complain
 ollama complain
 oomctl complain
 os-prober complain
+paru complain
 pam_kwallet_init complain
 passimd complain
 pkla-admin-identities complain
@@ -265,6 +267,7 @@ plymouth-set-default-theme complain
 plymouthd complain
 polkit-kde-authentication-agent complain
 pollinate complain
+psd complain
 pycompile complain
 qdbus complain
 remmina complain
