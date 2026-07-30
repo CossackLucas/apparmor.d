@@ -1,0 +1,102 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{export_ext} = page
+
+@{exec_path} = @{bin}/plasma-systemmonitor
+profile plasma-systemmonitor @{exec_path} flags=(attach_disconnected,mediate_deleted) {
+  include <abstractions/base>
+  include <abstractions/common/kde>
+  include <abstractions/kde-export-settings>
+  include <abstractions/nameservice-strict>
+  include <abstractions/ssl_certs>
+
+  capability sys_ptrace,
+
+  network netlink raw,
+
+  signal send set=(stop,cont,hup,int,term,kill,usr1,usr2),
+
+  ptrace read,
+
+  @{exec_path} mr,
+
+  @{open_path}      rPx -> child-open-help,
+  @{bin}/net        Px,
+  @{bin}/nvidia-smi rPx,
+  @{bin}/testparm   Px,
+
+  #aa:exec kioworker
+  @{lib}/{,@{multiarch}/libexec/}ksysguard/ksgrd_network_helper rCx -> network-helper,
+
+  @{bin}/ r,
+
+  /usr/share/ksysguard/sensorfaces/{,**} r,
+  /usr/share/knsrcfiles/plasma-systemmonitor.knsrc r,
+
+  owner @{user_config_dirs}/autostart/* r,
+  owner @{user_config_dirs}/libaccounts-glib/accounts.db{,-shm} rwk,
+  owner @{user_config_dirs}/libaccounts-glib/accounts.db-wal rw,
+  owner @{user_config_dirs}/systemmonitorrc@{atomic} rwlk,
+
+  owner @{user_share_dirs}/knewstuff3/plasma-systemmonitor.knsregistry rw,
+
+  owner @{tmp}/#@{int} rwk,
+  owner @{tmp}/plasma-systemmonitor.@{rand6}@{atomic} rwlk -> @{tmp}/#@{int},
+  owner @{tmp}/@{rand6}-*.page rw,
+  owner link @{tmp}/@{rand6}-*.page -> @{tmp}/#@{int},
+
+  @{run}/udev/data/+pci:* r,  # Identifies all PCI devices (CPU, GPU, Network, Disks, USB, etc.)
+
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/plasma-systemmonitor@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
+
+  owner @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/ r,
+  owner @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/init.scope/ r,
+  owner @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/{app,background,session}.slice/{,**/} r,
+  owner @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/{,**/}cgroup.procs r,
+
+        @{PROC}/ r,
+        @{PROC}/@{pids}/attr/current r,
+        @{PROC}/@{pids}/cgroup r,
+        #@{PROC}/@{pids}/cmdline r,
+        @{PROC}/@{pids}/smaps_rollup r,
+        @{PROC}/@{pids}/stat r,
+        @{PROC}/@{pids}/statm r,
+        @{PROC}/@{pids}/status r,
+        @{PROC}/@{pids}/task/ r,
+  owner @{PROC}/@{pid}/fdinfo/{,@{int}} r,
+  owner @{PROC}/@{pid}/io r,
+  owner @{PROC}/@{pid}/task/@{tid}/comm w,
+
+  /dev/tty r,
+
+  profile network-helper {
+    include <abstractions/base>
+
+    capability net_raw,
+    capability sys_ptrace,
+
+    network netlink raw,
+    network packet dgram,
+
+    ptrace read,
+
+    @{lib}/{,@{multiarch}/libexec/}ksysguard/ksgrd_network_helper r,
+
+    @{PROC}/ r,
+    @{PROC}/@{pids}/fd/ r,
+    @{PROC}/@{pids}/task/@{tid}/comm rw,
+
+    include if exists <local/plasma-systemmonitor_network-helper>
+  }
+
+  include if exists <local/plasma-systemmonitor>
+}
+
+# vim:syntax=apparmor
