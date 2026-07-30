@@ -16,12 +16,13 @@
   signal receive                           peer=@{p_systemd_user},
 
   # Htop like programs can send any signals to any processes
-  signal receive                           peer=btop,
-  signal receive                           peer=htop,
-  signal receive                           peer=pkill,
-  signal receive                           peer=resources//kill,
-  signal receive                           peer=top,
-  signal receive set=(cont,term,kill,stop) peer=gnome-system-monitor,
+  signal receive                                             peer=btop,
+  signal receive                                             peer=htop,
+  signal receive                                             peer=pkill,
+  signal receive                                             peer=resources//kill,
+  signal receive                                             peer=top,
+  signal receive set=(cont,term,kill,stop)                   peer=gnome-system-monitor,
+  signal receive set=(stop,cont,hup,int,term,kill,usr1,usr2) peer=plasma-systemmonitor,
 
   # Allow to receive termination signal from manager such as sudo, login, shutdown or systemd
   signal receive                           peer=su,
