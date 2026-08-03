@@ -28,6 +28,7 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   include <abstractions/sys/dmi>
   include <abstractions/thumbnails-cache-write>
   include <abstractions/upower-observe>
+  include <abstractions/user-read>  # ToDo: needs the same access as a file browser?
 
   userns,
 
