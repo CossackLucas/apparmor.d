@@ -1,0 +1,87 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{lib}/{,@{multiarch}/libexec/}kf6/kpackagehandlers/knshandler
+profile knshandler @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/kde-strict>
+  include <abstractions/nameservice-strict>
+  include <abstractions/ssl_certs>
+
+  network inet stream,
+  network inet6 stream,
+  network inet dgram,
+  network inet6 dgram,
+  network netlink raw,
+
+  signal receive set=kill peer=systemsettings,
+
+  @{exec_path} mrix,
+
+  @{bin}/sddmthemeinstaller Px,
+
+  /etc/sysconfig/proxy r,
+  @{etc_ro}/xdg/ r,
+
+  / r,
+
+  /usr/share/desktop-base/kf5-settings/{,**} r,
+  /usr/share/knsrcfiles/{,*} r,
+  /usr/share/plasma/look-and-feel/** r,
+
+  /home/ r,
+
+  owner @{HOME}/ r,
+
+  owner @{HOME}/.icons/{,**} rw,
+
+  owner @{user_cache_dirs}/kpackage-knshandler/ rw,
+  owner @{user_cache_dirs}/kpackage-knshandler/** rwl,
+
+  owner @{user_config_dirs}/ r,
+  owner @{user_config_dirs}/libaccounts-glib/ r,
+  owner @{user_config_dirs}/libaccounts-glib/accounts.db{,-shm} rwk,
+  owner @{user_config_dirs}/libaccounts-glib/accounts.db-wal rw,
+
+  owner @{user_share_dirs}/aurorae/ w,
+  owner @{user_share_dirs}/aurorae/themes/{,**} rw,
+  owner @{user_share_dirs}/color-schemes/{,**} rw,
+  owner @{user_share_dirs}/color-schemes/** l,
+  owner @{user_share_dirs}/icons/{,**} rw,
+  owner @{user_share_dirs}/knewstuff3/ r,
+  owner @{user_share_dirs}/knewstuff3/*.knsregistry rw,
+  owner @{user_share_dirs}/plasma/desktoptheme/{,**} rw,
+  owner @{user_share_dirs}/plasma/desktoptheme/*/** l,
+  owner @{user_share_dirs}/plasma/look-and-feel/{,**} rw,
+  owner @{user_share_dirs}/plasma/look-and-feel/*/** l,
+  owner @{user_share_dirs}/plasma/plasmoids/ rw,
+  owner @{user_share_dirs}/plasma/plasmoids/** rwl,
+  owner @{user_share_dirs}/wallpapers/ rw,
+  owner @{user_share_dirs}/wallpapers/** rwl,
+
+  # The same extensions as for plasma-discovery
+        @{tmp}/ r,
+  owner @{tmp}/#@{int} rw,
+  owner @{tmp}/@{rand6}-* rw,
+  owner link @{tmp}/@{rand6}-* -> @{tmp}/#@{int},
+  owner @{tmp}/kpackage-knshandler-@{rand6}/{,**} rw,
+  owner @{tmp}/*.@{archive_ext} w,
+
+        #@{run}/systemd/resolve/stub-resolv.conf r, # should be be in nameservice-strict
+        @{run}/systemd/userdb/ r,
+
+        @{PROC}/sys/kernel/random/boot_id r,
+  owner @{PROC}/@{pid}/mountinfo r,
+
+  /dev/tty r,
+  /dev/urandom r,
+
+  include if exists <local/knshandler>
+}
+
+# vim:syntax=apparmor

@@ -1,0 +1,71 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path}  = @{bin}/plasma-apply-*
+@{exec_path} += @{lib}/plasma-apply-aurorae @{lib}/plasma-changeicons
+profile plasma-apply @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/graphics>
+  include <abstractions/kde-strict>
+
+  @{exec_path} mrix,
+
+  @{sh_path} r,
+
+  @{bin}/xrdb rPx,
+
+  @{lib}/kwin-applywindowdecoration   Px,
+
+  /etc/machine-id r,
+  /etc/xdg/plasmarc r,
+
+  /usr/share/color-schemes/{,**} r,
+  /usr/share/desktop-base/kf5-settings/kdeglobals r,
+  /usr/share/plasma/look-and-feel/{,**} r,
+  /usr/share/plasma/desktoptheme/{,**} r,
+
+        /home/ r,
+
+  owner @{HOME}/ r,
+
+  owner @{user_config_dirs}/ r,
+  owner @{user_config_dirs}/gtkrc* rw,
+  owner link @{user_config_dirs}/gtkrc{,-2.0}{,.@{rand6}} -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/kcminputrc w,
+  owner @{user_config_dirs}/kcminputrc.lock rwk,
+  owner link @{user_config_dirs}/kcminputrc -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/kdeglobals* rw,
+  owner link @{user_config_dirs}/kdeglobals{,.@{rand6}} -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/kdeglobals.lock k,
+  owner @{user_config_dirs}/plasmarc rw,
+  owner link @{user_config_dirs}/plasmarc -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/plasmarc.lock rwk,
+  owner @{user_config_dirs}/Trolltech.conf* rw,
+  owner link @{user_config_dirs}/Trolltech.conf{,.@{rand6}} -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/Trolltech.conf.lock k,
+
+  owner @{user_share_dirs}/color-schemes/{,*.colors} r,
+  owner @{user_share_dirs}/plasma/look-and-feel/{,**} r,
+  owner @{user_share_dirs}/plasma/desktoptheme/{,**} r,
+  owner @{user_share_dirs}/wallpapers/{,**} r,
+
+  owner @{tmp}/#@{int} rw,
+  owner @{tmp}/plasma-apply-*.@{rand6} w,
+  owner link @{tmp}/plasma-apply-*.@{rand6} -> @{tmp}/#@{int},
+
+  owner @{run}/user/@{uid}/xauth_@{rand6} r,
+
+  @{PROC}/sys/kernel/core_pattern r,
+  @{PROC}/sys/kernel/random/boot_id r,
+
+  /dev/tty rw,
+
+  include if exists <local/plasma-apply>
+}
+
+# vim:syntax=apparmor
