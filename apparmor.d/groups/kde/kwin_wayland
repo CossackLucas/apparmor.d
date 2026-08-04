@@ -34,6 +34,8 @@ profile kwin_wayland @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   signal send set=term peer=unconfined,
   signal send set=term peer=plasma-keyboard,
   signal send set=(usr1, term) peer=kscreenlocker_greet,
+  signal send set=(abrt kill) peer=dolphin, # should probably be changed (rix on kwin_killer_helper)
+  #signal send set=(kill term) peer=kwin_killer_helper,
 
   unix type=stream peer=(label=xkbcomp),
   unix type=stream peer=(label=xwayland),
@@ -122,6 +124,9 @@ profile kwin_wayland @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_cache_dirs}/plasma-svgelements rw,
   owner @{user_cache_dirs}/plasma-svgelements.@{rand6} rwl -> @{user_cache_dirs}/#@{int},
   owner @{user_cache_dirs}/plasma-svgelements.lock rwk,
+  # killing apps related
+  audit owner @{user_cache_dirs}/drkonqi/application-not-responding/*.@{hex32}.*@{int}.@{int}.json w,
+  owner @{user_cache_dirs}/event-sound-cache.tdb.@{hex32}.@{arch}-pc-linux-gnu rwk,
 
   owner @{user_config_dirs}/#@{int} rwl,
   owner @{user_config_dirs}/breezerc r,
@@ -134,7 +139,11 @@ profile kwin_wayland @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_config_dirs}/kwinoutputconfig.json rw,
   owner @{user_config_dirs}/kwinrc.lock rwk,
   owner @{user_config_dirs}/kwinrc{,.@{rand6}} rwl,
-  owner @{user_config_dirs}/kwinrulesrc r,
+  owner @{user_config_dirs}/kwinrulesrc rw,
+  owner link @{user_config_dirs}/kwinrulesrc -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/kwinrulesrc.lock rwk,
+  owner @{user_config_dirs}/plasma_workspace.notifyrc r,
+
   owner @{user_config_dirs}/kxkbrc r,
   owner @{user_config_dirs}/menus/** r,
   owner @{user_config_dirs}/plasmarc r,
@@ -152,8 +161,10 @@ profile kwin_wayland @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_share_dirs}/plasma/desktoptheme/{,**} r,
   owner @{user_share_dirs}/smod/decorations/{,**} r,
 
+  owner @{user_state_dirs}/#@{int} rw,
   owner @{user_state_dirs}/kglobalshortcutsstaterc rw,
   owner @{user_state_dirs}/kglobalshortcutsstaterc.@{rand6} rw,
+  owner link @{user_state_dirs}/kglobalshortcutsstaterc -> @{user_state_dirs}/#@{int},
   owner link @{user_state_dirs}/kglobalshortcutsstaterc.@{rand6} -> @{user_state_dirs}/#@{int},
   owner @{user_state_dirs}/kglobalshortcutsstaterc.lock rwk,
   owner @{user_state_dirs}/kwinstaterc rw,
