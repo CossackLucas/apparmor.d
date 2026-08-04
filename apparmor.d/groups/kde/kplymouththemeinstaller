@@ -1,0 +1,34 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/kplymouththemeinstaller
+profile kplymouththemeinstaller @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/bus-session>
+  include <abstractions/desktop-base>
+  include <abstractions/mime>
+  include <abstractions/nameservice-strict>
+  include <abstractions/qt>
+
+  @{exec_path} mr,
+
+  owner @{user_config_dirs}/#@{int} rwk,
+  owner @{user_config_dirs}/kdedefaults/kdeglobals r,
+  owner @{user_config_dirs}/kdeglobals r,
+  owner @{user_config_dirs}/kplymouththemeinstallerrc@{atomic} rwlk -> @{user_config_dirs}/#@{int},
+
+  owner @{user_share_dirs}/kplymouththemeinstaller/*.@{archive_ext} r,
+  
+  @{PROC}/sys/kernel/random/boot_id r,
+
+  /dev/tty r,
+
+  include if exists <local/kplymouththemeinstaller>
+}
+
+# vim:syntax=apparmor
