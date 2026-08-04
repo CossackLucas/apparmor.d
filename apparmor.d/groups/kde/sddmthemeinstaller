@@ -1,0 +1,43 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/sddmthemeinstaller
+profile sddmthemeinstaller @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/audio-client>
+  include <abstractions/graphics>
+  include <abstractions/kde-strict>
+
+  @{exec_path} mr,
+
+  /etc/locale.alias r,
+  /etc/machine-id r,
+
+  /usr/share/desktop-base/kf5-settings/kdeglobals r,
+
+  /home/ r,
+
+  owner @{HOME}/ r,
+  owner @{HOME}/.icons/ r,
+
+  owner @{user_config_dirs}/ r,
+  owner @{user_config_dirs}/sddmthemeinstallerrc* rw,
+  owner link @{user_config_dirs}/sddmthemeinstallerrc{,.@{rand6}} -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/sddmthemeinstallerrc.lock k,
+
+  owner @{tmp}/*.@{archive_ext} r,
+
+  @{PROC}/sys/kernel/core_pattern r,
+  @{PROC}/sys/kernel/random/boot_id r,
+
+  /dev/tty r,
+
+  include if exists <local/sddmthemeinstaller>
+}
+
+# vim:syntax=apparmor
