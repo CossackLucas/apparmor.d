@@ -99,9 +99,9 @@ profile kde-powerdevil @{exec_path} flags=(attach_disconnected mediate_deleted) 
   @{sys}/devices/**/uevent r,
   @{sys}/devices/**wakeup/wakeup@{u8}/{name,wakeup_count} r,
 
-  @{PROC}/@{pid}/fd/ r,
-  @{PROC}/@{pid}/mountinfo r,
-  @{PROC}/@{pid}/mounts r,
+  @{PROC}/@{pids}/fd/ r,
+  @{PROC}/@{pids}/mountinfo r,
+  @{PROC}/@{pids}/mounts r,
 
   /dev/i2c-@{int} rwk,
   /dev/rfkill r,
@@ -122,8 +122,8 @@ profile kde-powerdevil @{exec_path} flags=(attach_disconnected mediate_deleted) 
           @{PROC}/ r,
           @{PROC}/locks r,
           @{PROC}/@{pids}/maps r,
-          @{PROC}/@{pid}/net/* r,
-          @{PROC}/@{pid}/stat r,
+          @{PROC}/@{pids}/net/* r,
+          @{PROC}/@{pids}/stat r,
     owner @{PROC}/@{pid}/fd/ r,
     owner @{PROC}/@{pid}/fdinfo/@{int} r,
     owner @{PROC}/@{pid}/mounts r,

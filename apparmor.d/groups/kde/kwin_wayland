@@ -54,6 +54,8 @@ profile kwin_wayland @{exec_path} flags=(attach_disconnected,mediate_deleted) {
 
   @{exec_path} mr,
 
+  @{lib}/kwin_killer_helper rix,
+
   /etc/xdg/Xwayland-session.d/00-at-spi Cx -> at-spi,
   /etc/xdg/Xwayland-session.d/00-pulseaudio-x11 Cx -> pulseaudio,
   /etc/xdg/Xwayland-session.d/10-ibus-x11 Cx -> ibus,
@@ -130,6 +132,11 @@ profile kwin_wayland @{exec_path} flags=(attach_disconnected,mediate_deleted) {
 
   owner @{user_config_dirs}/#@{int} rwl,
   owner @{user_config_dirs}/breezerc r,
+  owner @{user_config_dirs}/kaccessrc r,
+  owner @{user_config_dirs}/kcminputrc rw,
+  owner @{user_config_dirs}/kcminputrc.@{rand6} rw,
+  owner link @{user_config_dirs}/kcminputrc.@{rand6} -> @{user_config_dirs}/#@{int6},
+  owner @{user_config_dirs}/kcminputrc.lock rwk,
   owner @{user_config_dirs}/kdedefaults/* r,
   owner @{user_config_dirs}/kglobalshortcutsrc.lock rwk,
   owner @{user_config_dirs}/kglobalshortcutsrc{,.@{rand6}} rwl,

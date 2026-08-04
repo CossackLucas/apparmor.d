@@ -8,12 +8,31 @@ abi <abi/5.0>,
 include <tunables/global>
 
 @{exec_path} = @{bin}/kbuildsycoca{,5,6}
-profile kbuildsycoca @{exec_path} flags=(attach_disconnected) {
+profile kbuildsycoca @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   include <abstractions/base>
+  include <abstractions/consoles>
   include <abstractions/freedesktop.org>
   include <abstractions/nameservice-strict>
 
+  ptrace read peer=plasmashell,
+  ptrace read peer=unconfined,
+
   @{exec_path} mr,
+
+  /etc/xdg/menus/{,plasma-applications.menu} r,
+  /etc/machine-id r,
+
+  /usr/share/desktop-directories/{,*} r,
+  /usr/share/qt6/translations/{,*} r,
+
+  owner @{user_cache_dirs}/#@{int} rw,
+  owner @{user_cache_dirs}/ksycoca6_??_* rw,
+  owner @{user_cache_dirs}/ksycoca6_??_*.lock k,
+  owner link @{user_cache_dirs}/ksycoca6_??_* -> @{user_cache_dirs}/#@{int},
+
+  owner @{user_config_dirs}/kdedefaults/kdeglobals r,
+  owner @{user_config_dirs}/kdeglobals r,
+  owner @{user_config_dirs}/menus/{,**} r,
 
   /dev/tty r,
 

@@ -134,6 +134,7 @@ profile kioworker @{exec_path} {
 
     /usr/share/ghostscript/{,**} r,
     /usr/share/org.kde.syntax-highlighting/{,**} r,
+    /usr/share/poppler/{,**} r,
 
     /etc/paperspecs r,
 

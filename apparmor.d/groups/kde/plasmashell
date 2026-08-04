@@ -114,6 +114,7 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   /etc/xdg/** r,
 
   /var/lib/AccountsService/icons/* r,
+  /var/lib/flatpak/runtime/org.kde.Platform.Locale/{,**} r,
   /var/lib/swcatalog/icons/**.png r,
 
   @{MOUNTS}/ r,
@@ -133,15 +134,17 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_templates_dirs}/ r,
 
   owner @{user_cache_dirs}/ r,
-  owner @{user_cache_dirs}/#@{int} rwk,
+  owner @{user_cache_dirs}/#@{int} rwlk,
   owner @{user_cache_dirs}/appstream/ rw,
   owner @{user_cache_dirs}/appstream/*.xb rw,
   owner @{user_cache_dirs}/bookmarksrunner/ rw,
   owner @{user_cache_dirs}/bookmarksrunner/** rwlk -> @{user_cache_dirs}/bookmarksrunner/#@{int},
   owner @{user_cache_dirs}/kcrash-metadata/plasmashell.*.ini w,
   owner @{user_cache_dirs}/ksvg-elements rw,
+  owner link @{user_cache_dirs}/ksvg-elements -> @{user_cache_dirs}/#@{int},
   owner @{user_cache_dirs}/ksvg-elements.@{rand6} rwlk -> @{user_cache_dirs}/#@{int},
   owner @{user_cache_dirs}/ksvg-elements.lock rwlk,
+  owner @{user_cache_dirs}/ksvg-elements.lock.rmlock rwk,
   owner @{user_cache_dirs}/org.kde.dirmodel-qml.kcache rw,
   owner @{user_cache_dirs}/plasma_engine_potd/{,**} rw,
   owner @{user_cache_dirs}/plasma_theme_*.kcache rw,
@@ -215,8 +218,11 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_share_dirs}/user-places.xbel{,*} rwl,
   owner @{user_share_dirs}/wallpapers/{,**} rw,
   owner @{user_share_dirs}/knotifications6/apdatifier.notifyrc r,
+  owner @{user_share_dirs}/TelegramDesktop/tdata/audio_cache/TD_Default.wav r,
 
+  owner @{user_state_dirs}/#@{int} rwk,
   owner @{user_state_dirs}/kickerstaterc* rw,
+  owner link @{user_state_dirs}/kickerstaterc -> @{user_state_dirs}/#@{int},
   owner link @{user_state_dirs}/kickerstaterc.@{rand6} -> @{user_state_dirs}/#@{int},
   owner @{user_state_dirs}/kickerstaterc.lock k,
   owner @{user_state_dirs}/plasma/* r,
@@ -229,7 +235,7 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
 
         @{tmp}/.mount_nextcl@{rand6}/{,*} r,
   owner @{tmp}/#@{int} rw,
-  owner @{tmp}/plasma-browser-integration_artwork_@{rand6}.{jpg,png,webp} r,
+  owner @{tmp}/plasma-browser-integration_artwork_@{rand6}.@{image_ext} r,
 
         @{run}/mount/utab r,
         @{run}/user/@{uid}/gvfs/ r,
@@ -249,8 +255,8 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   @{sys}/devices/virtual/thermal/thermal_zone@{int}/hwmon@{int}/ r,
 
         @{PROC}/ r,
-        @{PROC}/@{pid}/cmdline r,
-        @{PROC}/@{pid}/stat r,
+        @{PROC}/@{pids}/cmdline r,
+        @{PROC}/@{pids}/stat r,
         @{PROC}/cmdline r,
         @{PROC}/diskstats r,
         @{PROC}/loadavg r,
@@ -264,7 +270,7 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{PROC}/@{pid}/task/@{tid}/comm rw,
 
   /dev/ptmx rw,
-  /dev/rfkill r,
+  /dev/rfkill rw,   # w required to control bluetooth
 
   include if exists <local/plasmashell>
 }
