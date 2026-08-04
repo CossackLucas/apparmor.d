@@ -72,13 +72,16 @@ profile okular @{exec_path} {
   owner @{user_config_dirs}/okularrc.lock rwk,
 
   owner @{user_share_dirs}/#@{int} rw,
+  owner @{user_share_dirs}/color-schemes/{,*} r,
   owner @{user_share_dirs}/kxmlgui{5,6}/okular/{,*} r,
   owner @{user_share_dirs}/okular/ rw,
   owner @{user_share_dirs}/okular/** rwlk,
   owner @{user_share_dirs}/user-places.xbel r,
 
+  owner @{user_state_dirs}/#@{int} rwk,
   owner @{user_state_dirs}/okularstaterc rwl,
-  owner @{user_state_dirs}/okularstaterc.@{rand6} rwlk,
+  owner @{user_state_dirs}/okularstaterc.@{rand6} rw,
+  owner link @{user_state_dirs}/okularstaterc.@{rand6} -> @{user_state_dirs}/#@{int},
   owner @{user_state_dirs}/okularstaterc.lock rwk,
 
   owner @{tmp}/@{hex12}@{h} w, # when opening pdf files as attchments in Thunderbird

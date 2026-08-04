@@ -10,6 +10,7 @@ include <tunables/global>
 profile dolphin @{exec_path} {
   include <abstractions/base>
   include <abstractions/app-launcher-user>
+  include <abstractions/audio-client>
   include <abstractions/bus/system/org.freedesktop.UDisks2>
   include <abstractions/consoles>
   include <abstractions/deny-sensitive-home>
@@ -26,6 +27,7 @@ profile dolphin @{exec_path} {
 
   signal send set=hup peer=@{p_systemd},
   signal send set=term peer=kioworker,
+  signal receive set=(abrt kill) peer=kwin_wayland,
 
   ptrace read peer=@{p_systemd},
   ptrace read peer=okular,
@@ -88,11 +90,8 @@ profile dolphin @{exec_path} {
   deny /tmp/.* rw,
   deny /tmp/.*/{,**} rw,
 
-  owner @{user_state_dirs}/dolphinstaterc{,.@{rand6}} rwl -> @{user_state_dirs}/#@{int},
-  owner @{user_state_dirs}/UserFeedback.org.kde.dolphin.lock k,
-  owner @{user_state_dirs}/UserFeedback.org.kde.dolphin.@{rand6} l -> @{user_state_dirs}/#@{int},
-  owner @{user_share_dirs}/dolphin/ rw,
-  owner @{user_share_dirs}/dolphin/** rwlk -> @{user_share_dirs}/dolphin/#@{int},
+  owner @{user_cache_dirs}/ksplash/qmlcache/*.qmlc rwl -> @{user_cache_dirs}/dolphin/qmlcache/#@{int},
+  owner @{user_cache_dirs}/ksplash/qmlcache/*.qmlc.@{rand6} rwl -> @{user_cache_dirs}/dolphin/qmlcache/#@{int},
 
   owner @{user_config_dirs}/dolphinrc{,.@{rand6}} rwl -> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/dolphinrc.lock rwk,
@@ -106,16 +105,28 @@ profile dolphin @{exec_path} {
   owner @{user_config_dirs}/kservicemenurc l -> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/kservicemenurc.lock k,
   owner @{user_config_dirs}/ktrashrc l -> @{user_config_dirs}/#@{int},
+  owner link @{user_config_dirs}/ktrashrc.@{rand6} -> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/ktrashrc.lock k,
   owner @{user_config_dirs}/knfsshare.{,.@{rand6}} rwk,
   owner @{user_config_dirs}/knfsshare.lock rwk,
+  owner @{user_config_dirs}/pulse/cookie k,
   owner @{user_config_dirs}/session/#@{int} rwk,
   owner @{user_config_dirs}/session/dolphin_dolphin_dolphin.@{rand6} rwl -> @{user_config_dirs}/session/#@{int},
+  
+  owner @{user_share_dirs}/baloo/index-lock k,
+  owner link @{user_share_dirs}/recently-used.xbel -> @{user_share_dirs}/#@{int},
+  owner @{user_share_dirs}/dolphin/ rw,
+  owner @{user_share_dirs}/dolphin/** rwlk -> @{user_share_dirs}/dolphin/#@{int},
+  owner @{user_share_dirs}/kactivitymanagerd/resources/database{,-shm} k,
 
-  owner @{user_cache_dirs}/ksplash/qmlcache/*.qmlc rwl -> @{user_cache_dirs}/dolphin/qmlcache/#@{int},
-  owner @{user_cache_dirs}/ksplash/qmlcache/*.qmlc.@{rand6} rwl -> @{user_cache_dirs}/dolphin/qmlcache/#@{int},
-
-  owner @{user_state_dirs}/dolphinstaterc{,.*} rwlk -> @{user_state_dirs}/#@{int},
+  owner @{user_state_dirs}/#@{int} rwk,
+  owner @{user_state_dirs}/dolphinstaterc rwlk -> @{user_state_dirs}/#@{int},
+  owner @{user_state_dirs}/dolphinstaterc.@{rand6} rwlk -> @{user_state_dirs}/#@{int},
+  owner @{user_state_dirs}/dolphinstaterc.lock rwk,
+  owner @{user_state_dirs}/UserFeedback.org.kde.dolphin.lock k,
+  owner link @{user_state_dirs}/UserFeedback.org.kde.dolphin -> @{user_state_dirs}/#@{int},
+  owner @{user_state_dirs}/UserFeedback.org.kde.dolphin.@{rand6} l -> @{user_state_dirs}/#@{int},
+  owner @{user_state_dirs}/UserFeedback.org.kde.dolphin.lock k,
 
   owner @{tmp}/#@{int} rwk,
   owner @{tmp}/dolphin.@{rand6} rwl -> @{tmp}/#@{int},
@@ -142,15 +153,13 @@ profile dolphin @{exec_path} {
   owner @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/app.slice/app-org.kde.dolphin-@{int}.scope/tab(@{int}).scope/ w,
   owner @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/app.slice/app-org.kde.dolphin-@{int}.scope/tab(@{int}).scope/cgroup.procs w,
 
-        @{PROC}/@{pid}/task/@{tid}/children r,
+        @{PROC}/@{pids}/task/@{tid}/children r,
   owner @{PROC}/@{pid}/cgroup r,
   owner @{PROC}/@{pid}/cmdline r,
   owner @{PROC}/@{pid}/fdinfo/@{int} r,
   owner @{PROC}/@{pid}/mountinfo r,
   owner @{PROC}/@{pid}/mounts r,
   owner @{PROC}/@{pid}/stat r,
-
-  @{sys}/devices/virtual/block/dm-@{int}/uevent r,
 
   /dev/ptmx rw,
 

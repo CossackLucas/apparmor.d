@@ -65,6 +65,7 @@ profile konsole @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_config_dirs}/kuriikwsfilterrc r,
   owner @{user_config_dirs}/Kvantum/{,**} r,
   owner @{user_config_dirs}/menus/{,**} r,
+  owner @{user_config_dirs}/plasma_workspace.notifyrc r,
   owner @{user_config_dirs}/session/** rwlk,
 
   owner @{user_share_dirs}/color-schemes/{,**} r,
@@ -79,9 +80,11 @@ profile konsole @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{tmp}/#@{int} rw,
   owner @{tmp}/konsole.@{rand6} rw,
 
+  @{run}/mount/utab r,
+
   owner @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/app.slice/app-org.kde.konsole-@{int}.scope/** rw,
 
-        @{PROC}/@{pid}/task/@{tid}/children r,
+        @{PROC}/@{pids}/task/@{tid}/children r,
         @{PROC}/@{pids}/cmdline r,
         @{PROC}/@{pids}/stat r,
         @{PROC}/@{pids}/status r,
