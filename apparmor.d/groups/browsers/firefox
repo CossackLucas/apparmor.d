@@ -74,6 +74,15 @@ profile firefox @{exec_path} flags=(attach_disconnected) {
   /opt/1Password/1Password-BrowserSupport                      rPUx,
   /opt/net.downloadhelper.coapp/bin/net.downloadhelper.coapp*  rPx,
 
+  # ToDo: part of gtl abstractions, add here or in firefox abstraction?
+  owner @{user_cache_dirs}/glycin/ w,
+  owner @{user_cache_dirs}/glycin/usr/ w,
+  owner @{user_cache_dirs}/glycin/usr/lib/ w,
+  owner @{user_cache_dirs}/glycin/usr/lib/glycin-loaders/ w,
+  owner @{user_cache_dirs}/glycin/usr/lib/glycin-loaders/@{d}+/ w,
+  owner @{user_cache_dirs}/glycin/usr/lib/glycin-loaders/@{d}+/glycin-svg/ w,
+  owner @{user_cache_dirs}/glycin/usr/lib/glycin-loaders/@{d}+/glycin-svg/fontconfig/ w,
+
   owner @{user_config_dirs}/gtk-{3,4}.0/assets/*.svg r,
   owner @{user_config_dirs}/ibus/bus/ r,
   owner @{user_config_dirs}/ibus/bus/@{hex32}-unix-{,wayland-}@{int} r,

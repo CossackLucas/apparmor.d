@@ -36,14 +36,17 @@ profile firefox-crashreporter @{exec_path} flags=(attach_disconnected) {
   @{bin}/curl rix,
   @{bin}/mv   rix,
 
-  @{firefox_path}               rPx,
+  @{firefox_path}               rPx -> firefox,
   @{lib_dirs}/minidump-analyzer rPx,
 
+  owner @{config_dirs}/firefox/*.*/breach-alerts.db-shm r,
+  owner @{config_dirs}/firefox/*.*/features/?@{uuid}?/ipp-activator@mozilla.com.xpi r, # ToDo: check
   owner @{config_dirs}/firefox/*.*/crashes/{,**} rw,
   owner @{config_dirs}/firefox/*.*/crashes/events/@{uuid} rw,
   owner @{config_dirs}/firefox/*.*/extensions/*.xpi r,
   owner @{config_dirs}/firefox/*.*/minidumps/{,**} rw,
   owner @{config_dirs}/firefox/*.*/minidumps//@{uuid}.{dmp,extra} r,
+  owner @{config_dirs}/firefox/*.*/places.sqlite-shm r,
   owner @{config_dirs}/firefox/*.*/prefs.js r,
   owner @{config_dirs}/firefox/*.*/storage-sync-v2.sqlite-shm r,
   owner @{config_dirs}/firefox/*.*/storage/default/* r,
