@@ -19,19 +19,20 @@
   deny       @{user_cache_dirs}/fontconfig/ w,
   deny       @{user_cache_dirs}/fontconfig/** w,
        owner @{user_cache_dirs}/fontconfig/CACHEDIR.TAG{,.NEW,.LCK,.TMP-*} r,
-       owner @{user_cache_dirs}/fontconfig/[a-f0-9]*.cache-?{,.NEW,.LCK,.TMP-*} r,
+       owner @{user_cache_dirs}/fontconfig/@{hex32}-@{arch}.cache-@{u8} r,
+       owner @{user_cache_dirs}/fontconfig/@{hex32}.cache-?{,.NEW,.LCK,.TMP-*} r,
 
        owner @{HOME}/.fontconfig/ r,
   deny       @{HOME}/.fontconfig/ w,
   deny       @{HOME}/.fontconfig/** w,
        owner @{HOME}/.fontconfig/CACHEDIR.TAG{,.NEW,.LCK,.TMP-*} r,
-       owner @{HOME}/.fontconfig/[a-f0-9]*.cache-?{,.NEW,.LCK,.TMP-*} r,
+       owner @{HOME}/.fontconfig/@{hex32}.cache-?{,.NEW,.LCK,.TMP-*} r,
 
        /var/cache/fontconfig/ r,
   deny /var/cache/fontconfig/ w,
   deny /var/cache/fontconfig/** w,
        /var/cache/fontconfig/CACHEDIR.TAG{,.NEW,.LCK,.TMP-*} r,
-       /var/cache/fontconfig/[a-f0-9]*.cache-?{,.NEW,.LCK,.TMP-*} r,
+       /var/cache/fontconfig/@{hex32}.cache-?{,.NEW,.LCK,.TMP-*} r,
 
   #owner @{HOME}/.fonts/ r,
   deny  @{HOME}/.fonts/ w,
