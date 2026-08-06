@@ -89,7 +89,7 @@ profile firefox @{exec_path} flags=(attach_disconnected) {
   owner @{tmp}/@{rand8}.* rw,  # file downloads (to anywhere)
   owner @{tmp}/@{uuid}.zip{,.tmp} rw,
   owner @{tmp}/crashreporter@{int}-request@{int}.json r,
-  owner @{tmp}/tmpaddon-1 w,   # ToDo: check if it's a matter of installing a new extension
+  audit owner @{tmp}/tmpaddon-@{int} w,
   owner @{tmp}/Mozilla@{uuid}-cachePurge-{@{hex15},@{hex16}} rwk,
   owner @{tmp}/Mozilla\{@{uuid}\}-cachePurge-{@{hex15},@{hex16}} rwk,
   owner @{tmp}/MozillaBackgroundTask-*/.parentlock k,
