@@ -26,12 +26,19 @@ profile startxfce @{exec_path} {
   @{bin}/dbus-update-activation-environment  rCx -> dbus,
 
   # wayland session
-  @{bin}/labwc rCx -> labwc,
+  @{bin}/{m,g,}awk rix,
+  @{bin}/{,e}grep  rix,
+  @{bin}/labwc     rCx -> labwc,
+  @{bin}/sed       rix,
 
   /etc/X11/xinit/xinitrc.d/{,**} r,
   /etc/xdg/xfce4/{,**} r,
 
   owner @{HOME}/.Xdefaults r,
+
+  owner @{user_config_dirs}/xfce4/labwc/* rw,
+
+  @{sys}/devices/virtual/tty/tty@{u8}/active r,
 
   profile labwc flags=(attach_disconnected) {
     include <abstractions/base>
@@ -73,6 +80,10 @@ profile startxfce @{exec_path} {
   profile systemctl flags=(attach_disconnected) {
     include <abstractions/base>
     include <abstractions/app/systemctl>
+
+    #signal send set=cont peer=child-pager,
+
+    @{bin}/less rPx -> child-pager,
 
     include if exists <local/startxfce_systemctl>
   }
