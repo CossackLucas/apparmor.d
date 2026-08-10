@@ -25,10 +25,50 @@ profile startxfce @{exec_path} {
   @{bin}/systemctl                           rCx -> systemctl,
   @{bin}/dbus-update-activation-environment  rCx -> dbus,
 
+  # wayland session
+  @{bin}/labwc rCx -> labwc,
+
   /etc/X11/xinit/xinitrc.d/{,**} r,
   /etc/xdg/xfce4/{,**} r,
 
   owner @{HOME}/.Xdefaults r,
+
+  profile labwc flags=(attach_disconnected) {
+    include <abstractions/base>
+    include <abstractions/desktop>
+    include <abstractions/graphics>
+
+    network netlink raw,
+
+    @{bin}/labwc mr,
+
+    @{bin}/dbus-update-activation-environment  rPx -> startxfce//dbus,
+    @{bin}/systemctl     rPx -> startxfce//systemctl,
+    @{bin}/xfce4-session rPx,
+
+    /usr/share/{,libinput-*/}libinput/ r,
+    /usr/share/{,libinput-*/}libinput/*.quirks r,
+
+    /var/lib/flatpak/{app,exports}/** r,
+
+    owner @{user_config_dirs}/xfce4/labwc/* r,
+
+    #owner @{user_share_dirs}/applications/{,*} r,
+
+    #@{run}/udev/data/+dmi:id r,             # for motherboard info
+    #@{run}/udev/data/+input:input@{int} r,  # for mouse, keyboard, touchpad
+    @{run}/udev/data/+*:* r,                # Identifies all subsystems
+    @{run}/udev/data/c@{int}:@{int} r,      # Identifies all character devices
+
+    @{sys}/devices/**/uevent r,
+
+    #@{PROC}/sys/dev/i915/perf_stream_paranoid r,
+
+    @{att}/dev/dri/card@{int} rw,
+    @{att}/dev/input/event@{int} rw,
+
+    include if exists <local/startxfce_labwc>
+  }
 
   profile systemctl flags=(attach_disconnected) {
     include <abstractions/base>
