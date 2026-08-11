@@ -7,7 +7,7 @@ abi <abi/5.0>,
 include <tunables/global>
 
 @{exec_path} = @{bin}/xfdesktop
-profile xfdesktop @{exec_path} {
+profile xfdesktop @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>
   include <abstractions/app-launcher-user>
   include <abstractions/bus-session>
@@ -27,13 +27,17 @@ profile xfdesktop @{exec_path} {
   /usr/share/xfce4/helpers/{,*.desktop} r,
   /usr/share/desktop-directories/{,*.directory} r,
   /usr/share/backgrounds/xfce/{,**} r,
+  /usr/share/wallpapers/{,**} r,
 
   /etc/fstab r,
 
   owner @{HOME}/@{XDG_DESKTOP_DIR}/{,**} r,
 
+  owner @{user_config_dirs}/dconf/user r,
   owner @{user_config_dirs}/Thunar/{,**} rw,
   owner @{user_config_dirs}/xfce4/desktop/{,**} rw,
+
+  owner @{run}/user/@{uid}/dconf/user rw,
 
   owner @{PROC}/@{pid}/mountinfo r,
 

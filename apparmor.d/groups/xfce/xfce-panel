@@ -7,7 +7,7 @@ abi <abi/5.0>,
 include <tunables/global>
 
 @{exec_path} = @{bin}/xfce4-panel @{lib}/{,@{multiarch}/}xfce4/panel/wrapper-2.0
-profile xfce-panel @{exec_path} {
+profile xfce-panel @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>
   include <abstractions/bus-session>
   include <abstractions/fontconfig-cache-read>
@@ -27,6 +27,8 @@ profile xfce-panel @{exec_path} {
 
   @{bin}/exo-open                                     rix,
   @{bin}/xfce4-mime-helper                            rix,
+  @{sbin}/xfpm-power-backlight-helper                 rPx,
+
   @{lib}/{,@{multiarch}/}xfce4/panel/wrapper-2.0      rix,
   @{lib}/@{multiarch}/glib-@{version}/gio-launch-desktop  rix,
   @{lib}/gio-launch-desktop                           rix,
@@ -49,6 +51,9 @@ profile xfce-panel @{exec_path} {
   owner @{user_config_dirs}/xfce4/panel/{,**} rw,
 
   owner @{tmp}/gdkpixbuf-xpm-tmp.@{rand6} w,
+
+  @{run}/systemd/sessions/* r,
+  @{run}/systemd/users/@{uid} r,
 
         @{PROC}/cmdline r,
   owner @{PROC}/@{pid}/cgroup r,

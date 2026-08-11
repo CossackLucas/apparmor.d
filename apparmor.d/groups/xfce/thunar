@@ -10,6 +10,7 @@ include <tunables/global>
 profile thunar @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>
   include <abstractions/bus-session>
+  include <abstractions/consoles>
   include <abstractions/deny-sensitive-home>
   include <abstractions/fontconfig-cache-read>
   include <abstractions/nameservice-strict>
@@ -29,6 +30,7 @@ profile thunar @{exec_path} flags=(attach_disconnected) {
   @{bin}/thunar-volman  rPx,
   @{bin}/dbus-launch    rCx -> dbus,
   @{open_path}          rPx -> child-open-any,
+  @{sh_path}            rix,
 
   /usr/share/ r,
   /usr/share/gvfs/{,**} r,

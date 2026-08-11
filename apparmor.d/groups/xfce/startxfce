@@ -33,6 +33,7 @@ profile startxfce @{exec_path} {
 
   /etc/X11/xinit/xinitrc.d/{,**} r,
   /etc/xdg/xfce4/{,**} r,
+  /etc/vconsole.conf r,
 
   owner @{HOME}/.Xdefaults r,
 
@@ -81,7 +82,7 @@ profile startxfce @{exec_path} {
     include <abstractions/base>
     include <abstractions/app/systemctl>
 
-    #signal send set=cont peer=child-pager,
+    signal send set=cont peer=child-pager,
 
     @{bin}/less rPx -> child-pager,
 

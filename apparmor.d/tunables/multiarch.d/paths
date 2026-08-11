@@ -24,9 +24,9 @@
 @{ldd_path} += @{lib}/@{multiarch}/ld-linux-@{arch}.so{,.*} 
 
 # Gstreamer plugin scanner
-@{gstreamer_path} = @{lib}/@{multiarch}/gstreamer1.0/gstreamer-1.0/gst-plugin-scanner
-@{gstreamer_path} += @{lib}/@{multiarch}/gstreamer-1.0/gst-plugin-scanner
-@{gstreamer_path} += @{lib}/gstreamer-1.0/gst-plugin-scanner
+@{gstreamer_path} = @{lib}/@{multiarch}/gstreamer1.0/gstreamer-1.0/gst-plugin-scanner{,-@{arch}}
+@{gstreamer_path} += @{lib}/@{multiarch}/gstreamer-1.0/gst-plugin-scanner{,-@{arch}}
+@{gstreamer_path} += @{lib}/gstreamer-1.0/gst-plugin-scanner{,-@{arch}}
 
 # Browsers
 @{brave_path} =  @{brave_lib_dirs}/@{brave_name}

@@ -22,6 +22,8 @@ profile system-config-printer-applet @{exec_path} {
   @{sh_path}            rix,
   @{python_path} r,
 
+  /etc/cups/client.conf r,
+
   /usr/share/system-config-printer/{,**} r,
 
   owner @{HOME}/.xsession-errors w,
@@ -29,6 +31,11 @@ profile system-config-printer-applet @{exec_path} {
   owner @{PROC}/@{pid}/mounts r,
 
   /dev/tty rw,
+
+  # Silencer
+  # ToDo: check if needed
+  #owner @{lib}/@{python_name}/**/__pycache__/{,**} w,
+  #owner /usr/share/system-config-printer/__pycache__/ w,
 
   include if exists <local/system-config-printer-applet>
 }

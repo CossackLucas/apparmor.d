@@ -31,6 +31,10 @@ profile xfce-notifyd @{exec_path} {
   owner @{user_cache_dirs}/xfce4/notifyd/ rw,
   owner @{user_cache_dirs}/xfce4/notifyd/** rwk,
 
+  owner @{user_config_dirs}/dconf/user r,
+
+  owner @{run}/user/@{uid}/dconf/user rw,
+
   include if exists <local/xfce-notifyd>
 }
 

@@ -9,6 +9,7 @@ include <tunables/global>
 @{exec_path} = @{bin}/xfce4-power-manager
 profile xfce-power-manager @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>
+  include <abstractions/consoles>
   include <abstractions/fontconfig-cache-read>
   include <abstractions/bus-session>
   include <abstractions/xfce>
@@ -19,14 +20,26 @@ profile xfce-power-manager @{exec_path} flags=(attach_disconnected) {
 
   @{exec_path} mr,
 
+  @{bin}/pkexec                      rCx -> pkexec,
   @{bin}/xfpm-power-backlight-helper rPx,
 
   /etc/xdg/autostart/xfce4-power-manager.desktop r,
+
+  owner @{user_config_dirs}/dconf/user r,
+
+  owner @{run}/user/@{uid}/dconf/user rw,
 
   owner @{PROC}/@{pid}/cgroup r,
   owner @{PROC}/@{pid}/stat r,
 
   @{att}@{run}/systemd/inhibit/@{int}.ref rw,
+
+  profile pkexec {
+    include <abstractions/base>
+    include <abstractions/app/pkexec>
+
+    include if exists <local/xfce-power-manager_pkexec>
+  }
 
   include if exists <local/xfce-power-manager>
 }

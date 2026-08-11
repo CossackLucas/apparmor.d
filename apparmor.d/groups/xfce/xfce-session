@@ -10,6 +10,7 @@ include <tunables/global>
 profile xfce-session @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>
   include <abstractions/app-launcher-user>
+  include <abstractions/consoles>
   include <abstractions/desktop>
   include <abstractions/fontconfig-cache-read>
   include <abstractions/graphics>
@@ -29,6 +30,7 @@ profile xfce-session @{exec_path} flags=(attach_disconnected) {
   @{bin}/dbus-update-activation-environment            rCx -> dbus,
   @{bin}/systemctl                                     rCx -> systemctl,
   @{lib}/legacy-dist/deprecation-popup                rPUx,
+  @{lib}/geoclue-2.0/demos/agent                       rPx,
   /usr/share/system-config-printer/applet.py           rPx,
   #aa:exec xfce-notifyd
   #aa:exec polkit-gnome-authentication-agent
@@ -40,20 +42,25 @@ profile xfce-session @{exec_path} flags=(attach_disconnected) {
   @{etc_ro}/xdg/autostart/ r,
   @{etc_ro}/xdg/autostart/*.desktop r,
 
+  owner @{HOME}/.ICEauthority w,
+
   owner @{user_cache_dirs}/sessions/{,**} rw,
   owner @{user_config_dirs}/autostart/ r,
   owner @{user_config_dirs}/autostart/*.desktop r,
+  owner @{user_config_dirs}/dconf/user r,
 
   owner @{tmp}/.xfsm-ICE-@{rand6} rw,
+
+  owner @{run}/user/@{uid}/dconf/ w,
+  owner @{run}/user/@{uid}/dconf/user rw,
 
   owner @{PROC}/@{pid}/stat r,
 
   @{sys}/class/i2c-adapter/ r,
 
-  /dev/tty rw,
-
   profile systemctl flags=(attach_disconnected) {
     include <abstractions/base>
+    include <abstractions/consoles>
     include <abstractions/app/systemctl>
 
     include if exists <local/xfce-session_systemctl>

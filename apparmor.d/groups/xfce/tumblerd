@@ -35,6 +35,7 @@ profile tumblerd @{exec_path} {
   owner @{PROC}/@{pid}/mountinfo r,
 
   /dev/ r,
+  /dev/dri/ r,
 
   include if exists <local/tumblerd>
 }
