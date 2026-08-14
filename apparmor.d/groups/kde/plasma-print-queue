@@ -1,0 +1,30 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/plasma-print-queue
+profile plasma-print-queue @{exec_path} flags=(attach_disconnected,mediate_deleted) {
+  include <abstractions/base>
+  include <abstractions/common/kde>
+
+  @{exec_path} mr,
+
+  @{open_path} rPx -> child-open-help,
+
+  /etc/cups/client.conf r,
+
+  @{bin}/ r,
+
+  owner @{user_cache_dirs}/printqueue/ w,
+  owner @{user_cache_dirs}/printqueue/** rwlk,
+
+  /dev/tty r,
+
+  include if exists <local/plasma-print-queue>
+}
+
+# vim:syntax=apparmor
