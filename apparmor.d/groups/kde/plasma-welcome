@@ -1,0 +1,115 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/plasma-welcome
+profile plasma-welcome @{exec_path} flags=(attach_disconnected,mediate_deleted) {
+  include <abstractions/base>
+  include <abstractions/common/kde>
+  include <abstractions/disks-read>
+  include <abstractions/nameservice-strict>
+  include <abstractions/network-manager-observe>
+  include <abstractions/ssl_certs>
+  include <abstractions/sys/dmi>
+
+  network inet stream,
+  network inet6 stream,
+  network inet dgram,
+  network inet6 dgram,
+  network netlink dgram,
+  network netlink raw,
+
+  ptrace read peer=plasmashell,
+
+  signal send set=term peer=kioworker,
+
+  @{exec_path} mr,
+
+  @{open_path}           rPx -> child-open,
+  @{sh_path}             rix,
+  @{bin}/plasma-discover rPUx,
+  @{bin}/plasmashell     rPx,
+
+  #aa:exec kioworker
+
+  /etc/fstab r,
+  /etc/xdg/kshorturifilterrc r,
+
+  /usr/share/kf{5,6}/searchproviders/{,*} r,
+  /usr/share/kglobalaccel/org.kde.*.desktop r,
+  /usr/share/krunner/dbusplugins/{,*} r,
+  /usr/share/metainfo/{,*} r,
+  /usr/share/plasma/desktoptheme/** r,
+  /usr/share/plasma/plasma-welcome/** r,
+  /usr/share/qalculate/* r,
+  /usr/share/swcatalog/xml/{,*} r,
+  /usr/share/swcatalog/icons/** r,
+  /usr/share/wallpapers/** r,
+
+  # ToDo: test with other appstore
+  /var/cache/swcatalog/cache/*.xb r,
+  /var/lib/flatpak/appstream/*/ r,
+  /var/lib/flatpak/appstream/{,**.@{image_ext}} r,
+  /var/lib/flatpak/appstream/*/@{arch}/@{hex64}/ r,
+  /var/lib/flatpak/appstream/*/@{arch}/@{hex64}/appstream.xml.gz r,
+  /var/lib/swcatalog/icons/**.@{icon_ext} r,
+
+  @{bin}/ r,
+
+  owner @{HOME}/ r,
+
+  owner @{user_cache_dirs}/appstream/ rw,
+  owner @{user_cache_dirs}/appstream/*.xb rw,
+  owner @{user_cache_dirs}/appstream/.goutputstream-@{rand6} rw,
+  owner @{user_cache_dirs}/bookmarksrunner/ w,
+  owner @{user_cache_dirs}/bookmarksrunner/** rwlk -> @{user_cache_dirs}/bookmarksrunner/#@{int},
+  owner @{user_cache_dirs}/KDE/ w,
+  owner @{user_cache_dirs}/KDE/plasma-welcome/ rw,
+  owner @{user_cache_dirs}/KDE/plasma-welcome/** rwlk,
+  owner @{user_cache_dirs}/ksvg-elements@{atomic} rwlk -> @{user_cache_dirs}/#@{int},
+  owner @{user_cache_dirs}/org.kde.unitconversion/{,hsts/} w,
+  owner @{user_cache_dirs}/org.kde.unitconversion/hsts/#@{int} rwk,
+  owner @{user_cache_dirs}/org.kde.unitconversion/hsts/hstsstore@{atomic} rwlk -> @{user_cache_dirs}/org.kde.unitconversion/hsts/#@{int},
+  owner @{user_cache_dirs}/plasma_theme_*.kcache rw,
+
+  owner @{user_config_dirs}/KDE/ w,
+  owner @{user_config_dirs}/KDE/UserFeedback.conf r,
+  owner @{user_config_dirs}/ksmserverrc r,
+  owner @{user_config_dirs}/PlasmaUserFeedback@{atomic} rwlk -> @{user_config_dirs}/#@{int},
+
+  owner @{user_share_dirs}/akonadi/search_db/**.glass r,
+  owner @{user_share_dirs}/akonadi/ w,
+  owner @{user_share_dirs}/akonadi/search_db/ w,
+  owner @{user_share_dirs}/akonadi/search_db/contacts/ w,
+  owner @{user_share_dirs}/akonadi/search_db/emailContacts/ w,
+  owner @{user_share_dirs}/kactivitymanagerd/resources/database* rwk,
+  owner @{user_share_dirs}/konsole/ r,
+  owner @{user_share_dirs}/libkunitconversion/ w,
+  owner @{user_share_dirs}/libkunitconversion/#@{int} rwk,
+  owner @{user_share_dirs}/libkunitconversion/currency.xml@{atomic} rwlk -> @{user_share_dirs}/libkunitconversion/#@{int},
+  owner @{user_share_dirs}/user-places.xbel r,
+
+        @{run}/mount/utab r,
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/plasma-welcome@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
+
+  @{sys}/bus/ r,
+  @{sys}/bus/usb/devices/ r,
+
+        @{PROC}/ r,
+  owner @{PROC}/@{pid}/mountinfo r,
+  owner @{PROC}/@{pid}/mounts r,
+
+  /dev/tty r,
+
+  # Silencers
+  deny /var/cache/swcatalog/ w,
+
+  include if exists <local/plasma-welcome>
+}
+
+# vim:syntax=apparmor
