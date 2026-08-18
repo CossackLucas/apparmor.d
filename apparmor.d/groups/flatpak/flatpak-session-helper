@@ -19,6 +19,7 @@ profile flatpak-session-helper @{exec_path} flags=(attach_disconnected,mediate_d
   signal send set=(hup int) peer=user_unconfined,
   signal send set=int peer=@{p_systemd},
   signal send set=int peer=flatpak-session-helper-app,
+  signal send set=term peer=flatpak,
 
   #aa:dbus own bus=session name=org.freedesktop.Flatpak
 
@@ -36,11 +37,14 @@ profile flatpak-session-helper @{exec_path} flags=(attach_disconnected,mediate_d
   @{bin}/getent                        rix,
   @{bin}/p11-kit                       rCx -> p11-kit,
   @{bin}/pkexec                        rCx -> pkexec,
+  @{bin}/plasmashell                   rPx, # ToDo: really needed?
   @{bin}/printenv                      rix,
   @{bin}/ps                            rPx,
 
   /var/lib/flatpak/app/@{appid}/**/@{bin}/**  rPx -> flatpak-session-helper-app,
   /var/lib/flatpak/app/@{appid}/**/@{lib}/**  rPx -> flatpak-session-helper-app,
+
+  owner @{att}@{HOME}/.var/app/@{appid}/.local/state/*/*/*.log a,
 
   owner @{user_cache_dirs}/.flatpak-helper/{,**} rw,
 
