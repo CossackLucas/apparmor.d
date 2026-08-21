@@ -215,6 +215,8 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
 
         @{tmp}/.mount_nextcl@{rand6}/{,*} r,
   owner @{tmp}/#@{int} rw,
+  # ToDo: test with other user
+  owner @{tmp}/kup-daemon-user rw,
   owner @{tmp}/plasma-browser-integration_artwork_@{rand6}.@{image_ext} r,
 
         @{run}/mount/utab r,
