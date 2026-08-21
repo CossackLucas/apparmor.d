@@ -1,0 +1,115 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+# ToDo: should there be a backup variable?
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/kup-{daemon,filedigger,purger}
+profile kup @{exec_path} flags=(attach_disconnected,mediate_deleted) {
+  include <abstractions/base>
+  include <abstractions/audio-client>
+  include <abstractions/common/kde>
+  include <abstractions/disks-read>
+  include <abstractions/ssl_certs>
+  include <abstractions/user-read>
+
+  network netlink raw,
+
+  signal send set=term peer=kioworker,
+
+  @{exec_path} mrix,
+
+  @{bin}/net          PUx,
+  @{bin}/rsync       rCx -> rsync,
+  @{bin}/testparm     PUx,
+
+  @{lib}/bup/cmd/bup rCx -> bup,
+
+  #aa:exec kioworker
+
+  /etc/fstab r,
+
+  owner @{HOME}/.bup*/{,**} r,
+
+  # ToDo: needed?
+  owner @{HOME}/.bash* r,
+  owner @{HOME}/.profile r,
+  owner @{HOME}/.sudo_as_admin_successful r,
+
+  owner @{user_state_dirs}/kupfilediggerstaterc.lock rwk,
+  owner @{user_state_dirs}/kuppurgerstaterc.lock rwk,
+
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/kupdaemon@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
+  owner @{run}/user/@{uid}/kupfiledigger@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
+
+  owner @{tmp}/kup-daemon-user w,
+
+        @{PROC}/sys/kernel/random/boot_id r,
+  owner @{PROC}/@{pid}/mountinfo r,
+  owner @{PROC}/@{pid}/mounts r,
+
+  /dev/tty r,
+
+  profile bup {
+    include <abstractions/base>
+    include <abstractions/app/git>
+    include <abstractions/python>
+
+    @{lib}/bup/cmd/bup mrix,
+
+    @{bin}/par2 rix,
+
+    /etc/mailname r,
+
+    / r,
+    /home/ r,
+
+    owner @{HOME}/ r,
+    owner @{HOME}/.bup*/ r,
+    owner @{HOME}/.bup*/** rw,
+    owner link @{HOME}/.bup*/**.idx -> @{HOME}/.bup*/objects/pack/pack-@{hex}.idx,
+    owner link @{HOME}/.bup*/**.pack -> @{HOME}/.bup*/objects/pack/pack-@{hex}.pack,
+
+    owner @{HOME}/{,**} r,
+    owner @{MOUNTS}/{,**} r,
+
+    owner @{tmp}/@{word8} rw,
+    owner @{tmp}/bup-fsck@{word8}/{,**} rw,
+
+    owner @{PROC}/@{pid}/mounts r, # file_inherit
+    owner @{PROC}/@{pid}/stat r,
+
+    deny owner @{lib}/bup/**/__pycache__/ w,
+
+    include if exists <local/kup_bup>
+  }
+
+  profile rsync {
+    include <abstractions/base>
+    include <abstractions/nameservice-strict>
+
+    @{bin}/rsync r,
+
+    / r,
+    /home/ r,
+
+    owner @{HOME}/ r,
+    owner @{HOME}/.bup*/ r,
+    owner @{HOME}/.bup*/** rw,
+
+    owner @{HOME}/{,**} r,
+    owner @{MOUNTS}/{,**} r,
+
+    owner @{PROC}/@{pid}/mounts r,
+
+    include if exists <local/kup_rsync>
+  }
+  include if exists <local/kup>
+}
+
+# vim:syntax=apparmor

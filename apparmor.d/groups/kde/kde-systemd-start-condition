@@ -17,6 +17,7 @@ profile kde-systemd-start-condition @{exec_path} {
   owner @{user_config_dirs}/kgpgrc r,
   owner @{user_config_dirs}/kmixrc r,
   owner @{user_config_dirs}/konquerorrc r,
+  owner @{user_config_dirs}/kuprc r,
   owner @{user_config_dirs}/plasma-welcomerc r,
 
   /dev/tty r,
