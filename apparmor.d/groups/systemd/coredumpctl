@@ -19,7 +19,8 @@ profile coredumpctl @{exec_path} {
   capability net_admin,
   capability sys_resource,
 
-  signal send peer=child-pager,
+  signal receive set=kill peer=drkonqi-coredump-gui,
+  signal send             peer=child-pager,
 
   @{exec_path} mr,
 
