@@ -1,0 +1,10 @@
+[Trigger]
+Operation = Remove
+Type = Package
+Target = apparmor.d
+
+[Action]
+Description = Removing AppArmor.d profiles...
+When = PreTransaction
+Exec = /usr/bin/aa-install --uninstall
+AbortOnFail
