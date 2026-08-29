@@ -8,4 +8,4 @@ Target = *
 [Action]
 Description = Updating AppArmor profiles...
 When = PostTransaction
-Exec = /usr/bin/aa-install --install
+Exec = /usr/bin/bash -c 'if [[ -n $(/usr/bin/pacman -Q apparmor.d 2>/dev/null) ]]; then /usr/bin/aa-install --install; fi'
