@@ -10,14 +10,20 @@ include <tunables/global>
 profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   include <abstractions/base>
   include <abstractions/audio-client>
+  include <abstractions/bus-session>
+  include <abstractions/bus/system/org.freedesktop.PolicyKit1>
+  include <abstractions/bus/system/org.freedesktop.systemd1>
   include <abstractions/common/kde>
   include <abstractions/cups-client>
   include <abstractions/dconf-write>
+  include <abstractions/disks-read>
+  # include <abstractions/file-dialog>
   include <abstractions/ibus-strict>
   include <abstractions/nameservice-strict>
   include <abstractions/sys/input>
   include <abstractions/thumbnails-cache-write>
   include <abstractions/udev/input>
+  include <abstractions/user-read-strict>
 
   network netlink raw,
 
@@ -31,22 +37,26 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
 
   @{exec_path} mrix,
 
-  @{sh_path}                       rix,
-  @{bin}/cat                       rix,
-  @{bin}/eglinfo                   PUx,
-  @{bin}/kcminit                   Px,
-  @{bin}/khelpcenter               Px,
-  @{bin}/lspci                     Px,
-  @{bin}/openssl                   rix,
-  @{bin}/orca                      PUx,
-  @{bin}/pactl                     Px,
-  @{bin}/plasma-apply-lookandfeel  Px,
-  @{bin}/plasma-discover           Px,
-  @{bin}/plasmashell               Px,
-  @{bin}/rsync                    rix,
-  @{bin}/xdpyinfo                 PUx,
-  @{lib}/bup/cmd/bup              PUx,
-  @{lib}/qt[56]/bin/qdbus          Px,
+  @{open_path} rPx -> child-open-help,
+  @{sh_path}   rix,
+
+  @{bin}/kcminit                           rPx,
+  @{bin}/khelpcenter                       rPx,
+  @{bin}/lspci                             rPx,
+  @{bin}/lscpu                             rPx,
+  @{bin}/net                               rUx,
+  @{bin}/openssl                           rix,
+  @{bin}/orca                              rPUx,
+  @{bin}/pactl                             rPx,
+  @{bin}/plasma-apply-lookandfeel          PUx,
+  @{bin}/plasma-discover                   rPx,
+  @{bin}/plasmashell                       rPx,
+  @{bin}/systemctl                         rCx -> systemctl,
+  @{bin}/testparm                          rUx,
+  @{bin}/xdpyinfo                          rPx,
+  @{bin}/xrdb                              rPx,
+
+  @{lib}/qt{5,6}/bin/qdbus                  rPx,
 
   #aa:exec kioworker
 
@@ -69,12 +79,12 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /usr/share/thumbnailers/{,**} r,
   /usr/share/wallpapers/{,**} r,
 
-  @{etc_ro}/login.defs r,
   /etc/fstab r,
   /etc/sddm.conf.d/{,**} r,
   /etc/sysconfig/displaymanager r,
   /etc/xdg/* r,
   /etc/xdg/ui/ui_standards.rc r,
+  @{etc_ro}/login.defs r,
 
   / r,
   @{bin}/ r,
@@ -88,15 +98,15 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{HOME}/.face r,
   owner @{HOME}/@{XDG_WALLPAPERS_DIR}/{,**} r,
 
-  owner @{user_cache_dirs}/[kK]* rwlk -> @{user_cache_dirs}/#@{int},
+  owner @{user_cache_dirs}/[kK]* rwlk, #-> @{user_cache_dirs}/#@{int},
   owner @{user_cache_dirs}/[kK]*/ rw,
-  owner @{user_cache_dirs}/[kK]*/** rwlk -> @{user_cache_dirs}/[kK]*/**,
+  owner @{user_cache_dirs}/[kK]*/** rwlk, #-> @{user_cache_dirs}/[kK]*/**,
   owner @{user_cache_dirs}/plasma*/{,**} r,
   owner @{user_cache_dirs}/plasma* rw,
 
-  owner @{user_config_dirs}/[kK]* rwlk -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/[kK]* rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/[kK]*/ rw,
-  owner @{user_config_dirs}/[kK]*/** rwlk -> @{user_config_dirs}/[kK]*/**,
+  owner @{user_config_dirs}/[kK]*/** rwlk, #-> @{user_config_dirs}/[kK]*/**,
   owner @{user_config_dirs}/{P,p}lasma* r,
   owner @{user_config_dirs}/*rc r,
   owner @{user_config_dirs}/autostart/ r,
@@ -105,24 +115,26 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_config_dirs}/libaccounts-glib/ rw,
   owner @{user_config_dirs}/libaccounts-glib/accounts.db{,-shm,-wal,-journal} rwk,
   owner @{user_config_dirs}/plasma*/{,**} r,
-  owner @{user_config_dirs}/powerdevilrc.lock rwk,
-  owner @{user_config_dirs}/powerdevilrc{,.@{rand6}} rwl -> @{user_config_dirs}/#@{int},
-  owner @{user_config_dirs}/session/** rwlk,
+  owner @{user_config_dirs}/powerdevilrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
 
-  owner @{user_share_dirs}/[kK]* rwlk -> @{user_share_dirs}/#@{int},
+  owner @{user_share_dirs}/[kK]* rwlk, #-> @{user_share_dirs}/#@{int},
   owner @{user_share_dirs}/[kK]*/ rw,
-  owner @{user_share_dirs}/[kK]*/** rwlk -> @{user_share_dirs}/[kK]*/**,
+  owner @{user_share_dirs}/[kK]*/** rwlk, #-> @{user_share_dirs}/[kK]*/**,
   owner @{user_share_dirs}/baloo/index r,
   owner @{user_share_dirs}/user-places.xbel r,
   owner @{user_share_dirs}/wallpapers/{,**} r,
 
         @{run}/mount/utab r,
-  owner @{run}/user/@{uid}/#@{int} rwl,
-  owner @{run}/user/@{uid}/systemsettings@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/systemsettings@{rand6}.@{int}.kioworker.socket rw,
+  owner link @{run}/user/@{uid}/systemsettings@{rand6}.@{int}.kioworker.socket -> @{run}/user/@{uid}/#@{int},
 
-  @{run}/udev/data/+drm:card@{int}-* r,   # For screen outputs
+  #@{run}/udev/data/+*:* r,                # Identifies all subsystems
   @{run}/udev/data/+dmi:* r,              # for motherboard info
+  @{run}/udev/data/+drm:card@{int}-* r,   # For screen outputs
   @{run}/udev/data/+pci:* r,              # Identifies all PCI devices (CPU, GPU, Network, Disks, USB, etc.)
+  #@{run}/udev/data/c@{int}:@{int} r,      # Identifies all character devices
+  @{run}/udev/data/c13:@{int} r,          # for /dev/input/*
   @{run}/udev/data/c81:@{int}  r,         # For video4linux
   @{run}/udev/data/c@{dynamic}:@{int} r,  # For dynamic assignment range 234 to 254, 384 to 511
   @{run}/udev/data/n@{int} r,             # For network interfaces
