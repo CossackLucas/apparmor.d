@@ -32,6 +32,7 @@ profile usermod @{exec_path} flags=(attach_disconnected) {
   @{bin}/nscd rix,
 
   @{etc_ro}/login.defs r,
+  @{etc_ro}/login.defs.d/{,*} r,
   /etc/subuid r,
 
   /etc/{passwd,shadow,gshadow,group} rw,
@@ -39,6 +40,7 @@ profile usermod @{exec_path} flags=(attach_disconnected) {
   /etc/{passwd,shadow,gshadow,group}.@{pid} w,
   /etc/{passwd,shadow,gshadow,group}.cio@{rand6} w,
   /etc/{passwd,shadow,gshadow,group}+ rw,
+  /etc/{passwd,shadow,gshadow,group}.cio@{rand6} rw,
 
   /etc/passwd.lock  wl -> /etc/passwd.@{pid},
   /etc/group.lock   wl -> /etc/group.@{pid},
@@ -57,6 +59,7 @@ profile usermod @{exec_path} flags=(attach_disconnected) {
 
   @{PROC}/ r,
   @{PROC}/@{pids}/task/ r,
+  @{PROC}/@{pids}/task/@{tid}/status r,
 
   include if exists <local/usermod>
 }

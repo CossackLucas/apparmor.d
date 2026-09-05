@@ -33,6 +33,7 @@ profile accounts-daemon @{exec_path} flags=(attach_disconnected) {
   @{bin}/chage       rPx,
   @{bin}/passwd      rPx,
   @{sbin}/chpasswd   rPx,
+  @{sbin}/useradd    rPx,
   @{sbin}/userdel    rPx,
   @{sbin}/usermod    rPx,
   @{bin}/locale     rPUx,

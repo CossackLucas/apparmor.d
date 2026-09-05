@@ -52,10 +52,9 @@ profile userdel @{exec_path} flags=(attach_disconnected) {
   /var/lib/*/{,**} rw,
 
   @{PROC}/ r,
-  @{PROC}/@{pid}/task/@{tid}/status r,
+  @{PROC}/@{pids}/task/@{tid}/status r,
   @{PROC}/@{pids}/status r,
   @{PROC}/@{pids}/task/ r,
-  @{PROC}/1/task/1/status r,
 
   include if exists <local/userdel>
 }
