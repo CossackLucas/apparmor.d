@@ -23,6 +23,7 @@ profile kaccess @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   @{exec_path} mr,
 
   @{bin}/gsettings rPx,
+  @{bin}/orca      rPUx,
 
   owner @{user_config_dirs}/breezerc r,
   owner @{user_config_dirs}/kaccessrc r,

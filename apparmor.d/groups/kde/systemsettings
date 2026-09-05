@@ -6,6 +6,10 @@ abi <abi/5.0>,
 
 include <tunables/global>
 
+# ToDo: give user access to install custom ICC profiles for displays
+
+@{export_ext} = kksrc shortcuts
+
 @{exec_path} = @{bin}/systemsettings
 profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   include <abstractions/base>
@@ -15,10 +19,11 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   include <abstractions/bus/system/org.freedesktop.systemd1>
   include <abstractions/common/kde>
   include <abstractions/cups-client>
-  # include <abstractions/dconf-write>
+  include <abstractions/dconf-write>
   include <abstractions/disks-read>
   # include <abstractions/file-dialog>
   include <abstractions/ibus-strict>
+  include <abstractions/kde-export-settings>
   include <abstractions/nameservice-strict>
   include <abstractions/sys/input>
   include <abstractions/thumbnails-cache-write>
@@ -36,7 +41,10 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{open_path} rPx -> child-open-help,
   @{sh_path}   rix,
 
+  @{bin}/gsettings                         rPx,
+  @{bin}/kaccess                           rPx,
   @{bin}/kcminit                           rPx,
+  @{bin}/kde_wacom_tabletfinder            rPx, # ToDo: not able to test it!
   @{bin}/khelpcenter                       rPx,
   @{bin}/lspci                             rPx,
   @{bin}/lscpu                             rPx,
@@ -52,30 +60,40 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{bin}/xdpyinfo                          rPx,
   @{bin}/xrdb                              rPx,
 
+  @{lib}/kf6/kdesu                          rPx -> kdesu,
   @{lib}/qt{5,6}/bin/qdbus                  rPx,
 
   #aa:exec kioworker
 
+  /usr/share/hunspell/ r,
   /usr/share/i18n/locales/{,*} r,
   /usr/share/iso-codes/json/*.json r,
   /usr/share/kcm_networkmanagement/{,**} r,
   /usr/share/kcm_recentFiles/{,**} r,
   /usr/share/kcmkeys/{,*.kksrc} r,
+  /usr/share/kgamma/pics/{,*} r,
   /usr/share/kglobalaccel/* r,
   /usr/share/kinfocenter/{,**} r,
   /usr/share/kpackage/{,**} r,
+  /usr/share/krunner/dbusplugins/{,*} r,
   /usr/share/kservices{5,6}/{,**} r,
   /usr/share/kservicetypes5/{,**} r,
   /usr/share/kwin/{,**} r,
+  /usr/share/kwin-wayland/{,**} r,
+  /usr/share/kwin-x11/{,**} r,
   /usr/share/libwacom/{,**} r,
+  /usr/share/myspell/ r,
   /usr/share/plasma/{,**} r,
   /usr/share/sddm/themes/{,**} r,
   /usr/share/solid/{,**} r,
   /usr/share/thumbnailers/{,**} r,
+  /usr/share/wacomtablet/images/{,*} r,
   /usr/share/wallpapers/{,**} r,
 
   @{etc_ro}/login.defs r,
   /etc/fstab r,
+  /etc/plasmalogin.conf r,
+  /etc/sddm.conf r,
   /etc/sddm.conf.d/{,**} r,
   /etc/sysconfig/displaymanager r,
   /etc/xdg/* r,
@@ -108,13 +126,21 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_config_dirs}/autostart/ r,
   owner @{user_config_dirs}/device_automounter_kcmrc.lock rwk,
   owner @{user_config_dirs}/emaildefaults r,
+  owner @{user_config_dirs}/fontconfig/ w,
   owner @{user_config_dirs}/libaccounts-glib/ rw,
   owner @{user_config_dirs}/libaccounts-glib/accounts.db{,-shm,-wal,-journal} rwk,
   owner @{user_config_dirs}/plasma*/{,**} r,
+  owner @{user_config_dirs}/plasmakeyboardrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/plasmaparc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/plasmarc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/powerdevilrc.lock rwk,
   owner @{user_config_dirs}/powerdevilrc{,.@{rand6}} rwl, #-> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/qtvirtualkeyboard/ w,
   owner @{user_config_dirs}/session/ rw,
   owner @{user_config_dirs}/session/** rwlk,
+  owner @{user_config_dirs}/wireplumber/ w,
+  owner @{user_config_dirs}/wireplumber/wireplumber.conf.d/ w,
+  owner @{user_config_dirs}/wireplumber/wireplumber.conf.d/*.conf rw,
 
   owner @{user_share_dirs}/[kK]* rwlk, #-> @{user_share_dirs}/#@{int},
   owner @{user_share_dirs}/[kK]*/ rw,
@@ -141,12 +167,14 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{sys}/bus/ r,
   @{sys}/bus/acpi/devices/ r,
   @{sys}/bus/cpu/devices/ r,
+  @{sys}/bus/usb/devices/ r,
   @{sys}/class/ r,
   @{sys}/class/hidraw/ r,
   @{sys}/class/input/ r,
   @{sys}/class/video4linux/ r,
   @{sys}/devices/**/uevent r,
   @{sys}/devices/**/report_descriptor r,
+  @{sys}/devices/@{pci}/sound/**/properties r,
   @{sys}/firmware/acpi/pm_profile r,
 
         @{PROC}/interrupts r,
@@ -158,8 +186,16 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /dev/ r,
   /dev/bus/usb/ r,
   /dev/input/ r,
+  /dev/input/event@{u8} r,
   /dev/rfkill r,
   /dev/tty r,
+
+  profile systemctl {
+    include <abstractions/base>
+    include <abstractions/app/systemctl>
+
+    include if exists <local/systemsettings_systemctl>
+  }
 
   include if exists <local/systemsettings>
 }
