@@ -31,11 +31,13 @@ profile useradd @{exec_path} flags=(attach_disconnected) {
 
   /etc/default/useradd r,
   @{etc_ro}/login.defs r,
+  @{etc_ro}/login.defs.d/{,*} r,
 
   /etc/{passwd,shadow,gshadow,group,subuid,subgid} rw,
   /etc/{passwd,shadow,gshadow,group,subuid,subgid}- w,
   /etc/{passwd,shadow,gshadow,group,subuid,subgid}.@{pid} w,
   /etc/{passwd,shadow,gshadow,group,subuid,subgid}+ rw,
+  /etc/{passwd,shadow,gshadow,group,subuid,subgid}.cio@{rand6} rw,
 
   /etc/group.lock   wl -> /etc/group.@{pid},
   /etc/gshadow.lock wl -> /etc/gshadow.@{pid},
@@ -58,7 +60,7 @@ profile useradd @{exec_path} flags=(attach_disconnected) {
   @{HOME}/** wl,
   @{HOME}/**/ r,
   /var/lib/*/{,*} rw,
-  /etc/skel/{,.**} r,
+  @{etc_ro}/skel/{,.**} r,
 
   profile pam_tally2 {
     include <abstractions/base>

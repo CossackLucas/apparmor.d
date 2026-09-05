@@ -26,6 +26,7 @@ profile chpasswd @{exec_path} {
   @{bin}/cat ix,
 
   @{etc_ro}/login.defs r,
+  @{etc_ro}/login.defs.d/{,*} r,
 
   /etc/.pwd.lock wk,
   /etc/passwd rw,
@@ -38,6 +39,7 @@ profile chpasswd @{exec_path} {
   /etc/shadow.lock l -> /etc/shadow.@{int},
   /etc/shadow.lock w,
   /etc/shadow+ rw,
+  /etc/shadow.cio@{rand6} rw,
 
   /etc/pam.d/* r,
   /etc/security/pwquality.conf r,
