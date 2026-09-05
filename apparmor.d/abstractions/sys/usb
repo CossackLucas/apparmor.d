@@ -41,6 +41,7 @@
   @{sys}/devices/**/usb@{int}/{,**/}modalias r,
   @{sys}/devices/**/usb@{int}/{,**/}product r,
   @{sys}/devices/**/usb@{int}/{,**/}removable r,
+  @{sys}/devices/**/usb@{int}/{,**/}report_descriptor r,
   @{sys}/devices/**/usb@{int}/{,**/}rx_lanes r,
   @{sys}/devices/**/usb@{int}/{,**/}serial r,
   @{sys}/devices/**/usb@{int}/{,**/}speed r,
