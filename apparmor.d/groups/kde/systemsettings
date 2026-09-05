@@ -13,13 +13,13 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   include <abstractions/common/kde>
   include <abstractions/cups-client>
   include <abstractions/dconf-write>
+  include <abstractions/disks-read>
   include <abstractions/ibus-strict>
   include <abstractions/nameservice-strict>
+  include <abstractions/network/netlink>
   include <abstractions/sys/input>
   include <abstractions/thumbnails-cache-write>
   include <abstractions/udev/input>
-
-  network netlink raw,
 
   signal send set=term peer=kioworker,
 
@@ -31,24 +31,26 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
 
   @{exec_path} mrix,
 
-  @{sh_path}                       rix,
-  @{bin}/cat                       rix,
-  @{bin}/eglinfo                   PUx,
-  @{bin}/kcminit                   Px,
-  @{bin}/khelpcenter               Px,
-  @{bin}/lspci                     Px,
-  @{bin}/openssl                   rix,
-  @{bin}/orca                      PUx,
-  @{bin}/pactl                     Px,
-  @{bin}/plasma-apply-lookandfeel  Px,
-  @{bin}/plasma-discover           Px,
-  @{bin}/plasmashell               Px,
-  @{bin}/rsync                    rix,
-  @{bin}/xdpyinfo                 PUx,
-  @{lib}/bup/cmd/bup              PUx,
-  @{lib}/qt[56]/bin/qdbus          Px,
+  @{open_path} rPx -> child-open-help,
+  @{sh_path}   rix,
+
+  @{bin}/kcminit                           rPx,
+  @{bin}/khelpcenter                       rPUx,
+  @{bin}/lspci                             rPx,
+  @{bin}/lscpu                             rPx,
+  @{bin}/net                               rUx,
+  @{bin}/openssl                           rix,
+  @{bin}/orca                              rPx,
+  @{bin}/pactl                             rPx,
+  @{bin}/plasma-apply-lookandfeel           Px,
+  @{bin}/plasma-discover                   rPx,
+  @{bin}/plasmashell                       rPx,
+  @{bin}/testparm                          rUx,
+  @{bin}/xdpyinfo                          rPx,
+  @{bin}/xrdb                              rPx,
 
   #aa:exec kioworker
+  #aa:exec qdbus
 
   /usr/share/i18n/locales/{,*} r,
   /usr/share/iso-codes/json/*.json r,
@@ -69,12 +71,12 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /usr/share/thumbnailers/{,**} r,
   /usr/share/wallpapers/{,**} r,
 
-  @{etc_ro}/login.defs r,
   /etc/fstab r,
   /etc/sddm.conf.d/{,**} r,
   /etc/sysconfig/displaymanager r,
   /etc/xdg/* r,
   /etc/xdg/ui/ui_standards.rc r,
+  @{etc_ro}/login.defs r,
 
   / r,
   @{bin}/ r,
@@ -105,9 +107,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_config_dirs}/libaccounts-glib/ rw,
   owner @{user_config_dirs}/libaccounts-glib/accounts.db{,-shm,-wal,-journal} rwk,
   owner @{user_config_dirs}/plasma*/{,**} r,
-  owner @{user_config_dirs}/powerdevilrc.lock rwk,
-  owner @{user_config_dirs}/powerdevilrc{,.@{rand6}} rwl -> @{user_config_dirs}/#@{int},
-  owner @{user_config_dirs}/session/** rwlk,
+  owner @{user_config_dirs}/powerdevilrc@{atomic} rwlk -> @{user_config_dirs}/#@{int},
 
   owner @{user_share_dirs}/[kK]* rwlk -> @{user_share_dirs}/#@{int},
   owner @{user_share_dirs}/[kK]*/ rw,
@@ -117,11 +117,11 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_share_dirs}/wallpapers/{,**} r,
 
         @{run}/mount/utab r,
-  owner @{run}/user/@{uid}/#@{int} rwl,
+  owner @{run}/user/@{uid}/#@{int} rw,
   owner @{run}/user/@{uid}/systemsettings@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
 
-  @{run}/udev/data/+drm:card@{int}-* r,   # For screen outputs
   @{run}/udev/data/+dmi:* r,              # for motherboard info
+  @{run}/udev/data/+drm:card@{int}-* r,   # For screen outputs
   @{run}/udev/data/+pci:* r,              # Identifies all PCI devices (CPU, GPU, Network, Disks, USB, etc.)
   @{run}/udev/data/c81:@{int}  r,         # For video4linux
   @{run}/udev/data/c@{dynamic}:@{int} r,  # For dynamic assignment range 234 to 254, 384 to 511
@@ -132,7 +132,6 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{sys}/bus/cpu/devices/ r,
   @{sys}/class/hidraw/ r,
   @{sys}/class/video4linux/ r,
-  @{sys}/devices/**/uevent r,
   @{sys}/devices/**/report_descriptor r,
   @{sys}/firmware/acpi/pm_profile r,
 
