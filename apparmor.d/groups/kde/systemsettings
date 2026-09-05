@@ -28,6 +28,8 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   include <abstractions/sys/input>
   include <abstractions/thumbnails-cache-write>
   include <abstractions/user-read-strict>
+  # ToDo: backups probably require this, or even more
+  # include <abstractions/user-read>
 
   network netlink raw,
 
@@ -41,32 +43,56 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{open_path} rPx -> child-open-help,
   @{sh_path}   rix,
 
+  @{bin}/aha                               rix,
+  @{bin}/baloo_filemetadata_temp_extractor rix,
+  @{bin}/basename                          rix,
+  @{bin}/cat                               rix,
+  @{bin}/clinfo                            rix,
+  @{bin}/di-edid-decode                    rix,
+  @{bin}/eglinfo{,.@{multiarch}}           rix,
+  @{bin}/fwupdmgr                          rPx,
+  @{bin}/glxinfo{,.@{multiarch}}           rix,
   @{bin}/gsettings                         rPx,
   @{bin}/kaccess                           rPx,
   @{bin}/kcminit                           rPx,
   @{bin}/kde_wacom_tabletfinder            rPx, # ToDo: not able to test it!
   @{bin}/khelpcenter                       rPx,
+  @{bin}/kup-daemon                        rPUx,
+  @{bin}/kup-filedigger                    rPUx,
+  @{bin}/lsblk                             rPx,
   @{bin}/lspci                             rPx,
   @{bin}/lscpu                             rPx,
   @{bin}/net                               rUx,
   @{bin}/openssl                           rix,
   @{bin}/orca                              rPUx,
   @{bin}/pactl                             rPx,
+  @{bin}/par2                              rix, # required by bup
   @{bin}/plasma-apply-lookandfeel          PUx,
   @{bin}/plasma-discover                   rPUx,
   @{bin}/plasmashell                       rPx,
+  @{bin}/rsync                             rix,
+  @{bin}/sed                               rix,
+  @{bin}/sensors                           rPx,
   @{bin}/systemctl                         rCx -> systemctl,
   @{bin}/testparm                          rUx,
+  @{bin}/vulkaninfo                        rix,
+  @{bin}/wayland-info                      rix,
   @{bin}/xdpyinfo                          rPx,
   @{bin}/xrdb                              rPx,
 
+  # ToDo: ip in @{bin} on Debian!
+  @{sbin}/ip                               rix,
+
+  @{lib}/bup/cmd/bup                        rix,
   @{lib}/kf6/kdesu                          rPx -> kdesu,
   @{lib}/qt{5,6}/bin/qdbus                  rPx,
+  @{lib}/{,@{multiarch}/libexec/}kinfocenter-{opengl,vulkan}-helper rix,
 
   #aa:exec kioworker
 
   /usr/share/hunspell/ r,
   /usr/share/i18n/locales/{,*} r,
+  /usr/share/iproute2/group r,
   /usr/share/iso-codes/json/*.json r,
   /usr/share/kcm_networkmanagement/{,**} r,
   /usr/share/kcm_recentFiles/{,**} r,
@@ -82,6 +108,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /usr/share/kwin-wayland/{,**} r,
   /usr/share/kwin-x11/{,**} r,
   /usr/share/libwacom/{,**} r,
+  /usr/share/misc/usb.ids r,
   /usr/share/myspell/ r,
   /usr/share/plasma/{,**} r,
   /usr/share/sddm/themes/{,**} r,
@@ -91,7 +118,10 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /usr/share/wallpapers/{,**} r,
 
   @{etc_ro}/login.defs r,
+  /etc/exports r,
   /etc/fstab r,
+  /etc/ImageMagick-@{int}/{,*.xml} r,
+  /etc/OpenCL/vendors/{,*} r,
   /etc/plasmalogin.conf r,
   /etc/sddm.conf r,
   /etc/sddm.conf.d/{,**} r,
@@ -111,6 +141,8 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
 
   owner @{HOME}/.face r,
   owner @{HOME}/@{XDG_WALLPAPERS_DIR}/{,**} r,
+  # ToDo: check backup on external device!
+  owner @{HOME}/.bup*/ rw,
 
   owner @{user_cache_dirs}/[kK]* rwlk, #-> @{user_cache_dirs}/#@{int},
   owner @{user_cache_dirs}/[kK]*/ rw,
@@ -123,21 +155,27 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_config_dirs}/[kK]*/** rwlk, #-> @{user_config_dirs}/[kK]*/**,
   owner @{user_config_dirs}/{P,p}lasma* r,
   owner @{user_config_dirs}/*rc r,
-  owner @{user_config_dirs}/autostart/ r,
+  owner @{user_config_dirs}/autostart/ rw,
+  owner @{user_config_dirs}/autostart/* rwlk, #-> @{user_config_dirs}/autostart/#@{int},
+  owner @{user_config_dirs}/baloofileinformationrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/device_automounter_kcmrc.lock rwk,
+  owner @{user_config_dirs}/discoverrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/emaildefaults r,
   owner @{user_config_dirs}/fontconfig/ w,
   owner @{user_config_dirs}/libaccounts-glib/ rw,
   owner @{user_config_dirs}/libaccounts-glib/accounts.db{,-shm,-wal,-journal} rwk,
   owner @{user_config_dirs}/plasma*/{,**} r,
+  owner @{user_config_dirs}/plasma-workspace/{,*/} w,
   owner @{user_config_dirs}/plasmakeyboardrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/plasmaparc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/plasmarc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/PlasmaDiscoverUpdates@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/powerdevilrc.lock rwk,
   owner @{user_config_dirs}/powerdevilrc{,.@{rand6}} rwl, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/qtvirtualkeyboard/ w,
   owner @{user_config_dirs}/session/ rw,
   owner @{user_config_dirs}/session/** rwlk,
+  owner @{user_config_dirs}/user-dirs.dirs@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/wireplumber/ w,
   owner @{user_config_dirs}/wireplumber/wireplumber.conf.d/ w,
   owner @{user_config_dirs}/wireplumber/wireplumber.conf.d/*.conf rw,
@@ -149,6 +187,13 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_share_dirs}/user-places.xbel r,
   owner @{user_share_dirs}/wallpapers/{,**} r,
 
+  owner @{user_state_dirs}/kinfocenterstaterc@{atomic} rwlk, # -> @{user_state_dirs}/#@{int},
+  owner @{user_state_dirs}/kiostaterc r,
+
+  owner @{tmp}/dep-@{hex6}.d rw,
+
+        @{run}/ r,
+        @{run}/motd.d/{,*} r,
         @{run}/mount/utab r,
   owner @{run}/user/@{uid}/#@{int} rw,
   owner @{run}/user/@{uid}/systemsettings@{rand6}.@{int}.kioworker.socket rw,
@@ -164,6 +209,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{run}/udev/data/c@{dynamic}:@{int} r,  # For dynamic assignment range 234 to 254, 384 to 511
   @{run}/udev/data/n@{int} r,             # For network interfaces
 
+  @{sys}/ r,
   @{sys}/bus/ r,
   @{sys}/bus/acpi/devices/ r,
   @{sys}/bus/cpu/devices/ r,
@@ -174,9 +220,13 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{sys}/class/video4linux/ r,
   @{sys}/devices/**/uevent r,
   @{sys}/devices/**/report_descriptor r,
+  @{sys}/devices/@{pci}/drm/card@{int}/*/edid r,
   @{sys}/devices/@{pci}/sound/**/properties r,
   @{sys}/firmware/acpi/pm_profile r,
+  @{sys}/kernel/ r,
 
+        @{PROC}/ r,
+        @{PROC}/fs/ r,
         @{PROC}/interrupts r,
   owner @{PROC}/@{pid}/cmdline r,
   owner @{PROC}/@{pid}/fd/ r,
@@ -188,6 +238,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /dev/input/ r,
   /dev/input/event@{u8} r,
   /dev/rfkill r,
+  /dev/snd/ r,
   /dev/tty r,
 
   profile systemctl {
