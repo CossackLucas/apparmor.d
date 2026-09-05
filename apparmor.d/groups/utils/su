@@ -19,6 +19,7 @@ profile su @{exec_path} flags=(attach_disconnected) {
   signal send    set=(term kill),
   signal receive set=(int  quit term),
   signal receive set=(cont hup)       peer=sudo,
+  signal receive set=kill peer=kdesu,
 
   @{exec_path} mr,
 
