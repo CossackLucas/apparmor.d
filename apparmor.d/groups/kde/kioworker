@@ -47,7 +47,9 @@ profile kioworker @{exec_path} flags=(attach_disconnected,mediate_deleted) {
 
   #aa:exec kio_http_cache_cleaner
 
+  /usr/share/doc/HTML/*/** r,
   /usr/share/kio_desktop/{,**} r,
+  /usr/share/kf6/kdoctools/customization/{,**} r,
   /usr/share/kservices{5,6}/{,**} r,
   /usr/share/kservicetypes{5,6}/*.desktop r,
   /usr/share/libalternatives/gs/{,**} r,
@@ -55,6 +57,7 @@ profile kioworker @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   /usr/share/remoteview/{,*} r,
   /usr/share/thumbnailers/{,**} r,
   /usr/share/wallpapers/{,**} r,
+  /usr/share/xml/docbook/xml-*/** r,
 
   @{etc_ro}/ssh/ssh_config r,
   @{etc_ro}/ssh/ssh_config.d/{,*} r,

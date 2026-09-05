@@ -1,0 +1,110 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{domain} = org.chromium.Chromium
+
+@{exec_path} = @{bin}/khelpcenter
+profile khelpcenter @{exec_path} flags=(attach_disconnected,mediate_deleted) {
+  include <abstractions/base>
+  include <abstractions/common/kde>
+  include <abstractions/common/qt-webengine>
+  include <abstractions/nameservice-strict>
+  include <abstractions/network/netlink>
+  include <abstractions/network/out/ipp>
+
+  network create inet6 dgram,
+
+  ptrace read peer=khelpcenter//&khelpcenter//webengine,
+
+  signal send set=term peer=kioworker,
+
+  unix type=seqpacket addr=@@{hex} peer=(label=khelpcenter//webengine),
+  unix type=seqpacket addr=none    peer=(label=khelpcenter//webengine), # file_inherit
+  unix type=seqpacket addr=none    peer=(label=khelpcenter//indexer), # file_inherit
+
+  @{exec_path} mrix,
+
+  @{lib}/khc_xapianindexer Cx -> indexer,
+  @{lib}/{,@{multiarch}/}qt{5,6}/{,libexec/}QtWebEngineProcess Px -> khelpcenter//&khelpcenter//webengine,
+
+  #aa:exec kioworker
+
+  #/usr/share/doc/HTML/en/kdoctools6-common/kde-default.css r,
+  /usr/share/doc/HTML/*/kdoctools6-common/kde-default.css r,
+  /usr/share/info/dir r,
+  /usr/share/khelpcenter/** r,
+
+  /opt/google/chrome/WidevineCdm/                                               r,
+  /opt/google/chrome/WidevineCdm/_platform_specific/linux_x64/libwidevinecdm.so mr,
+
+  owner @{user_config_dirs}/google-chrome/WidevineCdm/latest-component-updated-widevine-cdm r,
+  owner @{user_config_dirs}/kioslaverc r,
+
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/khelpcenter@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
+
+  owner @{PROC}/@{pid}/mountinfo r,
+  owner @{PROC}/@{pid}/oom_score_adj w,
+  owner @{PROC}/@{pid}/stat r,
+  owner @{PROC}/@{pid}/task/ r,
+  owner @{PROC}/@{pid}/task/@{tid}/comm w,
+  owner @{PROC}/@{pid}/task/@{tid}/status r,
+
+  /dev/tty r,
+
+  profile indexer {
+    include <abstractions/base>
+    include <abstractions/network/netlink>
+
+    unix (send receive) type=seqpacket addr=none peer=(label=khelpcenter), # file_inherit
+    unix (send receive) type=seqpacket addr=none peer=(label=khelpcenter//webengine), # file_inherit
+    unix (send receive) type=stream addr=none peer=(label=khelpcenter), # file_inherit
+    unix (send receive) type=stream addr=none peer=(label=khelpcenter//webengine), # file_inherit
+
+    /usr/share/doc/HTML/*/{,**} r,
+
+    owner @{user_cache_dirs}/khelpcenter/index/kde_application_manuals/ w,
+    owner @{user_cache_dirs}/khelpcenter/index/kde_application_manuals/* rwk,
+
+    # Inherit Silencers
+    deny /usr/share/qt[56]/** r,
+    deny /dev/shm/.@{domain}.@{rand6} rw,
+    deny /dev/dri/renderD12[89] rw,
+    deny /dev/udmabuf rw,
+
+    include if exists <local/khelpcenter_indexer>
+  }
+
+  profile webengine {
+    include <abstractions/base>
+    include <abstractions/common/qt-webengine>
+
+    signal receive set=term peer=khelpcenter,
+
+    unix type=seqpacket addr=none peer=(label=khelpcenter, addr=@@{hex}),
+    unix type=seqpacket addr=none peer=(label=khelpcenter), # file_inherit
+    unix type=seqpacket addr=none peer=(label=khelpcenter//indexer), # file_inherit
+    unix type=stream addr=none peer=(label=khelpcenter), # file_inherit
+    unix type=stream addr=none peer=(label=khelpcenter//indexer), # file_inherit
+
+    /opt/google/chrome/WidevineCdm/                                               r,
+    /opt/google/chrome/WidevineCdm/_platform_specific/linux_x64/libwidevinecdm.so mr,
+
+    owner @{user_config_dirs}/google-chrome/WidevineCdm/latest-component-updated-widevine-cdm r,
+
+    @{sys}/devices/system/cpu/present r,
+    @{sys}/devices/system/cpu/cpufreq/policy@{int}/cpuinfo_max_freq r,
+
+    include if exists <local/khelpcenter_webengine>
+  }
+
+
+  include if exists <local/khelpcenter>
+}
+
+# vim:syntax=apparmor
