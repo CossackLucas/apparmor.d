@@ -9,11 +9,28 @@ include <tunables/global>
 @{exec_path} = @{lib}/{,kf6/}kauth/{,libexec/}fontinst
 profile kauth-fontinst @{exec_path} {
   include <abstractions/base>
+  include <abstractions/fontconfig-cache-write>
+  include <abstractions/fonts-strict>
   include <abstractions/qt>
 
   @{exec_path} mr,
 
+  @{bin}/fc-cache Px,
+
   /usr/share/icu/@{int}.@{int}/*.dat r,
+
+  owner @{user_config_dirs}/#@{int} rw,
+  owner @{user_config_dirs}/disabledfonts.xml r,
+  owner link @{user_config_dirs}/disabledfonts.xml -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/fontconfig/fonts.conf w,
+  owner @{user_config_dirs}/fontconfig/fonts.conf.LCK w,
+  owner @{user_config_dirs}/fontconfig/fonts.conf.{NEW,TMP-@{rand6}} rw,
+  owner link @{user_config_dirs}/fontconfig/fonts.conf.LCK -> @{user_config_dirs}/fontconfig/fonts.conf.TMP-@{rand6},
+
+  owner @{user_share_dirs}/kfontinst/ r,
+  owner @{user_share_dirs}/kfontinst/{,.}@{int6}-*.@{font_ext} rw,
+
+  /dev/tty r,
 
   include if exists <local/kauth-fontinst>
 }
