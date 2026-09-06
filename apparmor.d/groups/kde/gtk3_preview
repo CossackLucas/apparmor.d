@@ -1,0 +1,39 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{lib}/gtk3_preview
+profile gtk3_preview @{exec_path} flags=(attach_disconnected) {
+  include <abstractions/base>
+  include <abstractions/audio-client>
+  include <abstractions/bwrap>
+  include <abstractions/cgroup-limits>
+  include <abstractions/dconf-write>
+  include <abstractions/kde-strict>
+  include <abstractions/nameservice-strict>
+
+  @{exec_path} mr,
+
+  @{bin}/bwrap ix,
+  @{bin}/true  rix,
+
+  #aa:only apparmor<5.0
+  @{lib}/glycin-loaders/@{d}+/glycin-*  Px -> gtk3_preview//&glycin//loaders,
+
+  #aa:only apparmor>=5.0
+  @{lib}/glycin-loaders/@{d}+/glycin-*  Px -> gtk3_preview//&:glycin:loaders,
+
+  /usr/share/glib-2.0/schemas/gschemas.compiled r,
+  /usr/share/kcm-gtk-module/preview.ui r,
+  /usr/share/themes/Default/gtk-3.0/gtk-keys.css r,
+
+  / r,
+
+  include if exists <local/gtk3_preview>
+}
+
+# vim:syntax=apparmor

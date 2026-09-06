@@ -1,0 +1,56 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+# needs some access to files - it could open fonts from inside via dialog
+# ToDo: KDE drive access abstraction?
+
+@{exec_path} = @{bin}/kfontview
+profile kfontview @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/audio-client>
+  include <abstractions/common/kde>
+  include <abstractions/kde-globals-write>
+  include <abstractions/qt-settings-write>
+
+  network netlink raw,
+
+  signal send set=term peer=kioworker,
+
+  @{exec_path} mr,
+
+  @{open_path} rPx -> child-open-help,
+
+  @{bin}/net rPUx,
+
+  #aa:exec kfontprint
+  #aa:exec kioworker
+
+  /etc/machine-id r,
+
+  /usr/share/kxmlgui5/kfontviewpart/** r,
+
+  owner @{user_config_dirs}/ r,
+  owner @{user_config_dirs}/kioslaverc r,
+  owner @{user_config_dirs}/klanguageoverridesrc@{atomic} rwlk -> @{user_config_dirs}/#@{int},
+
+  owner @{user_share_dirs}/user-places.xbel r,
+
+  owner @{user_state_dirs}/ r,
+
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/kfontview@{rand6}.@{int}.kioworker.socket w,
+  owner link @{run}/user/@{uid}/kfontview@{rand6}.@{int}.kioworker.socket -> @{run}/user/@{uid}/#@{int},
+
+  @{PROC}/sys/kernel/random/boot_id r,
+
+  /dev/tty r,
+
+  include if exists <local/kfontview>
+}
+
+# vim:syntax=apparmor
