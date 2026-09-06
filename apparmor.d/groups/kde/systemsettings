@@ -9,6 +9,8 @@ include <tunables/global>
 # ToDo: give user access to install custom ICC profiles for displays
 # ToDo: energy tab on battery device (system)
 # ToDo: adding avatars by user
+# ToDo: test different wallets than kwallet
+# ToDo: test downloaded krunner plugins
 
 @{export_ext} = kksrc shortcuts
 
@@ -26,6 +28,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   include <abstractions/disks-read>
   # include <abstractions/file-dialog>
   include <abstractions/ibus-strict>
+  include <abstractions/journal-read>
   include <abstractions/kde-export-settings>
   include <abstractions/nameservice-strict>
   include <abstractions/ssl_certs>
@@ -37,9 +40,11 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   # ToDo: backups probably require this, or even more
   # include <abstractions/user-read>
 
+  network netlink dgram,
   network netlink raw,
 
   signal send set=term peer=kioworker,
+  signal send set=kill peer=plasma-discover,
 
   #aa:dbus own bus=session name=org.kde.internal.KSettingsWidget_kcm_networkmanagement
   #aa:dbus own bus=session name=org.kde.systemsettings
@@ -64,10 +69,14 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{bin}/gsettings                         rPx,
   @{bin}/kaccess                           rPx,
   @{bin}/kcminit                           rPx,
+  @{bin}/kcmshell6                         rPx,
   @{bin}/kde_wacom_tabletfinder            rPx, # ToDo: not able to test it!
   @{bin}/khelpcenter                       rPx,
+  @{bin}/krunner-plugininstaller           rPx,
   @{bin}/kup-daemon                        rPUx,
   @{bin}/kup-filedigger                    rPUx,
+  @{bin}/kwalletmanager{5,6}               rPx,
+  @{bin}/localectl                         rPx,
   @{bin}/lsblk                             rPx,
   @{bin}/lspci                             rPx,
   @{bin}/lscpu                             rPx,
@@ -125,10 +134,12 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /usr/share/sddm/themes/{,**} r,
   /usr/share/solid/{,**} r,
   /usr/share/thumbnailers/{,**} r,
+  /usr/share/timezonefiles/timezones.json r,
   /usr/share/wacomtablet/images/{,*} r,
   /usr/share/wallpapers/{,**} r,
 
   /etc/exports r,
+  /etc/flatpak/remotes.d/{,*} r,
   /etc/fstab r,
   /etc/ImageMagick-@{int}/{,*.xml} r,
   /etc/OpenCL/vendors/{,*} r,
@@ -147,7 +158,11 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /var/cache/cracklib/cracklib_dict.* r,
   /var/cache/samba/ rw,
   /var/lib/AccountsService/icons/* r,
+  /var/lib/flatpak/app/{,**} r,
   /var/lib/flatpak/repo/{,**} r,
+  # ToDo: dictionaries?
+  /var/lib/flatpak/runtime/org.kde.Platform.Locale/ r,
+  /var/lib/flatpak/runtime/org.kde.Platform.Locale/@{arch}/{,**} r,
 
   owner @{HOME}/.face r,
   owner @{HOME}/@{XDG_WALLPAPERS_DIR}/{,**} r,
@@ -159,6 +174,10 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_cache_dirs}/[kK]*/** rwlk, #-> @{user_cache_dirs}/[kK]*/**,
   owner @{user_cache_dirs}/plasma*/{,**} r,
   owner @{user_cache_dirs}/plasma* rw,
+  owner @{user_cache_dirs}/flatpak/system-cache/ r,
+  owner @{user_cache_dirs}/plasma_engine_potd/{,*} rw,
+  owner @{user_cache_dirs}/org.kde.ki18n/{,**} rw,
+  owner @{user_cache_dirs}/QtLocation/{,**} rw,
 
   owner @{user_config_dirs}/[kK]* rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/[kK]*/ rw,
@@ -168,6 +187,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_config_dirs}/autostart/ rw,
   owner @{user_config_dirs}/autostart/* rwlk, #-> @{user_config_dirs}/autostart/#@{int},
   owner @{user_config_dirs}/baloofileinformationrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/baloofilerc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/device_automounter_kcmrc.lock rwk,
   owner @{user_config_dirs}/discoverrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/emaildefaults r,
@@ -175,11 +195,13 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_config_dirs}/libaccounts-glib/ rw,
   owner @{user_config_dirs}/libaccounts-glib/accounts.db{,-shm,-wal,-journal} rwk,
   owner @{user_config_dirs}/plasma*/{,**} r,
+  owner @{user_config_dirs}/plasma-localerc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/plasma-workspace/{,*/} w,
   owner @{user_config_dirs}/plasmakeyboardrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/plasmaparc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/plasmarc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/PlasmaDiscoverUpdates@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/PlasmaUserFeedback@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/powerdevilrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/qtvirtualkeyboard/ w,
   owner @{user_config_dirs}/user-dirs.dirs@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
@@ -190,12 +212,20 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_share_dirs}/[kK]* rwlk, #-> @{user_share_dirs}/#@{int},
   owner @{user_share_dirs}/[kK]*/ rw,
   owner @{user_share_dirs}/[kK]*/** rwlk, #-> @{user_share_dirs}/[kK]*/**,
-  owner @{user_share_dirs}/baloo/index r,
+  owner @{user_share_dirs}/baloo/index rw,
+  owner @{user_share_dirs}/baloo/index-lock rwk,
+  owner @{user_share_dirs}/flatpak/app/{,*/} r,
+  owner @{user_share_dirs}/flatpak/app/*/@{arch}/ r,
+  owner @{user_share_dirs}/flatpak/app/*/@{arch}/*/@{hex64}/deploy r,
+  owner @{user_share_dirs}/flatpak/overrides/* rwk,
+  owner link @{user_share_dirs}/flatpak/overrides/* -> @{user_share_dirs}/flatpak/overrides/#@{int},
+  owner @{user_share_dirs}/flatpak/repo/{,**} r,
   owner @{user_share_dirs}/user-places.xbel r,
   owner @{user_share_dirs}/wallpapers/{,**} r,
 
   owner @{user_state_dirs}/kinfocenterstaterc@{atomic} rwlk, # -> @{user_state_dirs}/#@{int},
   owner @{user_state_dirs}/kiostaterc r,
+  owner @{user_state_dirs}/UserFeedback.org.kde.systemsettings@{atomic} rwlk, #-> @{user_state_dirs}/#@{int},
 
   owner @{tmp}/dep-@{hex6}.d rw,
   owner @{tmp}/systemsettings.@{rand6} rw,
@@ -208,13 +238,24 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner link @{run}/user/@{uid}/systemsettings@{rand6}.@{int}.kioworker.socket -> @{run}/user/@{uid}/#@{int},
 
   #@{run}/udev/data/+*:* r,                # Identifies all subsystems
+  @{run}/udev/data/+acpi:* r,             # Exposes ACPI objects (power buttons, batteries, thermal)
   @{run}/udev/data/+dmi:* r,              # for motherboard info
   @{run}/udev/data/+drm:card@{int}-* r,   # For screen outputs
+  @{run}/udev/data/+leds:* r,             # Identifies all LEDs (keyboard, mouse, etc.)
   @{run}/udev/data/+pci:* r,              # Identifies all PCI devices (CPU, GPU, Network, Disks, USB, etc.)
+  @{run}/udev/data/+platform:* r,         # Identifies onboard devices (laptop/board model, power controllers, thermal sensors)
   #@{run}/udev/data/c@{int}:@{int} r,      # Identifies all character devices
   @{run}/udev/data/c13:@{int} r,          # for /dev/input/*
   @{run}/udev/data/c81:@{int}  r,         # For video4linux
   @{run}/udev/data/c@{dynamic}:@{int} r,  # For dynamic assignment range 234 to 254, 384 to 511
+  @{run}/udev/data/c1:@{int} r,           # For RAM disk
+  @{run}/udev/data/c10:@{int} r,          # For non-serial mice, misc features
+  @{run}/udev/data/c202:@{int} r,         # CPU model-specific registers
+  @{run}/udev/data/c29:@{int} r,          # For CD-ROM
+  @{run}/udev/data/c4:@{int}   r,         # for /dev/tty[0-9]*
+  @{run}/udev/data/c5:@{int} r,           # for /dev/tty, /dev/console, /dev/ptmx
+  @{run}/udev/data/c7:@{int} r,           # For Virtual console capture devices
+  @{run}/udev/data/c89:@{int}  r,         # For I2C bus interface
   @{run}/udev/data/n@{int} r,             # For network interfaces
 
   @{sys}/ r,
@@ -234,6 +275,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{sys}/devices/@{pci}/sound/**/properties r,
   @{sys}/devices/system/cpu/cpu@{int}/uevent r,
   @{sys}/devices/system/cpu/uevent r,
+  @{sys}/devices/virtual/bdi/*/uevent r,
   @{sys}/devices/virtual/dmi/id/uevent r,
   @{sys}/devices/virtual/misc/rfkill/uevent r,
   @{sys}/devices/virtual/misc/udmabuf/uevent r,
