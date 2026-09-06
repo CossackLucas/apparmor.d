@@ -7,7 +7,7 @@ abi <abi/5.0>,
 include <tunables/global>
 
 @{exec_path} = @{lib}/cups/backend/bluetooth
-profile cups-backend-bluetooth @{exec_path} {
+profile cups-backend-bluetooth @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>
   include <abstractions/bus-system>
 
