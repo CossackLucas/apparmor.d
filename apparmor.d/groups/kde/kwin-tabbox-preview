@@ -1,0 +1,36 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{lib}/kwin-tabbox-preview
+profile kwin-tabbox-preview @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/common/kde>
+
+  @{exec_path} mr,
+
+  /usr/share/kwin-wayland/tabbox/** r,
+  /usr/share/kwin/tabbox/** r,
+  /usr/share/plasma/desktoptheme/** r,
+
+  @{lib}/ r,
+
+  owner @{user_cache_dirs}/ksvg-elements@{atomic} rwlk -> @{user_cache_dirs}/#@{int},
+  owner @{user_cache_dirs}/plasma_theme_*.kcache rw,
+
+  owner @{user_share_dirs}/baloo/index r,
+  owner @{user_share_dirs}/kwin/tabbox/** r,
+  owner @{user_share_dirs}/plasma/desktoptheme/** r,
+
+  @{PROC}/sys/kernel/random/boot_id r,
+
+  /dev/tty r,
+
+  include if exists <local/kwin-tabbox-preview>
+}
+
+# vim:syntax=apparmor
