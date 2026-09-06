@@ -6,9 +6,15 @@ abi <abi/5.0>,
 
 include <tunables/global>
 
+@{domain} = org.chromium.Chromium
+
 # ToDo: give user access to install custom ICC profiles for displays
 # ToDo: test different wallets than kwallet
 # ToDo: test downloaded krunner plugins
+# ToDo: printing should be checked (devices)
+# ToDo: thunderbolt (devices)
+# ToDo: some network option allow user to pick cert files from drive (Network)
+# ToDo: authorization network accounts (network)
 
 @{export_ext} = kksrc shortcuts
 
@@ -19,22 +25,29 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   include <abstractions/bus-session>
   include <abstractions/bus/system/org.freedesktop.PolicyKit1>
   include <abstractions/bus/system/org.freedesktop.systemd1>
+  include <abstractions/common/chromium>
   include <abstractions/common/kde>
   include <abstractions/cups-client>
   include <abstractions/dconf-write>
   include <abstractions/disks-read>
   # include <abstractions/file-dialog>
   include <abstractions/ibus-strict>
+  include <abstractions/input>
   include <abstractions/kde-export-settings>
   include <abstractions/nameservice-strict>
-  include <abstractions/sys/input>
+  include <abstractions/ssl_certs>
   include <abstractions/thumbnails-cache-write>
   include <abstractions/user-read-strict>
   # ToDo: backups probably require this, or even more
   # include <abstractions/user-read>
 
+  network inet dgram,
+  network inet6 dgram,
   network netlink dgram,
   network netlink raw,
+
+  ptrace read peer=kded,
+  ptrace read peer=systemsettings//&systemsettings//webengine,
 
   signal send set=term peer=kioworker,
 
@@ -53,10 +66,12 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{bin}/clinfo                            rix,
   @{bin}/di-edid-decode                    rix,
   @{bin}/eglinfo{,.@{multiarch}}           rix,
+  @{bin}/firewall-cmd                      rPx,
   @{bin}/fwupdmgr                          rPx,
   @{bin}/glxinfo{,.@{multiarch}}           rix,
   @{bin}/gsettings                         rPx,
   @{bin}/kaccess                           rPx,
+  @{bin}/kbuildsycoca{,5,6}                rPx,
   @{bin}/kcminit                           rPx,
   @{bin}/kcmshell6                         rPx,
   @{bin}/kde_wacom_tabletfinder            rPx, # ToDo: not able to test it!
@@ -88,21 +103,27 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{bin}/xrdb                              rPx,
 
   # ToDo: ip in @{bin} on Debian!
-  @{sbin}/ip                               rix,
+  @{sbin}/ip  rix,
+  @{sbin}/ss  rPx,
+  @{sbin}/ufw rPx,
 
   @{lib}/bup/cmd/bup                        rix,
   @{lib}/kf6/kdesu                          rPx -> kdesu,
   @{lib}/qt{5,6}/bin/qdbus                  rPx,
   @{lib}/{,@{multiarch}/libexec/}kinfocenter-{opengl,vulkan}-helper rix,
+  @{lib}/{,@{multiarch}/}qt{5,6}/{,libexec/}QtWebEngineProcess Px -> systemsettings//&systemsettings//webengine,
 
   #aa:exec kioworker
 
+  /usr/share/accounts/{providers,services}/{,kde/} r,
+  /usr/share/accounts/{providers,services}/kde/* r,
   /usr/share/hunspell/ r,
   /usr/share/i18n/locales/{,*} r,
   /usr/share/iproute2/group r,
   /usr/share/iso-codes/json/*.json r,
   /usr/share/kcm_networkmanagement/{,**} r,
   /usr/share/kcm_recentFiles/{,**} r,
+  /usr/share/kcmsolidactions/solid-action-template.desktop r,
   /usr/share/kcmkeys/{,*.kksrc} r,
   /usr/share/kgamma/pics/{,*} r,
   /usr/share/kglobalaccel/* r,
@@ -118,6 +139,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /usr/share/misc/usb.ids r,
   /usr/share/myspell/ r,
   /usr/share/plasma/{,**} r,
+  /usr/share/qt6/resources/v8_context_snapshot.bin r,
   /usr/share/sddm/themes/{,**} r,
   /usr/share/solid/{,**} r,
   /usr/share/thumbnailers/{,**} r,
@@ -126,6 +148,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /usr/share/wallpapers/{,**} r,
 
   @{etc_ro}/login.defs r,
+  /etc/cups/cupsd.conf r,
   /etc/exports r,
   /etc/flatpak/remotes.d/{,*} r,
   /etc/fstab r,
@@ -180,6 +203,8 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_config_dirs}/autostart/* rwlk, #-> @{user_config_dirs}/autostart/#@{int},
   owner @{user_config_dirs}/baloofileinformationrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/baloofilerc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/bluedevilglobalrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/bluedevilreceiverrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/device_automounter_kcmrc.lock rwk,
   owner @{user_config_dirs}/discoverrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/emaildefaults r,
@@ -188,6 +213,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_config_dirs}/libaccounts-glib/accounts.db{,-shm,-wal,-journal} rwk,
   owner @{user_config_dirs}/plasma*/{,**} r,
   owner @{user_config_dirs}/plasma-localerc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/plasma-nm@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/plasma-workspace/{,*/} w,
   owner @{user_config_dirs}/plasmakeyboardrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/plasmaparc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
@@ -212,6 +238,10 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_share_dirs}/flatpak/overrides/* rwk,
   owner link @{user_share_dirs}/flatpak/overrides/* -> @{user_share_dirs}/flatpak/overrides/#@{int},
   owner @{user_share_dirs}/flatpak/repo/{,**} r,
+  owner @{user_share_dirs}/solid/ w,
+  owner @{user_share_dirs}/solid/actions/ rw,
+  owner @{user_share_dirs}/solid/actions/#@{int} rwk,
+  owner @{user_share_dirs}/solid/actions/*.desktop@{atomic} rwlk, #-> @{user_share_dirs}/solid/actions/#@{int},
   owner @{user_share_dirs}/user-places.xbel r,
   owner @{user_share_dirs}/wallpapers/{,**} r,
 
@@ -219,6 +249,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_state_dirs}/kiostaterc r,
   owner @{user_state_dirs}/UserFeedback.org.kde.systemsettings@{atomic} rwlk, #-> @{user_state_dirs}/#@{int},
 
+  owner @{tmp}/@{hex} rw, # ToDo: probably printing
   owner @{tmp}/dep-@{hex6}.d rw,
 
         @{run}/ r,
@@ -232,12 +263,10 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{run}/udev/data/+acpi:* r,             # Exposes ACPI objects (power buttons, batteries, thermal)
   @{run}/udev/data/+dmi:* r,              # for motherboard info
   @{run}/udev/data/+drm:card@{int}-* r,   # For screen outputs
-  @{run}/udev/data/+input:input@{int} r,  # for mouse, keyboard, touchpad
   @{run}/udev/data/+leds:* r,             # Identifies all LEDs (keyboard, mouse, etc.)
   @{run}/udev/data/+pci:* r,              # Identifies all PCI devices (CPU, GPU, Network, Disks, USB, etc.)
   @{run}/udev/data/+platform:* r,         # Identifies onboard devices (laptop/board model, power controllers, thermal sensors)
   #@{run}/udev/data/c@{int}:@{int} r,      # Identifies all character devices
-  @{run}/udev/data/c13:@{int} r,          # for /dev/input/*
   @{run}/udev/data/c@{dynamic}:@{int} r,  # For dynamic assignment range 234 to 254, 384 to 511
   @{run}/udev/data/c1:@{int} r,           # For RAM disk
   @{run}/udev/data/c10:@{int} r,          # For non-serial mice, misc features
@@ -262,24 +291,62 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
         @{PROC}/ r,
         @{PROC}/fs/ r,
         @{PROC}/interrupts r,
+        @{PROC}/sys/fs/inotify/max_user_watches r,
+        @{PROC}/sys/kernel/yama/ptrace_scope r,
   owner @{PROC}/@{pid}/cmdline r,
   owner @{PROC}/@{pid}/fd/ r,
   owner @{PROC}/@{pid}/mountinfo r,
   owner @{PROC}/@{pid}/mounts r,
+  owner @{PROC}/@{pid}/stat r,
 
   /dev/ r,
   /dev/bus/usb/ r,
-  /dev/input/ r,
-  /dev/input/event@{u8} r,
-  /dev/rfkill r,
+  /dev/rfkill rw,
   /dev/snd/ r,
   /dev/tty r,
+
+  # Silencers
+  deny @{lib}/bup/**__pycache__/ w,
+
+  deny /usr/share/qt6/resources/locales/ w,
 
   profile systemctl {
     include <abstractions/base>
     include <abstractions/app/systemctl>
+    include <abstractions/bus-session>
+    include <abstractions/journal-read>
+    include <abstractions/nameservice-strict>
+
+    # For some reason journal-read was not enough, why?
+    #@{log}/journal/@{hex32}/user-@{uid}@@{hex32}-@{hex16}-@{hex16}.journal r,
+
+    @{PROC}/@{pids}/comm r,
 
     include if exists <local/systemsettings_systemctl>
+  }
+
+  profile webengine {
+    include <abstractions/base>
+    include <abstractions/common/chromium>
+
+    @{lib}/{,@{multiarch}/}qt{5,6}/{,libexec/}QtWebEngineProcess r,
+
+    /usr/share/icu/@{int}.@{int}/*.dat r,
+    /usr/share/qt6/resources/* r,
+    /usr/share/qt6/translations/qtwebengine_locales/*.pak r,
+
+    @{sys}/devices/system/cpu/present r,
+
+          @{PROC}/ r,
+          @{PROC}/sys/fs/inotify/max_user_watches r,
+          @{PROC}/sys/kernel/yama/ptrace_scope r,
+    owner @{PROC}/@{pid}/cmdline r,
+    owner @{PROC}/@{pid}/fd/ r,
+
+    #Silencer
+    deny owner /usr/share/qt6/resources/locales/ w,
+
+    include if exists <local/systemsettings_webengine>
   }
 
   include if exists <local/systemsettings>

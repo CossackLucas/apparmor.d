@@ -11,6 +11,7 @@ profile firewall-config @{exec_path} {
   include <abstractions/base>
   include <abstractions/dconf-write>
   include <abstractions/desktop>
+  include <abstractions/nameservice-strict>
   include <abstractions/python>
 
   @{exec_path} mr,
@@ -21,6 +22,12 @@ profile firewall-config @{exec_path} {
 
   /usr/share/firewalld/{,**} r,
 
+  @{run}/systemd/userdb/ r,
+
+  owner @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/app.slice/app-firewall\x2dconfig@@{hex32}.service/cpu.max r,
+
+        @{PROC}/sys/kernel/random/boot_id r,
+  owner @{PROC}/@{pid}/cgroup r,
   owner @{PROC}/@{pid}/mounts r,
 
   include if exists <local/firewall-config>
