@@ -23,6 +23,9 @@ profile cups-backend-usb @{exec_path} {
 
   /etc/cups/ppd/*.ppd r,
 
+  @{sys}/devices/@{pci}/uevent r,
+  @{sys}/devices/@{pci_bus}/uevent r,
+
   include if exists <local/cups-backend-usb>
 }
 
