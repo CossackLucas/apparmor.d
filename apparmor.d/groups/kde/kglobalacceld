@@ -13,6 +13,7 @@ profile kglobalacceld @{exec_path} {
   include <abstractions/kde-strict>
 
   ptrace read peer=plasmashell,
+  ptrace read peer=systemsettings,
 
   #aa:dbus own bus=session name=org.kde.KGlobalAccel path=/kglobalaccel
 

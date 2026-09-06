@@ -126,8 +126,7 @@ profile kwin_wayland @{exec_path} flags=(attach_disconnected,mediate_deleted) {
 
   owner @{user_share_dirs}/aurorae/themes/{,**} r,
   owner @{user_share_dirs}/kscreen/* r,
-  owner @{user_share_dirs}/kwin/effects/{,**} r,
-  owner @{user_share_dirs}/kwin/scripts/{,**} r,
+  owner @{user_share_dirs}/kwin/{,**} r,
   owner @{user_share_dirs}/plasma/desktoptheme/{,**} r,
   owner @{user_share_dirs}/smod/decorations/{,**} r,
 

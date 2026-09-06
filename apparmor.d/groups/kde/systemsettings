@@ -16,7 +16,7 @@ include <tunables/global>
 # ToDo: some network option allow user to pick cert files from drive (Network)
 # ToDo: authorization network accounts (network)
 
-@{export_ext} = kksrc shortcuts
+@{export_ext} = kksrc shortcuts kwinrule kwinscript
 
 @{exec_path} = @{bin}/systemsettings
 profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) {
@@ -42,11 +42,14 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   # include <abstractions/user-read>
 
   network inet dgram,
+  network inet stream,
   network inet6 dgram,
+  network inet6 stream,
   network netlink dgram,
   network netlink raw,
 
   ptrace read peer=kded,
+  ptrace read peer=plasmashell,
   ptrace read peer=systemsettings//&systemsettings//webengine,
 
   signal send set=term peer=kioworker,
@@ -97,6 +100,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{bin}/sensors                           rPx,
   @{bin}/systemctl                         rCx -> systemctl,
   @{bin}/testparm                          rUx,
+  @{bin}/update-mime-database              rPx,
   @{bin}/vulkaninfo                        rix,
   @{bin}/wayland-info                      rix,
   @{bin}/xdpyinfo                          rPx,
@@ -107,9 +111,11 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{sbin}/ss  rPx,
   @{sbin}/ufw rPx,
 
-  @{lib}/bup/cmd/bup                        rix,
-  @{lib}/kf6/kdesu                          rPx -> kdesu,
-  @{lib}/qt{5,6}/bin/qdbus                  rPx,
+  @{lib}/bup/cmd/bup         rix,
+  @{lib}/kf6/kdesu           rPx -> kdesu,
+  @{lib}/kwin-tabbox-preview rPx,
+  @{lib}/qt{5,6}/bin/qdbus   rPx,
+
   @{lib}/{,@{multiarch}/libexec/}kinfocenter-{opengl,vulkan}-helper rix,
   @{lib}/{,@{multiarch}/}qt{5,6}/{,libexec/}QtWebEngineProcess Px -> systemsettings//&systemsettings//webengine,
 
@@ -128,6 +134,8 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /usr/share/kgamma/pics/{,*} r,
   /usr/share/kglobalaccel/* r,
   /usr/share/kinfocenter/{,**} r,
+  /usr/share/knotifications{5,6}/ r,
+  /usr/share/knsrcfiles/*.knsrc r,
   /usr/share/kpackage/{,**} r,
   /usr/share/krunner/dbusplugins/{,*} r,
   /usr/share/kservices{5,6}/{,**} r,
@@ -158,8 +166,8 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /etc/sddm.conf r,
   /etc/sddm.conf.d/{,**} r,
   /etc/sysconfig/displaymanager r,
+  /etc/sysconfig/proxy r,
   /etc/xdg/* r,
-  /etc/xdg/plasmanotifyrc r,
   /etc/xdg/ui/ui_standards.rc r,
 
   / r,
@@ -199,6 +207,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_config_dirs}/[kK]*/** rwlk, #-> @{user_config_dirs}/[kK]*/**,
   owner @{user_config_dirs}/{P,p}lasma* r,
   owner @{user_config_dirs}/*rc r,
+  owner @{user_config_dirs}/*notifyrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/autostart/ rw,
   owner @{user_config_dirs}/autostart/* rwlk, #-> @{user_config_dirs}/autostart/#@{int},
   owner @{user_config_dirs}/baloofileinformationrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
@@ -208,9 +217,11 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_config_dirs}/device_automounter_kcmrc.lock rwk,
   owner @{user_config_dirs}/discoverrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/emaildefaults r,
+  owner @{user_config_dirs}/filetypesrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/fontconfig/ w,
   owner @{user_config_dirs}/libaccounts-glib/ rw,
   owner @{user_config_dirs}/libaccounts-glib/accounts.db{,-shm,-wal,-journal} rwk,
+  owner @{user_config_dirs}/mimeapps.list@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/plasma*/{,**} r,
   owner @{user_config_dirs}/plasma-localerc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/plasma-nm@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
@@ -233,11 +244,17 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_share_dirs}/[kK]* rwlk, #-> @{user_share_dirs}/#@{int},
   owner @{user_share_dirs}/[kK]*/ rw,
   owner @{user_share_dirs}/[kK]*/** rwlk, #-> @{user_share_dirs}/[kK]*/**,
+  owner @{user_share_dirs}/applications/ w,
+  owner @{user_share_dirs}/applications/#@{int} rwk,
+  owner @{user_share_dirs}/applications/*.desktop@{atomic} rwlk, #-> @{user_share_dirs}/applications/#@{int},
   owner @{user_share_dirs}/baloo/index rw,
   owner @{user_share_dirs}/baloo/index-lock rwk,
   owner @{user_share_dirs}/flatpak/overrides/* rwk,
   owner link @{user_share_dirs}/flatpak/overrides/* -> @{user_share_dirs}/flatpak/overrides/#@{int},
   owner @{user_share_dirs}/flatpak/repo/{,**} r,
+  owner @{user_share_dirs}/mime/*/*.xml w,
+  owner @{user_share_dirs}/mime/{,packages/} w,
+  owner @{user_share_dirs}/recently-used.xbel l,  #-> @{user_share_dirs}/#@{int},
   owner @{user_share_dirs}/solid/ w,
   owner @{user_share_dirs}/solid/actions/ rw,
   owner @{user_share_dirs}/solid/actions/#@{int} rwk,
@@ -249,8 +266,12 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_state_dirs}/kiostaterc r,
   owner @{user_state_dirs}/UserFeedback.org.kde.systemsettings@{atomic} rwlk, #-> @{user_state_dirs}/#@{int},
 
+  owner @{tmp}/#@{int} rw,
   owner @{tmp}/@{hex} rw, # ToDo: probably printing
+  owner @{tmp}/@{rand6}-*.@{archive_ext} rwl, #-> @{tmp}/#@{int},
+  owner @{tmp}/@{rand6}-*.kwinscript rwl, #-> @{tmp}/#@{int},
   owner @{tmp}/dep-@{hex6}.d rw,
+  owner @{tmp}/systemsettings-@{rand6}/{,**} rw,
 
         @{run}/ r,
         @{run}/motd.d/{,*} r,

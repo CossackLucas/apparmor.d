@@ -62,10 +62,11 @@ profile kwin_x11 @{exec_path} {
   owner @{user_config_dirs}/kwinoutputconfig.json rw,
   owner @{user_config_dirs}/kwinrc@{atomic} rwlk,
   owner @{user_config_dirs}/kwinrulesrc r,
+  owner @{user_config_dirs}/kwinrulesrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/kxkbrc r,
   owner @{user_config_dirs}/menus/applications-kmenuedit.menu r,
 
-  owner @{user_share_dirs}/kwin/scripts/ r,
+  owner @{user_share_dirs}/kwin/** r,
 
   owner @{user_state_dirs}/kwinstaterc@{atomic} rwlk, #-> @{user_state_dirs}/#@{int},
 
