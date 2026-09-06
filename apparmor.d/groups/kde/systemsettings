@@ -15,6 +15,7 @@ include <tunables/global>
 # ToDo: thunderbolt (devices)
 # ToDo: some network option allow user to pick cert files from drive (Network)
 # ToDo: authorization network accounts (network)
+# ToDo: installing visual components manually
 
 @{export_ext} = kksrc shortcuts kwinrule kwinscript
 
@@ -52,6 +53,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   ptrace read peer=plasmashell,
   ptrace read peer=systemsettings//&systemsettings//webengine,
 
+  audit signal send set=kill,
   signal send set=term peer=kioworker,
 
   #aa:dbus own bus=session name=org.kde.internal.KSettingsWidget_kcm_networkmanagement
@@ -77,9 +79,12 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{bin}/kbuildsycoca{,5,6}                rPx,
   @{bin}/kcminit                           rPx,
   @{bin}/kcmshell6                         rPx,
+  @{bin}/kcolorschemeeditor                rPx,
   @{bin}/kde_wacom_tabletfinder            rPx, # ToDo: not able to test it!
+  @{bin}/kfontview                         rPx,
   @{bin}/khelpcenter                       rPx,
   @{bin}/krunner-plugininstaller           rPUx,
+  @{bin}/ksplashqml                        rPx,
   @{bin}/kup-daemon                        rPUx,
   @{bin}/kup-filedigger                    rPUx,
   @{bin}/kwalletmanager{5,6}               rPx,
@@ -92,10 +97,13 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{bin}/orca                              rPUx,
   @{bin}/pactl                             rPx,
   @{bin}/par2                              rix, # required by bup
-  @{bin}/plasma-apply-lookandfeel          PUx,
+  @{bin}/plasma-apply*                     PUx,
+  #@{bin}/plasma-apply-colorscheme          PUx,
+  #@{bin}/plasma-apply-lookandfeel          PUx,
   @{bin}/plasma-discover                   rPUx,
   @{bin}/plasmashell                       rPx,
   @{bin}/rsync                             rix,
+  @{bin}/sddmthemeinstaller                rPUx,
   @{bin}/sed                               rix,
   @{bin}/sensors                           rPx,
   @{bin}/systemctl                         rCx -> systemctl,
@@ -112,17 +120,24 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{sbin}/ufw rPx,
 
   @{lib}/bup/cmd/bup         rix,
+  @{lib}/gtk3_preview        rPx,
   @{lib}/kf6/kdesu           rPx -> kdesu,
   @{lib}/kwin-tabbox-preview rPx,
   @{lib}/qt{5,6}/bin/qdbus   rPx,
 
   @{lib}/{,@{multiarch}/libexec/}kinfocenter-{opengl,vulkan}-helper rix,
+  @{lib}/{,{,@{multiarch}}/libexec/}kf6/kpackagehandlers/knshandler PUx,
+  @{lib}/@{multiarch}/libexec/kwin-applywindowdecoration PUx,
+  @{lib}/@{multiarch}/libexec/plasma-changeicons PUx,
   @{lib}/{,@{multiarch}/}qt{5,6}/{,libexec/}QtWebEngineProcess Px -> systemsettings//&systemsettings//webengine,
 
+  #aa:exec kauth-fontinst
+  #aa:exec kfontprint
   #aa:exec kioworker
 
   /usr/share/accounts/{providers,services}/{,kde/} r,
   /usr/share/accounts/{providers,services}/kde/* r,
+  /usr/share/color-schemes/* w,
   /usr/share/hunspell/ r,
   /usr/share/i18n/locales/{,*} r,
   /usr/share/iproute2/group r,
@@ -131,6 +146,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /usr/share/kcm_recentFiles/{,**} r,
   /usr/share/kcmsolidactions/solid-action-template.desktop r,
   /usr/share/kcmkeys/{,*.kksrc} r,
+  /usr/share/kfontinst/icons/** r,
   /usr/share/kgamma/pics/{,*} r,
   /usr/share/kglobalaccel/* r,
   /usr/share/kinfocenter/{,**} r,
@@ -140,6 +156,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /usr/share/krunner/dbusplugins/{,*} r,
   /usr/share/kservices{5,6}/{,**} r,
   /usr/share/kservicetypes5/{,**} r,
+  /usr/share/kstyle/themes/{,*} r,
   /usr/share/kwin/{,**} r,
   /usr/share/kwin-wayland/{,**} r,
   /usr/share/kwin-x11/{,**} r,
@@ -154,8 +171,10 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /usr/share/timezonefiles/timezones.json r,
   /usr/share/wacomtablet/images/{,*} r,
   /usr/share/wallpapers/{,**} r,
+  /usr/share/wayland-sessions/{,*.desktop} r,
 
   @{etc_ro}/login.defs r,
+  @{etc_ro}/vdpau_wrapper.cfg r,
   /etc/cups/cupsd.conf r,
   /etc/exports r,
   /etc/flatpak/remotes.d/{,*} r,
@@ -172,6 +191,9 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
 
   / r,
   @{bin}/ r,
+  # ToDo: deny or change to all directories there?
+  @{bin}/*_perl/ r,
+  @{bin}/db5.3/ r,
   @{sbin}/ r,
 
   /var/cache/cracklib/cracklib_dict.* r,
@@ -188,6 +210,8 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{log}/journal/@{hex32}/user-@{uid}.journal r,
 
   owner @{HOME}/.face r,
+  owner @{HOME}/.icons/{,**} w,
+  owner @{HOME}/.themes/{,**} w,
   owner @{HOME}/@{XDG_WALLPAPERS_DIR}/{,**} r,
   # ToDo: check backup on external device!
   owner @{HOME}/.bup*/ rw,
@@ -208,17 +232,27 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_config_dirs}/{P,p}lasma* r,
   owner @{user_config_dirs}/*rc r,
   owner @{user_config_dirs}/*notifyrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/auroraerc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/autostart/ rw,
   owner @{user_config_dirs}/autostart/* rwlk, #-> @{user_config_dirs}/autostart/#@{int},
   owner @{user_config_dirs}/baloofileinformationrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/baloofilerc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/bluedevilglobalrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/bluedevilreceiverrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/breezerc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/oxygenrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/device_automounter_kcmrc.lock rwk,
   owner @{user_config_dirs}/discoverrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/emaildefaults r,
   owner @{user_config_dirs}/filetypesrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/fontconfig/ w,
+  owner @{user_config_dirs}/fontconfig/fonts.conf w,
+  owner @{user_config_dirs}/fontconfig/fonts.conf.NEW rw,
+  owner @{user_config_dirs}/fontconfig/fonts.conf.TMP-@{rand6} rw,
+  owner @{user_config_dirs}/fontconfig/fonts.conf.LCK rwl, #-> @{user_config_dirs}/fontconfig/fonts.conf.TMP-@{rand6},
+  owner @{user_config_dirs}/fontgroups.xml@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/gtkrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/gtkrc-2.0@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/libaccounts-glib/ rw,
   owner @{user_config_dirs}/libaccounts-glib/accounts.db{,-shm,-wal,-journal} rwk,
   owner @{user_config_dirs}/mimeapps.list@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
@@ -236,6 +270,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_config_dirs}/qtvirtualkeyboard/ w,
   owner @{user_config_dirs}/session/ rw,
   owner @{user_config_dirs}/session/** rwlk,
+  owner @{user_config_dirs}/Trolltech.conf@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/user-dirs.dirs@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/wireplumber/ w,
   owner @{user_config_dirs}/wireplumber/wireplumber.conf.d/ w,
@@ -247,20 +282,32 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_share_dirs}/applications/ w,
   owner @{user_share_dirs}/applications/#@{int} rwk,
   owner @{user_share_dirs}/applications/*.desktop@{atomic} rwlk, #-> @{user_share_dirs}/applications/#@{int},
+  owner @{user_share_dirs}/aurorae/themes/ r,
+  owner @{user_share_dirs}/aurorae/themes/** rw,
   owner @{user_share_dirs}/baloo/index rw,
   owner @{user_share_dirs}/baloo/index-lock rwk,
+  owner @{user_share_dirs}/color-schemes/* wl, #-> @{user_share_dirs}/color-schemes/#@{int},
   owner @{user_share_dirs}/flatpak/overrides/* rwk,
   owner link @{user_share_dirs}/flatpak/overrides/* -> @{user_share_dirs}/flatpak/overrides/#@{int},
   owner @{user_share_dirs}/flatpak/repo/{,**} r,
+  owner @{user_share_dirs}/fonts/kfontinst w,
+  owner @{user_share_dirs}/icons/** w,
   owner @{user_share_dirs}/mime/*/*.xml w,
   owner @{user_share_dirs}/mime/{,packages/} w,
+  owner @{user_share_dirs}/plasma/ w,
+  owner @{user_share_dirs}/plasma/desktoptheme/{,**} rw,
+  owner link @{user_share_dirs}/plasma/desktoptheme/** -> @{user_share_dirs}/plasma/desktoptheme/**#@{int},
+  owner @{user_share_dirs}/plasma/look-and-feel/{,**} rwlk, #-> @{user_share_dirs}/plasma/look-and-feel/**#@{int},
+  owner @{user_share_dirs}/plasma/wallpapers/{,**} rw,
+  owner link @{user_share_dirs}/plasma/wallpapers/** -> @{user_share_dirs}/plasma/wallpapers/**#@{int},
   owner @{user_share_dirs}/recently-used.xbel l,  #-> @{user_share_dirs}/#@{int},
   owner @{user_share_dirs}/solid/ w,
   owner @{user_share_dirs}/solid/actions/ rw,
   owner @{user_share_dirs}/solid/actions/#@{int} rwk,
   owner @{user_share_dirs}/solid/actions/*.desktop@{atomic} rwlk, #-> @{user_share_dirs}/solid/actions/#@{int},
+  owner @{user_share_dirs}/sounds/{,**} rw,
   owner @{user_share_dirs}/user-places.xbel r,
-  owner @{user_share_dirs}/wallpapers/{,**} r,
+  owner @{user_share_dirs}/wallpapers/{,**} rw,
 
   owner @{user_state_dirs}/kinfocenterstaterc@{atomic} rwlk, # -> @{user_state_dirs}/#@{int},
   owner @{user_state_dirs}/kiostaterc r,
@@ -269,9 +316,17 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{tmp}/#@{int} rw,
   owner @{tmp}/@{hex} rw, # ToDo: probably printing
   owner @{tmp}/@{rand6}-*.@{archive_ext} rwl, #-> @{tmp}/#@{int},
+  audit owner @{tmp}/@{rand6}-*.@{image_ext} rwl, #-> @{tmp}/#@{int},
+  owner @{tmp}/@{rand6}-*.colors rwl, #-> @{tmp}/#@{int},
   owner @{tmp}/@{rand6}-*.kwinscript rwl, #-> @{tmp}/#@{int},
+  owner @{tmp}/@{rand6}-@{int}-*.@{font_ext} rwl, #-> @{tmp}/#@{int},
+  owner @{tmp}/@{rand6}- rw,
+  owner @{tmp}/*.@{archive_ext} w, # special version for sddm themes
   owner @{tmp}/dep-@{hex6}.d rw,
   owner @{tmp}/systemsettings-@{rand6}/{,**} rw,
+  owner link @{tmp}/systemsettings-@{rand6}/plasmalogin.conf -> @{tmp}/systemsettings-@{rand6}/#@{int},
+  owner @{tmp}/systemsettings-@{rand6}/plasmalogin.conf.lock k,
+  owner @{tmp}/systemsettings.@{rand6} wl, #-> @{tmp}/#@{int},
 
         @{run}/ r,
         @{run}/motd.d/{,*} r,
@@ -319,6 +374,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{PROC}/@{pid}/mountinfo r,
   owner @{PROC}/@{pid}/mounts r,
   owner @{PROC}/@{pid}/stat r,
+  owner @{PROC}/@{pid}/task/@{tid}/comm w,
 
   /dev/ r,
   /dev/bus/usb/ r,

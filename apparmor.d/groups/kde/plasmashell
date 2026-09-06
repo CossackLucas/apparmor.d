@@ -154,6 +154,7 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_cache_dirs}/bookmarksrunner/ rw,
   owner @{user_cache_dirs}/bookmarksrunner/** rwlk -> @{user_cache_dirs}/bookmarksrunner/#@{int},
   owner @{user_cache_dirs}/ksvg-elements@{atomic} rwlk,
+  owner @{user_cache_dirs}/ksvg-elements.lock.rmlock rwk,
   owner @{user_cache_dirs}/org.kde.dirmodel-qml.kcache rw,
   owner @{user_cache_dirs}/plasma_engine_potd/{,**} rw,
   owner @{user_cache_dirs}/plasma_theme_*.kcache rw,

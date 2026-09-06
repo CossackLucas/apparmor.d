@@ -54,6 +54,7 @@ profile xdg-desktop-portal-kde @{exec_path} flags=(attach_disconnected,mediate_d
   /etc/xdg/dolphinrc r,
 
   / r,
+  @{lib}/ r,
 
   @{lib}/ r,
 
@@ -61,7 +62,7 @@ profile xdg-desktop-portal-kde @{exec_path} flags=(attach_disconnected,mediate_d
 
   owner @{HOME}/ r,
 
-  owner @{user_pictures_dirs}/Screenshot_@{int8}_@{int6}.png w,
+  owner @{user_pictures_dirs}/Screenshot_@{int8}_@{int6}.png w, # Taking screenshots for user themes
 
   owner @{user_config_dirs}/autostart/org.kde.*.desktop r,
   owner @{user_config_dirs}/kbookmarkrc r,
