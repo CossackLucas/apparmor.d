@@ -18,10 +18,6 @@ profile ss @{exec_path} {
 
   ptrace read,
 
-  signal receive set=kill peer=systemsettings,
-
-  network inet dgram,
-  network inet6 dgram,
   network netlink raw,
 
   @{exec_path} mr,
