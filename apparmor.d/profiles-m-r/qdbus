@@ -14,11 +14,6 @@ profile qdbus @{exec_path} {
 
   @{exec_path} mr,
 
-  # ToDo: should kdeconnect use it's own profile for qdbus?
-  # Silencer Inherit
-  deny network inet dgram,
-  deny network inet6 dgram,
-
   include if exists <local/qdbus>
 }
 

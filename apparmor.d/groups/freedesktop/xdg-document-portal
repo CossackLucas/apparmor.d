@@ -55,7 +55,6 @@ profile xdg-document-portal @{exec_path} flags=(attach_disconnected) {
   owner @{MOUNTS}/** rw,
 
   owner @{run}/user/@{uid}/.flatpak/@{int}/bwrapinfo.json r,
-  owner @{run}/user/@{uid}/@{hex32}/storage/emulated/@{u8}/** r,
   owner @{run}/user/@{uid}/doc/ rw,
 
   @{sys}/devices/system/node/ r,
