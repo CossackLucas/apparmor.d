@@ -13,7 +13,7 @@ include <tunables/multiarch.d/path>
 @{MOUNTDIRS}=/media/ @{run}/media/@{user}/ /mnt/
 
 # @{MOUNTS} is a space-separated list of all user mounted directories.
-@{MOUNTS}=@{MOUNTDIRS}/*/ @{run}/user/@{uid}/gvfs/
+@{MOUNTS}=@{MOUNTDIRS}/*/ @{run}/user/@{uid}/gvfs/ @{run}/user/@{uid}/@{hex32}/
 
 # Common places for binaries and libraries across distributions
 @{bin}=/{,usr/}bin

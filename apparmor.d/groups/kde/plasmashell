@@ -154,6 +154,7 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_cache_dirs}/appstream/.goutputstream-@{rand6} rw,
   owner @{user_cache_dirs}/bookmarksrunner/ rw,
   owner @{user_cache_dirs}/bookmarksrunner/** rwlk -> @{user_cache_dirs}/bookmarksrunner/#@{int},
+  owner @{user_cache_dirs}/kdeconnect.daemon/kdeconnect/albumart/*.@{image_ext} r,
   owner @{user_cache_dirs}/ksvg-elements@{atomic} rwlk,
   owner @{user_cache_dirs}/org.kde.dirmodel-qml.kcache rw,
   owner @{user_cache_dirs}/plasma_engine_potd/{,**} rw,
@@ -217,6 +218,7 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
 
         @{tmp}/.mount_nextcl@{rand6}/{,*} r,
   owner @{tmp}/#@{int} rw,
+  owner @{tmp}/kdeconnect.daemon-@{rand6}/* r,
   owner @{tmp}/plasma-browser-integration_artwork_@{rand6}.@{image_ext} r,
 
         @{run}/mount/utab r,
