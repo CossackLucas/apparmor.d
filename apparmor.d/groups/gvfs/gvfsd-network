@@ -22,6 +22,8 @@ profile gvfsd-network @{exec_path} flags=(attach_disconnected) {
   owner @{run}/user/@{uid}/gvfsd/ rw,
   owner @{run}/user/@{uid}/gvfsd/socket-@{rand8} rw,
 
+  owner @{PROC}/@{pid}/comm r,
+
   include if exists <local/gvfsd-network>
 }
 
