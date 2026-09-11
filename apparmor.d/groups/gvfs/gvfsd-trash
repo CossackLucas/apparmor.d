@@ -26,6 +26,8 @@ profile gvfsd-trash @{exec_path} {
 
   @{exec_path} mr,
 
+  /etc/fstab r,
+
   # Can restore all user files
   owner @{HOME}/{,**} rw,
   owner @{MOUNTS}/{,**} rw,
@@ -36,6 +38,7 @@ profile gvfsd-trash @{exec_path} {
 
   @{run}/mount/utab r,
 
+  owner @{PROC}/@{pid}/comm r,
   owner @{PROC}/@{pid}/mountinfo r,
   owner @{PROC}/@{pid}/mounts r,
 

@@ -1,0 +1,102 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/darktable
+profile darktable @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/cgroup-limits>
+  include <abstractions/dconf-write>
+  include <abstractions/desktop>
+  include <abstractions/devices-usb-read>
+  include <abstractions/graphics>
+  include <abstractions/input>
+  include <abstractions/nameservice-strict>
+  include <abstractions/ssl_certs> # needed for geotagging
+  include <abstractions/thumbnails-cache-read>
+  include <abstractions/trash-strict>
+
+  network inet dgram,
+  network inet stream,
+  network inet6 dgram,
+  network inet6 stream,
+  network netlink raw,
+
+  @{exec_path} mr,
+
+  @{shells_path} rix,
+  @{bin}/find    rix,
+  @{bin}/git      Cx -> git,
+  @{bin}/locale  rix,
+  @{bin}/sort    rix,
+
+  /etc/fstab r,
+  /etc/OpenCL/** r,
+
+  /usr/share/darktable/{,**} r,
+  /usr/share/GraphicsMagick-@{version}/config/*.mgk r,
+  /usr/share/iso-codes/json/*.json r,
+  /usr/share/lensfun/** r,
+  /usr/share/p11-kit/modules/{,*} r,
+
+        @{MOUNTDIRS}/ r,
+        @{MOUNTS}/ r,
+  owner @{HOME}/ r,
+
+  owner @{user_pictures_dirs}/{,**} rw,
+  owner @{user_work_dirs}/{,**} rw,
+
+  owner @{user_cache_dirs}/darktable/ rw,
+  owner @{user_cache_dirs}/darktable/** rwlk,
+  owner @{user_cache_dirs}/osmgpsmap/{,**} rw,
+
+  owner @{user_config_dirs}/darktable/{,**} rwlk,
+  owner @{user_config_dirs}/kioslaverc r,
+
+  owner @{user_share_dirs}/darktable/{,**} rwlk,
+
+        @{tmp}/ r,
+  owner @{tmp}/dep-@{hex6}.d rw,
+
+        # ToDo: probably removeable
+        @{sys}/block/ r,
+        @{sys}/class/sound/ r,
+        @{sys}/devices/virtual/sound/seq/uevent r,
+        @{sys}/devices/virtual/sound/timer/uevent r,
+
+        @{sys}/class/hidraw/ r,
+        @{sys}/devices/@{pci_bus}/uevent r,
+        @{sys}/devices/platform/LNXPWRBN:00/uevent r,
+        @{sys}/devices/platform/pcspkr/uevent r,
+        @{sys}/devices/platform/PNP0C0C:00/uevent r,
+        @{sys}/devices/platform/uevent r,
+
+        @{PROC}/sys/vm/nr_hugepages r,
+  owner @{PROC}/@{pid}/mountinfo r,
+  owner @{PROC}/@{pid}/mounts r,
+  owner @{PROC}/@{pid}/task/@{tid}/comm w,
+
+  /dev/tty rw,
+
+  profile git {
+    include <abstractions/base>
+    include <abstractions/app/git>
+
+          @{HOMEDIRS}/ r,
+    owner @{HOME}/ r,
+
+    owner @{user_config_dirs}/ r,
+    owner @{user_config_dirs}/darktable/{,**} r,
+    owner @{user_config_dirs}/darktable/lua/.git/index.lock w,
+      
+    include if exists <local/darktable_git>
+  }
+
+  include if exists <local/darktable>
+}
+
+# vim:syntax=apparmor
