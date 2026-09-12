@@ -1,0 +1,49 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{lib}/freecad/bin/FreeCAD
+profile freecad @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/desktop>
+  include <abstractions/graphics>
+  include <abstractions/nameservice-strict>
+  include <abstractions/python>
+  include <abstractions/qt-shader-cache>
+  include <abstractions/thumbnails-cache-read>
+
+  @{exec_path} mr,
+
+  /usr/share/freecad/{,**} r,
+  /usr/share/opencascade/{,**} r,
+
+  owner @{user_documents_dirs}/{,**} rw,
+  owner @{user_pictures_dirs}/{,**} rw,
+  owner @{user_work_dirs}/{,**} rw,
+
+  owner @{user_cache_dirs}/FreeCAD/ rw,
+  owner @{user_cache_dirs}/FreeCAD/** rwlk -> @{user_cache_dirs}/FreeCAD/#@{int},
+
+  owner @{user_config_dirs}/FreeCAD/ rw,
+  owner @{user_config_dirs}/FreeCAD/** rwlk,
+
+  owner @{user_share_dirs}/FreeCAD/ rw,
+  owner @{user_share_dirs}/FreeCAD/** rwlk,
+
+  owner @{tmp}/FreeCAD w,
+  owner @{tmp}/system.cfg.lock rwk,
+  owner @{tmp}/user.cfg.lock rwk,
+
+  owner @{PROC}/@{pid}/mounts r,
+
+  # Silencer
+  deny @{lib}/freecad/**__pycache__/ w,
+
+  include if exists <local/freecad>
+}
+
+# vim:syntax=apparmor
