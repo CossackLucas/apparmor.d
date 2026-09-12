@@ -17,6 +17,8 @@ profile plasma-keyboard @{exec_path} flags=(attach_disconnected,mediate_deleted)
 
   signal receive set=term peer=kwin_wayland,
 
+  unix type=stream peer=(label=kwin_wayland),
+
   @{exec_path} mr,
 
   @{bin}/ r,

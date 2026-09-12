@@ -7,9 +7,15 @@ abi <abi/5.0>,
 include <tunables/global>
 
 @{exec_path} = @{bin}/firewall-cmd
-profile firewall-cmd @{exec_path} {
+profile firewall-cmd @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>
+  include <abstractions/bus-system>
+  include <abstractions/nameservice-strict>
   include <abstractions/python>
+
+  capability dac_read_search,
+
+  #aa:dbus talk bus=system name=org.fedoraproject.FirewallD1 label=firewalld
 
   @{exec_path} mr,
 

@@ -1,0 +1,52 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{lib}/{,kf6/}kauth/{,libexec/}fontinst_helper
+profile kauth-fontinst_helper @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/bus-system>
+  include <abstractions/bus/system/org.freedesktop.PolicyKit1>
+  include <abstractions/desktop-base>
+  include <abstractions/fontconfig-cache-write>
+  include <abstractions/nameservice-strict>
+  include <abstractions/fonts-strict>
+  include <abstractions/qt>
+
+  #aa:dbus own bus=system name=org.kde.fontinst path=/ interface+=org.kde.kf[56]auth
+
+  @{exec_path} mr,
+
+  @{sh_path}      mr,
+  @{bin}/fc-cache mrPx,
+
+  /etc/fonts/#@{int} w,
+  /etc/fonts/disabledfonts.xml@{atomic} wl -> /etc/fonts/#@{int},
+
+  /usr/local/share/fonts/{,**} w,
+  /usr/share/*-fonts/conf.avail/{,**} w,
+  /usr/share/a2ps/fonts/{,**} w,
+  /usr/share/AbiSuite/fonts/** w,
+  /usr/share/fontconfig/conf.avail/{,**} w,
+  /usr/share/fonts-*/{,**} w,
+  /usr/share/fonts/{,**} w,
+  /usr/share/ghostscript/fonts/{,**} w,
+  /usr/share/javascript/*/fonts/{,**} w,
+  /usr/share/libthai/thbrk.tri w,
+  /usr/share/texlive/texmf-dist/fonts/{,**} w,
+  /usr/share/texmf/{,*/}fonts/{,**} w,
+  /usr/share/xfce{,4}/fonts/{,**} w,
+
+  owner @{HOME}/.fonts/{,**} w,
+  owner @{user_share_dirs}/fonts/{,**} w,
+
+  #aa:exec kauth-fontinst_x11
+
+  include if exists <local/kauth-fontinst_helper>
+}
+
+# vim:syntax=apparmor

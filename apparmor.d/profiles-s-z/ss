@@ -6,7 +6,8 @@ abi <abi/5.0>,
 
 include <tunables/global>
 
-@{exec_path} = @{sbin}/ss
+
+@{exec_path} = @{sbin}/ss @{bin}/ss #aa:lint ignore=sbin
 profile ss @{exec_path} {
   include <abstractions/base>
   include <abstractions/consoles>

@@ -1,0 +1,28 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/plasma-localegen-helper
+profile plasma-localegen-helper @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/bus-system>
+  include <abstractions/bus/system/org.freedesktop.PolicyKit1>
+  include <abstractions/qt>
+
+  #aa:dbus own bus=system name=org.kde.localegenhelper path=/LocaleGenHelper
+
+  @{exec_path} mr,
+
+  @{sh_path} mr,
+  @{sbin}/locale-gen Px,
+
+  /etc/locale.gen rw,
+
+  include if exists <local/plasma-localegen-helper>
+}
+
+# vim:syntax=apparmor

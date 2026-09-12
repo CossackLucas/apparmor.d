@@ -35,6 +35,11 @@ profile locale-gen @{exec_path} {
 
   /var/lib/locales/supported.d/{,**} r,
 
+  @{sys}/fs/cgroup/system.slice/cpu.max r,
+  @{sys}/fs/cgroup/system.slice/dbus.service/cpu.max r,
+
+  @{PROC}/@{pid}/cgroup r,
+
   # Inherit Silencer
   deny network inet6 stream,
   deny network inet stream,

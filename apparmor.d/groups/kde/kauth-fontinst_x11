@@ -1,0 +1,32 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{lib}/{,kf6/}kauth/{,libexec/}fontinst_x11
+profile kauth-fontinst_x11 @{exec_path} {
+  include <abstractions/base>
+
+  @{exec_path} mr,
+
+  @{sh_path}         mr,
+  @{bin}/cat         mrix,
+  @{bin}/{,e}grep    mrix,
+  @{bin}/{m,g,}awk   mrix,
+  @{bin}/mkfontdir    rix,
+  @{bin}/mkfontscale mrix,
+  @{bin}/rm          mrix,
+  @{bin}/wc          mrix,
+  @{bin}/xset        mrPx,
+
+  /usr/share/fonts/X11/** rw,
+
+  / r,
+
+  include if exists <local/kauth-fontinst_x11>
+}
+
+# vim:syntax=apparmor

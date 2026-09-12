@@ -51,9 +51,13 @@ profile adduser @{exec_path} flags=(attach_disconnected) {
   # To create user dirs and copy files from /etc/skel/ to them
   @{HOME}/ rw,
   @{HOME}/* w,
+  @{HOME}/*/ w,
   @{HOME}/**/.Private/* rw,
   /var/lib/*/ rw,
   /var/lib/*/*/ rw,
+
+  #aa:only ubuntu
+  owner @{HOME}/Desktop/org.*.desktop w,
 
   @{run}/adduser wk,
   @{run}/userdb/ r,

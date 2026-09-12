@@ -13,6 +13,7 @@ profile kded @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   include <abstractions/audio-client>
   include <abstractions/bluetooth-observe>
   include <abstractions/bus/system/org.bluez.AgentManager1>
+  include <abstractions/bus/system/org.cups.cupsd.Notifier>
   include <abstractions/bus/system/org.freedesktop.login1>
   include <abstractions/bus/system/org.freedesktop.UDisks2>
   include <abstractions/common/kde>
@@ -40,6 +41,7 @@ profile kded @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   ptrace read,
 
   signal send set=hup peer=xsettingsd,
+  signal send set=kill peer=gtk3_preview,
   signal send set=term peer=kioworker,
 
   # Owned by KDE
@@ -75,6 +77,7 @@ profile kded @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   #aa:dbus talk bus=system name=org.freedesktop.NetworkManager label=NetworkManager
   #aa:dbus talk bus=system name=org.freedesktop.PackageKit path=/** label=packagekitd
   #aa:dbus talk bus=system name=org.freedesktop.PolicyKit1 label="@{p_polkitd}"
+  #aa:dbus talk bus=system name=org.kde.kded.smart path=/ interface+=org.kde.kf[56]auth label=kauth-kded-smart-helper
 
   #aa:dbus talk bus=session name=org.freedesktop.systemd1 label="@{p_systemd_user}"
   #aa:dbus talk bus=session name=org.kde.ActivityManager path=/ActivityManager{,**} label=kactivitymanagerd
@@ -84,15 +87,10 @@ profile kded @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   #aa:dbus talk bus=session name=org.kde.KWin label=kwin_wayland
   #aa:dbus talk bus=session name=org.kde.NightColor path=/ColorCorrect label="{kwin_wayland,kwin_x11}"
 
-  dbus receive bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=remoteSignal
-       peer=(name=@{busname}, label=kauth-kded-smart-helper),
-
-  dbus send bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=performAction
-       peer=(name="{@{busname},org.kde.kded.smart}", label=kauth-kded-smart-helper),
+  #dbus receive bus=system path=/org/freedesktop
+       #interface=org.freedesktop.DBus.ObjectManager
+       #member=InterfacesAdded
+       #peer=(name=@{busname}, label=NetworkManager),
 
   @{exec_path} mrix,
 
@@ -110,10 +108,10 @@ profile kded @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   @{bin}/xsettingsd         rPx,
   @{lib}/drkonqi            rPx,
 
-  @{lib}/gtk3_preview                      rPx,
-  @{lib}/{,@{multiarch}/}utempter/utempter rPx,
+  #aa:exec gtk3_preview
   #aa:exec kconf_update
   #aa:exec kioworker
+  #aa:exec utempter
 
   /usr/share/desktop-directories/kf5-*.directory r,
   /usr/share/distro-info/{,**} r,
@@ -189,10 +187,12 @@ profile kded @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_share_dirs}/kscreen/{,**} rwl,
   owner @{user_share_dirs}/kservices{5,6}/{,**} r,
   owner @{user_share_dirs}/ktp/cache.db rwk,
+  owner @{user_share_dirs}/plasma/look-and-feel/** r,
   owner @{user_share_dirs}/remoteview/ r,
   owner @{user_share_dirs}/services5/{,**} r,
   owner @{user_share_dirs}/user-places.xbel r,
 
+  owner @{user_state_dirs}/lookandfeelautoswitcherstaterc@{atomic} rwlk, #-> @{user_state_dirs}/#@{int},
   owner @{user_state_dirs}/plasmashellstaterc@{atomic} rwlk, #-> @{user_state_dirs}/#@{int},
 
         @{run}/mount/utab r,

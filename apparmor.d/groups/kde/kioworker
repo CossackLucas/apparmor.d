@@ -28,7 +28,7 @@ profile kioworker @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   network netlink raw,
   network netlink dgram,
 
-  mqueue getattr type=posix,
+  audit mqueue getattr type=posix,
 
   signal receive set=term,
 

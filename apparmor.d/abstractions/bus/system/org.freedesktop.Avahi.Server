@@ -18,7 +18,7 @@
   # Allow accessing DBus properties and resolving
   dbus send bus=system path=/
        interface=org.freedesktop.Avahi.Server
-       member={Get*,Resolve*,IsNSSSupportAvailable}
+       member={EntryGroupNew,Get*,Resolve*,IsNSSSupportAvailable}
        peer=(name=org.freedesktop.Avahi, label="@{p_avahi_daemon}"),
 
   # Allow receiving anything from the Avahi server
