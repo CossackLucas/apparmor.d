@@ -10,7 +10,17 @@ include <tunables/global>
 profile sddmthemeinstaller @{exec_path} {
   include <abstractions/base>
   include <abstractions/audio-client>
+  include <abstractions/bus/system/org.freedesktop.PolicyKit1>
   include <abstractions/common/kde>
+
+  dbus receive bus=system path=/
+       interface=org.kde.kf[56]auth
+       member=remoteSignal
+       peer=(name=@{busname}, label=unconfined),
+  dbus send bus=system path=/
+       interface=org.kde.kf[56]auth
+       member=performAction
+       peer=(name=org.kde.kcontrol.kcmsddm, label=unconfined),
 
   @{exec_path} mr,
 

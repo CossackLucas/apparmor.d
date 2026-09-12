@@ -11,6 +11,7 @@ profile plasma-discover @{exec_path} flags=(attach_disconnected,mediate_deleted)
   include <abstractions/base>
   include <abstractions/accounts-observe>
   include <abstractions/audio-client>
+  include <abstractions/bus-system>
   include <abstractions/bus/system/org.freedesktop.locale1>
   include <abstractions/common/kde>
   include <abstractions/dconf-write>
@@ -33,6 +34,8 @@ profile plasma-discover @{exec_path} flags=(attach_disconnected,mediate_deleted)
   signal (receive) set=(kill) peer=systemsettings,
 
   #aa:dbus talk bus=system name=org.freedesktop.Flatpak.SystemHelper label=flatpak-system-helper
+  #aa:dbus talk bus=system name=org.freedesktop.fwupd path=/ label=fwupd
+  #aa:dbus talk bus=system name=org.freedesktop.PackageKit path=/** label=packagekitd
 
   @{exec_path} mr,
 
@@ -69,6 +72,7 @@ profile plasma-discover @{exec_path} flags=(attach_disconnected,mediate_deleted)
   /usr/share/metainfo/{,**} r,
   /usr/share/myspell/{,dicts/} r,
   /usr/share/plasma/look-and-feel/{,**} r,
+  /usr/share/publicsuffix/{,*} r,
   /usr/share/swcatalog/xml/{,*.xml.gz} r,
   /usr/share/swcatalog/icons/{,**} r,
 
@@ -99,6 +103,8 @@ profile plasma-discover @{exec_path} flags=(attach_disconnected,mediate_deleted)
   /var/tmp/#@{int} rw,
   /var/tmp/flatpak-cache-*/ rw,
   /var/tmp/flatpak-cache-*/** rwlk,
+
+  /snap/**.@{icon_ext} r,
 
   @{log}/pacman.log r,
 
@@ -198,6 +204,7 @@ profile plasma-discover @{exec_path} flags=(attach_disconnected,mediate_deleted)
   owner @{tmp}/@{rand6}-*.kwinscript rwl -> @{tmp}/#@{int},
   owner @{tmp}/@{rand6}-*.plasmoid rwl -> @{tmp}/#@{int},
 
+        @{run}/snapd.socket rw,
   owner @{run}/user/@{uid}/#@{int} rw,
   owner @{run}/user/@{uid}/.flatpak-cache rw,
   owner @{run}/user/@{uid}/.flatpak/{,**} rw,

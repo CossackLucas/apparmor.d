@@ -10,12 +10,25 @@ include <tunables/global>
 profile kplymouththemeinstaller @{exec_path} {
   include <abstractions/base>
   include <abstractions/bus-session>
+  include <abstractions/bus-system>
+  include <abstractions/bus/system/org.freedesktop.PolicyKit1>
   include <abstractions/desktop-base>
   include <abstractions/mime>
   include <abstractions/nameservice-strict>
   include <abstractions/qt>
 
+  dbus receive bus=system path=/
+       interface=org.kde.kf[56]auth
+       member=remoteSignal
+       peer=(name=@{busname}, label=unconfined),
+  dbus send bus=system path=/
+       interface=org.kde.kf[56]auth
+       member=performAction
+       peer=(name=org.kde.kcontrol.kcmplymouth, label=unconfined),
+
   @{exec_path} mr,
+
+  /usr/share/kubuntu-default-settings/kf5-settings/kdeglobals r,
 
   owner @{user_config_dirs}/#@{int} rwk,
   owner @{user_config_dirs}/kdedefaults/kdeglobals r,
@@ -23,7 +36,7 @@ profile kplymouththemeinstaller @{exec_path} {
   owner @{user_config_dirs}/kplymouththemeinstallerrc@{atomic} rwlk -> @{user_config_dirs}/#@{int},
 
   owner @{user_share_dirs}/kplymouththemeinstaller/*.@{archive_ext} r,
-  
+
   @{PROC}/sys/kernel/random/boot_id r,
 
   /dev/tty r,
