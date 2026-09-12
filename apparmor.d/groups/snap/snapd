@@ -82,7 +82,7 @@ profile snapd @{exec_path} {
   @{bin}/systemctl                rCx -> systemctl,
   @{bin}/systemd-detect-virt      rPx,
   @{bin}/tar                      rix,
-  @{bin}/udevadm                  rPx,
+  audit @{bin}/udevadm                  rPUx,
   @{bin}/umount                   rix,
   @{bin}/unsquashfs               rix,
   @{bin}/update-desktop-database  rPx,

@@ -98,6 +98,7 @@ profile xdg-desktop-portal @{exec_path} flags=(attach_disconnected) {
   @{lib}/xdg-desktop-portal-validate-icon rPx,
   @{open_path}                           mrPx -> child-open-any,
 
+  /usr/share/kubuntu-default-settings/kf5-settings/mimeapps.list r,
   /usr/share/xdg-desktop-portal/** r,
 
   /etc/sysconfig/proxy r,

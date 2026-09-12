@@ -43,6 +43,10 @@ profile wireplumber @{exec_path} flags=(attach_disconnected) {
        interface=org.freedesktop.DBus.ObjectManager
        member=GetManagedObjects
        peer=(name=@{busname}, label="@{p_bluetoothd}"),
+  dbus send bus=system path=/org/freedesktop/ModemManager1
+       interface=org.freedesktop.DBus.ObjectManager
+       member=GetManagedObjects
+       peer=(name=@{busname}, label=ModemManager),
 
   @{exec_path} mr,
 

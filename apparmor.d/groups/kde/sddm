@@ -33,6 +33,7 @@ profile sddm @{exec_path} flags=(attach_disconnected,mediate_deleted) {
 
   network netlink raw,
 
+  signal (send) set=(kill, term) peer=kwin_wayland,
   signal (send) set=(kill, term) peer=sddm-greeter,
   signal (send) set=(kill, term) peer=startplasma,
   signal (send) set=(kill, term) peer=xorg,
@@ -60,6 +61,8 @@ profile sddm @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   /usr/share/sddm/scripts/Xsession           rix,
 
   if "wayland" in @{DS} {
+    @{bin}/kwin_wayland Px,
+
     @{lib}/{,@{multiarch}/}{,sddm/}sddm-helper-start-wayland rix,
     /usr/share/sddm/scripts/wayland-session  rix,
     @{etc_ro}/sddm/wayland-session            Px,
