@@ -71,7 +71,7 @@ profile kded @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   #aa:dbus talk bus=system name=org.kde.kameleon.qmk.helper label=kameleon-qmk-helper
   #aa:dbus talk bus=system name=org.freedesktop.bolt label=boltd
   #aa:dbus talk bus=system name=org.freedesktop.ModemManager1 label=ModemManager
-  #aa:dbus talk bus=system name=org.freedesktop.NetworkManager label=NetworkManager
+  #aa:dbus talk bus=system name=org.freedesktop.NetworkManager path=/{,org/freedesktop/NetworkManager{,/**}} label=NetworkManager
   #aa:dbus talk bus=system name=org.freedesktop.PackageKit path=/** label=packagekitd
   #aa:dbus talk bus=system name=org.freedesktop.PolicyKit1 label="@{p_polkitd}"
 
@@ -124,6 +124,7 @@ profile kded @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   /usr/share/kservices{5,6}/{,**} r,
   /usr/share/kservicetypes5/{,**} r,
   /usr/share/kwin/decorations/{,**} r,
+  /usr/share/language-selector/** r,
   /usr/share/plasma/look-and-feel/{,**} r,
   /usr/share/ubuntu-release-upgrader/{,*} r,
 
@@ -174,6 +175,7 @@ profile kded @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_config_dirs}/libaccounts-glib/ rw,
   owner @{user_config_dirs}/libaccounts-glib/accounts.db{,-shm,-wal,-journal} rwk,
   owner @{user_config_dirs}/menus/{,**} r,
+  owner @{user_config_dirs}/notificationhelper r,
   owner @{user_config_dirs}/plasma* r,
   owner @{user_config_dirs}/Trolltech.conf@{atomic} rwlk,
   owner @{user_config_dirs}/xsettingsd/{,**} rw,
