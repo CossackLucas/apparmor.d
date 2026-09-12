@@ -14,7 +14,9 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   include <abstractions/bus-session>
   include <abstractions/bus/session/com.canonical.Unity.LauncherEntry>
   include <abstractions/bus-system>
+  include <abstractions/bus/system/org.cups.cupsd.Notifier>
   include <abstractions/bus/system/org.freedesktop.login1>
+  include <abstractions/bus/system/org.freedesktop.NetworkManager>
   include <abstractions/bus/system/org.freedesktop.UDisks2>
   include <abstractions/common/kde>
   include <abstractions/consoles>
@@ -73,6 +75,11 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   #aa:dbus talk bus=session name=org.kde.ScreenBrightness label=kde-powerdevil
   #aa:dbus talk bus=session name=org.kde.Solid.PowerManagement label=kde-powerdevil
   #aa:dbus talk bus=session name=org.kde.StatusNotifierWatcher path=/StatusNotifierWatcher label=kded
+
+  dbus receive bus=system path=/org/freedesktop
+       interface=org.freedesktop.DBus.ObjectManager
+       member=InterfacesAdded
+       peer=(name=@{busname}, label=NetworkManager),
 
   dbus send bus=session path=/modules/kdeconnect
        interface=org.kde.kdeconnect.daemon
@@ -176,10 +183,12 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_config_dirs}/*rc r,
   owner @{user_config_dirs}/akonadi* r,
   owner @{user_config_dirs}/akonadi/akonadi*rc r,
+  owner @{user_config_dirs}/dolphinrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/kactivitymanagerd@{atomic} rwlk,
   owner @{user_config_dirs}/kactivitymanagerd-statsrc@{atomic} rwlk,
   owner @{user_config_dirs}/knfsshare r,
   owner @{user_config_dirs}/Kvantum/{,**} r,
+  owner @{user_config_dirs}/kwinrc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/menus/{,**} r,
   owner @{user_config_dirs}/PlasmaUserFeedback r,
   owner @{user_config_dirs}/plasma* rwlk,
@@ -208,6 +217,7 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_share_dirs}/libkunitconversion/** rwlk,
   owner @{user_share_dirs}/plasma_icons/*.desktop r,
   owner @{user_share_dirs}/plasma/{,**} r,
+  owner @{user_share_dirs}/plasma/plasmoids/** m,
   owner @{user_share_dirs}/qalculate/{,**} r,
   owner @{user_share_dirs}/solid/actions/{,*} r,
   owner @{user_share_dirs}/user-places.xbel{,*} rwl,

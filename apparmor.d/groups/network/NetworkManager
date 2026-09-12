@@ -40,7 +40,7 @@ profile NetworkManager @{exec_path} flags=(attach_disconnected) {
 
   signal send set=(term) peer=dnsmasq,
 
-  #aa:dbus own bus=system name=org.freedesktop.NetworkManager
+  #aa:dbus own bus=system name=org.freedesktop.NetworkManager path=/{,org/freedesktop/NetworkManager{,/**}}
 
   #aa:dbus talk bus=system name=fi.w1.wpa_supplicant1 label=wpa-supplicant
   #aa:dbus talk bus=system name=org.fedoraproject.FirewallD1 label=firewalld

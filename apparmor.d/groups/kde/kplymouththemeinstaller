@@ -37,6 +37,8 @@ profile kplymouththemeinstaller @{exec_path} {
 
   owner @{user_share_dirs}/kplymouththemeinstaller/*.@{archive_ext} r,
 
+  owner @{tmp}/#@{int} rw,
+
   @{PROC}/sys/kernel/random/boot_id r,
 
   /dev/tty r,

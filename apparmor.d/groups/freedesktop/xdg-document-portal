@@ -17,12 +17,15 @@ profile xdg-document-portal @{exec_path} flags=(attach_disconnected) {
   include <abstractions/mime>
   include <abstractions/nameservice-strict>
 
+  capability dac_override,
+  capability setuid,
   capability sys_admin,
   capability sys_nice,
   capability sys_ptrace,
   capability sys_resource,
 
   mount fstype=fuse.portal -> @{run}/user/@{uid}/doc/,
+  mount fstype=fuse.portal options=(rw nodev nosuid) portal -> /root/.cache/doc/,
 
   signal receive set=term peer=gdm,
   signal receive set=hup  peer=gdm-session-worker,
@@ -43,6 +46,7 @@ profile xdg-document-portal @{exec_path} flags=(attach_disconnected) {
 
   @{bin}/flatpak         rPx,
   @{bin}/fusermount{,3}  rCx -> fusermount,
+  @{bin}/mount           rPx,
   @{bin}/snap            rPx,
 
               / r,

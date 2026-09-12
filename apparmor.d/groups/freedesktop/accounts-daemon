@@ -65,6 +65,7 @@ profile accounts-daemon @{exec_path} flags=(attach_disconnected) {
   owner @{HOME}/.pam_environment r,
 
   owner @{tmp}/gnome-control-center-user-icon-@{rand6} rw,
+  owner @{tmp}/systemsettings.@{rand6} r,
 
   @{att}@{run}/systemd/userdb/io.systemd.Machine rw,
 

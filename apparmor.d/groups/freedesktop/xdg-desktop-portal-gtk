@@ -26,6 +26,8 @@ profile xdg-desktop-portal-gtk @{exec_path} flags=(attach_disconnected) {
   include <abstractions/sys/dmi>
   include <abstractions/thumbnails-cache-read>
 
+  capability dac_read_search,
+
   network inet stream,
 
   signal receive set=term peer=gdm,
@@ -57,6 +59,10 @@ profile xdg-desktop-portal-gtk @{exec_path} flags=(attach_disconnected) {
   owner @{tmp}/runtime-*/xauth_@{rand6} r,
 
   @{run}/mount/utab r,
+
+  # ToDo: check
+  @{run}/user/@{uid}/at-spi/bus_@{u8} rw,
+  @{run}/user/@{uid}/xauth_@{rand6} r,
 
   owner @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/app.slice/xdg-desktop-portal-gtk.service/cpu.max r,
 

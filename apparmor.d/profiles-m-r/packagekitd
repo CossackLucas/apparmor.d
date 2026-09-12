@@ -43,6 +43,15 @@ profile packagekitd @{exec_path} flags=(attach_disconnected) {
 
   #aa:dbus own bus=system name=org.freedesktop.PackageKit path=/**
 
+  dbus send bus=system path=/org/freedesktop/PackageKit
+       interface=org.freedesktop.DBus.Introspectable
+       member=Introspect
+       peer=(name=org.freedesktop.PackageKit, label=packagekitd),
+  dbus send bus=system path=/org/freedesktop/PackageKit
+       interface=org.freedesktop.PackageKit
+       member=StateHasChanged
+       peer=(name=org.freedesktop.PackageKit, label=packagekitd),
+
   @{exec_path} mr,
 
   @{bin}/gpg{,2}         Cx -> gpg,

@@ -6,7 +6,7 @@ abi <abi/5.0>,
 
 include <tunables/global>
 
-@{exec_path} = @{lib}/gtk3_preview
+@{exec_path} = @{lib}/{,@{multiarch}/libexec/}gtk3_preview
 profile gtk3_preview @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>
   include <abstractions/audio-client>
@@ -15,6 +15,8 @@ profile gtk3_preview @{exec_path} flags=(attach_disconnected) {
   include <abstractions/dconf-write>
   include <abstractions/kde-strict>
   include <abstractions/nameservice-strict>
+
+  unix type=stream peer=(label=---), # file_inherit
 
   @{exec_path} mr,
 

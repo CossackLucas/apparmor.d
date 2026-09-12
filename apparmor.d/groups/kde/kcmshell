@@ -9,9 +9,31 @@ include <tunables/global>
 @{exec_path} = @{bin}/kcmshell6
 profile kcmshell @{exec_path} {
   include <abstractions/base>
-  include <abstractions/graphics>
-  include <abstractions/kde-strict>
+  include <abstractions/bus/system/org.freedesktop.GeoClue2>
+  include <abstractions/common/kde>
   include <abstractions/nameservice-strict>
+
+  # ToDo: move it to the abstraction?
+  dbus send bus=system path=/org/freedesktop/GeoClue2/Client/@{int}
+       interface=org.freedesktop.DBus.Properties
+       member={Get,Set,Start,Stop}
+       peer=(name=org.freedesktop.GeoClue2, label=geoclue),
+  dbus send bus=system path=/org/freedesktop/GeoClue2/Client/@{int}/Location/@{int}
+       interface=org.freedesktop.DBus.Properties
+       member=Get
+       peer=(name=org.freedesktop.GeoClue2, label=geoclue),
+  dbus send bus=system path=/org/freedesktop/GeoClue2/Manager
+       interface=org.freedesktop.DBus.Properties
+       member=Get
+       peer=(name=org.freedesktop.GeoClue2),
+  dbus send bus=system path=/org/freedesktop/GeoClue2/Manager
+       interface=org.freedesktop.DBus.Properties
+       member=Get
+       peer=(name=org.freedesktop.GeoClue2, label=geoclue),
+  dbus send bus=system path=/org/freedesktop/GeoClue2/Manager
+       interface=org.freedesktop.GeoClue2.Manager
+       member=GetClient
+       peer=(name=org.freedesktop.GeoClue2, label=geoclue),
 
   @{exec_path} mr,
 
@@ -22,8 +44,10 @@ profile kcmshell @{exec_path} {
 
   owner @{user_config_dirs}/KDE/#@{int} rwk,
   owner @{user_config_dirs}/KDE/Sonnet.conf@{atomic} rwlk -> @{user_config_dirs}/KDE/#@{int},
+  owner @{user_config_dirs}/knighttimerc@{atomic} rwlk -> @{user_config_dirs}/#@{int},
 
   owner @{user_share_dirs}/baloo/index r,
+  owner @{user_share_dirs}/qtposition-geoclue2@{atomic} rwlk -> @{user_share_dirs}/#@{int},
 
   @{PROC}/sys/kernel/random/boot_id r,
 

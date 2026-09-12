@@ -77,6 +77,8 @@ profile sddm-greeter @{exec_path} flags=(attach_disconnected,mediate_deleted) {
 
   owner @{user_config_dirs}/qtvirtualkeyboard/ w,
 
+  owner @{user_share_dirs}/plasma/desktoptheme/** r,
+
   # If one is blocked, the others are probed.
   deny owner @{HOME}/#@{int} mrw,
        owner @{HOME}/.glvnd* mrw,
@@ -85,6 +87,7 @@ profile sddm-greeter @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{tmp}/sddm--@{rand6} rw,
   owner @{tmp}/sddm-:@{int}-@{rand6} rw,
 
+  @{run}/mount/utab r,
   owner @{run}/sddm/{,*} rw,
 
   owner @{PROC}/@{pid}/cmdline r,

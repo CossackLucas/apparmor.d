@@ -36,6 +36,7 @@ profile kwin_wayland @{exec_path} flags=(attach_disconnected,mediate_deleted) {
 
   unix type=stream peer=(label=xkbcomp),
   unix type=stream peer=(label=xwayland),
+  unix type=stream peer=(label=plasma-keyboard),
 
   #aa:dbus own bus=session name=org.freedesktop.a11y.Manager
   #aa:dbus own bus=session name=org.freedesktop.ScreenSaver

@@ -17,7 +17,11 @@ profile krunner-plugininstaller @{exec_path} {
   ptrace read peer=kded,
   ptrace read peer=plasma-discover,
 
+  #aa:dbus talk bus=system name=org.freedesktop.PackageKit path=/** label=packagekitd
+
   @{exec_path} mr,
+
+  @{sh_path} mr,
 
   @{bin}/xdg-open Cx -> open,
 

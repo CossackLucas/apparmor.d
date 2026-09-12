@@ -12,6 +12,7 @@ profile cupsd @{exec_path} flags=(attach_disconnected) {
   include <abstractions/authentication>
   include <abstractions/avahi-observe>
   include <abstractions/bus-system>
+  include <abstractions/bus/system/org.freedesktop.Avahi.EntryGroup>
   include <abstractions/bus/system/org.freedesktop.Avahi.Server>
   include <abstractions/bus/system/org.freedesktop.Avahi.ServiceBrowser>
   include <abstractions/bus/system/org.freedesktop.ColorManager>
@@ -52,6 +53,26 @@ profile cupsd @{exec_path} flags=(attach_disconnected) {
 
   unix type=stream peer=(label=cups-backend-*),
   unix type=stream peer=(label=ippfind),
+
+  dbus send bus=system path=/Client@{int}/EntryGroup@{int}
+       interface=org.freedesktop.Avahi.EntryGroup
+       member=Free
+       peer=(name=org.freedesktop.Avahi, label="@{p_avahi_daemon}"),
+  # ToDo: why needed?
+  dbus send bus=system path=/Client@{int}/EntryGroup@{int}
+       interface=org.freedesktop.Avahi.EntryGroup
+       member={AddService,AddServiceSubtype,Commit,GetState}
+       peer=(name=org.freedesktop.Avahi, label="@{p_avahi_daemon}"),
+
+  dbus send bus=system path=/
+       interface=org.freedesktop.Avahi.Server
+       member=EntryGroupNew
+       peer=(name=org.freedesktop.Avahi, label="@{p_avahi_daemon}"),
+
+  dbus send bus=system path=/org/freedesktop/home1
+       interface=org.freedesktop.home1.Manager
+       member=GetUserRecordByName
+       peer=(name=org.freedesktop.home1, label="@{p_systemd_homed}"),
 
   @{exec_path} mr,
 
