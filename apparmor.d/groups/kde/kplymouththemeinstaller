@@ -9,8 +9,18 @@ include <tunables/global>
 @{exec_path} = @{bin}/kplymouththemeinstaller
 profile kplymouththemeinstaller @{exec_path} {
   include <abstractions/base>
+  include <abstractions/bus/system/org.freedesktop.PolicyKit1>
   include <abstractions/kde-strict>
   include <abstractions/nameservice-strict>
+
+  dbus receive bus=system path=/
+       interface=org.kde.kf[56]auth
+       member=remoteSignal
+       peer=(name=@{busname}, label=unconfined),
+  dbus send bus=system path=/
+       interface=org.kde.kf[56]auth
+       member=performAction
+       peer=(name=org.kde.kcontrol.kcmplymouth, label=unconfined),
 
   @{exec_path} mr,
 

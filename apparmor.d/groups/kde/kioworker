@@ -10,7 +10,7 @@ include <tunables/global>
 @{exec_path} += @{lib}/kf5/kioslave5 @{lib}/@{multiarch}/{,libexec/}kf5/kioslave5
 profile kioworker @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   include <abstractions/base>
-  include <abstractions/bus-session>
+  include <abstractions/bus/system/org.freedesktop.NetworkManager>
   include <abstractions/deny-sensitive-home>
   include <abstractions/devices-usb>
   include <abstractions/fontconfig-cache-write>

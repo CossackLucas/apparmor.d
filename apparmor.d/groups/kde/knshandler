@@ -25,12 +25,15 @@ profile knshandler @{exec_path} {
   signal receive set=kill peer=plasma-discover,
   signal receive set=kill peer=systemsettings,
 
+  #aa:dbus see bus=system name=org.freedesktop.NetworkManager
+
   @{exec_path} mrix,
 
   @{bin}/sddmthemeinstaller Px,
 
   /usr/share/knsrcfiles/{,*} r,
   /usr/share/plasma/look-and-feel/** r,
+  /usr/share/publicsuffix/{,*} r,
 
   /etc/sysconfig/proxy r,
   @{etc_ro}/xdg/{,*} r,
