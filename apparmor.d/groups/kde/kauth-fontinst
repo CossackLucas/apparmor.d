@@ -9,15 +9,26 @@ include <tunables/global>
 @{exec_path} = @{lib}/{,kf6/}kauth/{,libexec/}fontinst
 profile kauth-fontinst @{exec_path} {
   include <abstractions/base>
+  include <abstractions/bus-session>
+  include <abstractions/bus-system>
+  include <abstractions/bus/system/org.freedesktop.PolicyKit1>
+  include <abstractions/desktop-base>
   include <abstractions/fontconfig-cache-write>
   include <abstractions/fonts-strict>
   include <abstractions/qt>
 
+  dbus receive bus=system path=/
+       interface=org.kde.kf[56]auth
+       member=remoteSignal
+       peer=(name=@{busname}, label=unconfined),
+  dbus send bus=system path=/
+       interface=org.kde.kf[56]auth
+       member=performAction
+       peer=(name=org.kde.fontinst, label=unconfined),
+
   @{exec_path} mr,
 
   @{bin}/fc-cache Px,
-
-  /usr/share/icu/@{int}.@{int}/*.dat r,
 
   owner @{user_config_dirs}/#@{int} rw,
   owner @{user_config_dirs}/disabledfonts.xml r,

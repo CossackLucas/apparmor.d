@@ -9,7 +9,19 @@ include <tunables/global>
 @{exec_path} = @{lib}/{,kf6/}kauth/{,libexec/}kinfocenter-dmidecode-helper
 profile kauth-kinfocenter-dmidecode-helper @{exec_path} {
   include <abstractions/base>
+  include <abstractions/bus-system>
   include <abstractions/nameservice-strict>
+  include <abstractions/bus/system/org.freedesktop.PolicyKit1>
+
+  #aa:dbus own  bus=system name=org.kde.kinfocenter.dmidecode
+  #aa:dbus talk bus=system name=org.kde.kf[56]auth path=/ label=systemsettings
+
+  #dbus bind bus=system name=org.kde.kinfocenter.dmidecode,
+
+  dbus send bus=system path=/org/freedesktop/DBus
+       interface=org.freedesktop.DBus
+       member=RequestName
+       peer=(name=org.freedesktop.DBus, label=dbus-system//&unconfined),
 
   @{exec_path} mr,
 
