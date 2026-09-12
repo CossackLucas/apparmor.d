@@ -5,6 +5,9 @@
 
   abi <abi/5.0>,
 
+  unix type=stream peer=(label=kwin_wayland, addr=@/tmp/.X11-unix/X@{int}),
+  unix type=stream peer=(label=kwin_wayland_wrapper, addr=@/tmp/.X11-unix/X@{int}),
+
   owner @{run}/flatpak/wayland-@{int} r,
 
   # Allow access to the Wayland compositor server socket

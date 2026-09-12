@@ -12,6 +12,7 @@ include <tunables/global>
 profile polkit-kde-authentication-agent @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   include <abstractions/base>
   include <abstractions/audio-client>
+  include <abstractions/bus/system/org.freedesktop.PolicyKit1>
   include <abstractions/consoles>
   include <abstractions/fontconfig-cache-read>
   include <abstractions/graphics>
@@ -29,7 +30,18 @@ profile polkit-kde-authentication-agent @{exec_path} flags=(attach_disconnected,
   signal (send) set=(term, kill) peer=polkit-agent-helper,
 
   #aa:dbus own bus=session name=org.kde.polkit-kde-authentication-agent-@{int}
-  #aa:dbus talk bus=system name=org.freedesktop.PolicyKit1 label=polkitd
+  #aa:dbus talk bus=system name=org.freedesktop.PolicyKit1 label="@{p_polkitd}"
+
+  # ToDo: Probably label is wrong, check after ubuntu fixes profile transitions
+  #dbus send bus=session path=/org/freedesktop/portal/desktop
+       #interface=org.freedesktop.DBus.Properties
+       #member=Get
+       #peer=(name=org.freedesktop.portal.Desktop, label=unconfined),
+
+  #dbus send bus=session path=/org/freedesktop/portal/desktop
+       #interface=org.freedesktop.host.portal.Registry
+       #member=Register
+       #peer=(name=org.freedesktop.portal.Desktop, label=unconfined),
 
   @{exec_path} mr,
 

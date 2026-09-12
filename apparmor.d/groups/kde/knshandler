@@ -13,6 +13,7 @@ profile knshandler @{exec_path} {
   include <abstractions/kde-base>
   include <abstractions/mime>
   include <abstractions/nameservice-strict>
+  include <abstractions/network-manager-observe>
   include <abstractions/qt>
   include <abstractions/ssl_certs>
 
@@ -31,6 +32,7 @@ profile knshandler @{exec_path} {
 
   /usr/share/knsrcfiles/{,*} r,
   /usr/share/plasma/look-and-feel/** r,
+  /usr/share/publicsuffix/{,*} r,
 
   /etc/sysconfig/proxy r,
   audit @{etc_ro}/xdg/{,*} r,
