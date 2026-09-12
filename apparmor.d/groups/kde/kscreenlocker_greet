@@ -101,10 +101,9 @@ profile kscreenlocker_greet @{exec_path} {
   @{run}/faillock/@{user} rwk,
   @{run}/mount/utab r,
 
-  @{sys}/devices/virtual/input/**/uevent r,
+  @{sys}/devices/**/uevent r,
   @{sys}/devices/system/node/ r,
   @{sys}/devices/system/node/node@{int}/meminfo r,
-  @{sys}/devices/virtual/sound/{seq,timer}/uevent r,
 
         @{PROC}/@{pids}/cgroup r,
         @{PROC}/@{pids}/cmdline r,
