@@ -72,6 +72,18 @@ profile NetworkManager @{exec_path} flags=(attach_disconnected) {
        interface=org.freedesktop.DBus.Introspectable
        member=Introspect
        peer=(name=@{busname}, label=cockpit-bridge),
+  dbus receive bus=system path=/
+       interface=org.freedesktop.DBus.Introspectable
+       member=Introspect
+       peer=(name=@{busname}, label=DiscoverNotifier),
+  dbus receive bus=system path=/
+       interface=org.freedesktop.DBus.Introspectable
+       member=Introspect
+       peer=(name=@{busname}, label=kded),
+  dbus receive bus=system path=/
+       interface=org.freedesktop.DBus.Introspectable
+       member=Introspect
+       peer=(name=@{busname}, label=unconfined),
 
   @{exec_path} mr,
 

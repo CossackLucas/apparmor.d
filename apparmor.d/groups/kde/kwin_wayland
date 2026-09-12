@@ -12,6 +12,7 @@ profile kwin_wayland @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   include <abstractions/app-launcher-user>
   include <abstractions/audio-client>
   include <abstractions/bus-session>
+  include <abstractions/bus-system>
   include <abstractions/bus/system/org.freedesktop.locale1>
   include <abstractions/common/kde>
   include <abstractions/fontconfig-cache-write>
@@ -52,6 +53,8 @@ profile kwin_wayland @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   #aa:dbus talk bus=system name=org.freedesktop.login1 label=systemd-logind
 
   @{exec_path} mr,
+
+  @{sh_path} mr,
 
   @{lib}/{,@{multiarch}/libexec/}kwin_killer_helper rix,
 
