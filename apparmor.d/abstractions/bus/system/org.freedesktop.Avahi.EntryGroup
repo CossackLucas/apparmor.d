@@ -16,10 +16,10 @@
        member=EntryGroupNew
        peer=(name="{@{busname},org.freedesktop.Avahi}", label="@{p_avahi_daemon}"),
 
-#   dbus send bus=system path=/Client@{int}/EntryGroup@{int}
-#        interface=org.freedesktop.Avahi.EntryGroup
-#        member=Free
-#        peer=(name=org.freedesktop.Avahi, label="@{p_avahi_daemon}"),
+   dbus send bus=system path=/Client@{int}/EntryGroup@{int}
+        interface=org.freedesktop.Avahi.EntryGroup
+        member={Free,GetState}
+        peer=(name=org.freedesktop.Avahi, label="@{p_avahi_daemon}"),
 
   dbus send bus=system path=/Client@{int}/EntryGroup@{int}
        interface=org.freedesktop.Avahi.EntryGroup

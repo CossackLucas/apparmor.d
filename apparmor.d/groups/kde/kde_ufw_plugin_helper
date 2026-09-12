@@ -1,0 +1,71 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+#@{exec_path} = @{lib}/{,kf6/}kauth/{,libexec/}kde_ufw_plugin_helper
+@{exec_path} = @{lib}/kf6/kauth/libexec/kde_ufw_plugin_helper
+profile kde_ufw_plugin_helper @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/bus-system>
+  include <abstractions/bus/system/org.freedesktop.PolicyKit1>
+  include <abstractions/nameservice-strict>
+  include <abstractions/python>
+  include <abstractions/qt>
+
+  capability net_admin,
+
+  #network connect inet dgram peer=(ip=::1), # failed af match
+  #network connect inet6 dgram, # failed af match
+  #network create inet6 dgram, # failed af match
+  #network getattr inet6 dgram ip=::1 port=39014 peer=(ip=::1, port=631), # failed af match
+  #network getattr inet6 dgram ip=::1 port=51091 peer=(ip=::1, port=631), # failed af match
+  #network getattr inet6 dgram ip=::ffff:127.0.0.1 port=39930 peer=(ip=::ffff:127.0.0.1, port=631), # failed af match
+  #network getattr inet6 dgram ip=::ffff:127.0.0.1 port=58225 peer=(ip=::ffff:127.0.0.1, port=631), # failed af match
+  #network bind netlink raw, # failed af match
+  #network bind netlink raw, # failed af match
+  #network create netlink raw, # failed af match
+  #network create netlink raw, # failed af match
+  #network getattr netlink raw, # failed af match
+  #network getattr netlink raw, # failed af match
+  #network receive netlink raw, # failed af match
+  #network receive netlink raw, # failed af match
+  #network send netlink raw, # failed af match
+  #network send netlink raw, # failed af match
+  #network setopt netlink raw, # failed af match
+
+  network inet dgram,
+  network inet6 dgram,
+  network netlink raw,
+
+  #aa:dbus own bus=system name=org.kde.ufw path=/ interface+=org.kde.kf[56]auth
+
+  @{exec_path} mr,
+
+  @{sh_path}    mr,
+  @{python_path} rix,
+  @{lib}/@{multiarch}/libexec/kde_ufw_plugin_helper.py rix,
+
+  @{bin}/journalctl  mrPx -> child-journalctl-read,
+  @{sbin}/ufw          Px,
+  @{sbin}/xtables-{nft,legacy}-multi mrix,
+  @{lib}/ufw/ufw-init rPx,
+
+  /etc/default/ r,
+  /etc/default/ufw rw,
+  /etc/kcm_ufw/ rw,
+  /etc/ufw/{,**} r,
+  /etc/ufw/after{,6}.rules w,
+  /etc/ufw/ufw.conf w,
+  /etc/ufw/user{,6}.rules w,
+
+  @{tmp}/@{word8} rw,
+  @{tmp}/tmp@{word8} rw,
+
+  include if exists <local/kde_ufw_plugin_helper>
+}
+
+# vim:syntax=apparmor

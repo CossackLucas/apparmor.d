@@ -46,7 +46,7 @@
   # List units
   dbus send bus=system path=/org/freedesktop/systemd1
        interface=org.freedesktop.systemd1.Manager
-       member={GetUnit,GetUnitByPIDFD,ListUnitsByPatterns}
+       member={GetUnit,GetUnitByPIDFD,GetUnitFileState,ListUnitsByPatterns}
        peer=(label="@{p_systemd}"),
 
   dbus receive bus=system path=/org/freedesktop/systemd1

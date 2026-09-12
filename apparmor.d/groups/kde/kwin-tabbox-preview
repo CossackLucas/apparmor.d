@@ -6,7 +6,7 @@ abi <abi/5.0>,
 
 include <tunables/global>
 
-@{exec_path} = @{lib}/kwin-tabbox-preview
+@{exec_path} = @{lib}/{,@{multiarch}/libexec/}kwin-tabbox-preview
 profile kwin-tabbox-preview @{exec_path} {
   include <abstractions/base>
   include <abstractions/common/kde>

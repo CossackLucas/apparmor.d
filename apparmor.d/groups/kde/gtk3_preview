@@ -6,7 +6,8 @@ abi <abi/5.0>,
 
 include <tunables/global>
 
-@{exec_path} = @{lib}/gtk3_preview
+@{exec_path}  = @{lib}/gtk3_preview
+@{exec_path} += @{lib}/@{multiarch}/libexec/gtk3_preview
 profile gtk3_preview @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>
   include <abstractions/audio-client>

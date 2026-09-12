@@ -9,9 +9,9 @@ include <tunables/global>
 @{exec_path} = @{bin}/kcmshell6
 profile kcmshell @{exec_path} {
   include <abstractions/base>
-  include <abstractions/graphics>
+  include <abstractions/bus/system/org.freedesktop.GeoClue2>
+  include <abstractions/common/kde>
   include <abstractions/kde-sonnet>
-  include <abstractions/kde-strict>
   include <abstractions/nameservice-strict>
 
   @{exec_path} mr,
@@ -20,9 +20,11 @@ profile kcmshell @{exec_path} {
 
   @{bin}/ r,
 
+  owner @{user_config_dirs}/knighttimerc@{atomic} rwlk -> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/kwinrulesrc r,
 
   owner @{user_share_dirs}/baloo/index r,
+  owner @{user_share_dirs}/qtposition-geoclue2@{atomic} rwlk -> @{user_share_dirs}/#@{int},
 
   /dev/tty r,
 

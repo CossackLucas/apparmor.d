@@ -30,6 +30,7 @@ profile xdg-desktop-portal @{exec_path} flags=(attach_disconnected) {
   include <abstractions/trash-strict>
   include <abstractions/user-download-strict>
 
+  capability sys_nice,
   capability sys_ptrace,
 
   network netlink raw,

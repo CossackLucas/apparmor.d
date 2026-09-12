@@ -18,16 +18,27 @@ include <tunables/global>
 # ToDo: some network option allow user to pick cert files from drive (Network)
 # ToDo: authorization network accounts (network)
 # ToDo: installing visual components manually
+# ToDo: push notifications (Network)
 
 @{export_ext} = kksrc shortcuts kwinrule kwinscript
 
 @{exec_path} = @{bin}/systemsettings
 profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   include <abstractions/base>
+  include <abstractions/accounts-observe>
   include <abstractions/audio-client>
   include <abstractions/bus-session>
+  include <abstractions/bus/system/org.cups.cupsd.Notifier>
+  include <abstractions/bus/system/org.freedesktop.Avahi.Server>
+  include <abstractions/bus/system/org.freedesktop.GeoClue2>
+  include <abstractions/bus/system/org.freedesktop.login1>
+  include <abstractions/bus/system/org.freedesktop.NetworkManager>
   include <abstractions/bus/system/org.freedesktop.PolicyKit1>
   include <abstractions/bus/system/org.freedesktop.systemd1>
+  include <abstractions/bus/system/org.freedesktop.timedate1>
+  include <abstractions/bus/system/org.freedesktop.UDisks2>
+  include <abstractions/bus/system/org.freedesktop.UPower>
+  include <abstractions/bus/system/net.reactivated.Fprint>
   include <abstractions/cgroup-limits>
   include <abstractions/common/kde>
   include <abstractions/common/qt-webengine>
@@ -35,6 +46,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   include <abstractions/dconf-write>
   include <abstractions/disks-read>
   # include <abstractions/file-dialog>
+  include <abstractions/fontconfig-cache-write>
   include <abstractions/ibus-strict>
   include <abstractions/input>
   include <abstractions/journal-read>
@@ -58,14 +70,41 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   ptrace read peer=plasmashell,
   ptrace read peer=systemsettings//&systemsettings//webengine,
 
-  signal send set=term peer=kioworker,
+  mqueue getattr type=posix,
+
+  signal send set=kill peer=knshandler,
   signal send set=kill peer=plasma-discover,
+  signal send set=term peer=kioworker,
 
   #aa:dbus own bus=session name=org.kde.internal.KSettingsWidget_kcm_networkmanagement
   #aa:dbus own bus=session name=org.kde.systemsettings
 
   #aa:dbus talk bus=system name=org.freedesktop.PolicyKit1 label="@{p_polkitd}"
   #aa:dbus talk bus=system name=org.freedesktop.systemd1 label="@{p_systemd}"
+
+  #aa:dbus talk bus=session name=org.kde.kf[56]auth path=/ interface+=org.kde.kf[56]auth label=kauth-*
+
+  #aa:dbus talk bus=system name=org.freedesktop.login1 path=/org/freedesktop/login1{,/**} label=systemd-logind
+  #aa:dbus talk bus=system name=org.freedesktop.Accounts path=/org/freedesktop/Accounts{,/**} label=accounts-daemon
+  #aa:dbus talk bus=system name=org.freedesktop.NetworkManager path=/{,org/freedesktop/NetworkManager**} label=NetworkManager
+  #aa:dbus talk bus=system name=org.kde.localegenhelper.LocaleGenHelper path=/LocaleGenHelper label=plasma-localegen-helper
+  #aa:dbus talk bus=system name=org.kde.ufw path=/ interface+=org.kde.kf[56]auth label=kde_ufw_plugin_helper
+  #aa:dbus talk bus=system name=org.fedoraproject.FirewallD1 label=firewalld
+
+  dbus send bus=system path=/org/freedesktop/DisplayManager/Seat@{int}
+       interface=org.freedesktop.DBus.Introspectable
+       member=Introspect
+       peer=(name=org.freedesktop.DisplayManager, label=sddm),
+
+  dbus send bus=system path=/org/freedesktop/timedate1
+       interface=org.freedesktop.DBus.Properties
+       member=Get
+       peer=(name=org.freedesktop.timedate1),
+
+  dbus send bus=system path=/LocaleGenHelper
+       interface=org.kde.localegenhelper.LocaleGenHelper
+       member=enableLocales
+       peer=(name=org.kde.localegenhelper),
 
   @{exec_path} mrix,
 
@@ -91,15 +130,17 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{bin}/kde_wacom_tabletfinder            rPx, # ToDo: not able to test it!
   @{bin}/kfontview                         rPx,
   @{bin}/khelpcenter                       rPx,
+  @{bin}/kplymouththemeinstaller           rPx,
   @{bin}/krunner-plugininstaller           rPx,
   @{bin}/ksplashqml                        rPx,
   @{bin}/kup-daemon                        rPUx,
   @{bin}/kup-filedigger                    rPUx,
   @{bin}/kwalletmanager{5,6}               rPx,
+  @{bin}/lame                              rix,
   @{bin}/localectl                         rPx,
-  @{bin}/lsblk                             rPx,
-  @{bin}/lspci                             rPx,
-  @{bin}/lscpu                             rPx,
+  @{bin}/lsblk                             rPx -> lsblk,
+  @{bin}/lspci                             rPx -> lspci,
+  @{bin}/lscpu                             rPx -> lscpu,
   @{bin}/net                               rUx,
   @{bin}/openssl                           rix,
   @{bin}/orca                              rPx,
@@ -121,22 +162,26 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{bin}/wayland-info                      rix,
   @{bin}/xdpyinfo                          rPx,
   @{bin}/xrdb                              rPx,
-  # ToDo: ip in @{bin} on Debian!
-  @{sbin}/ip                               rix,
-  @{sbin}/ss                               rPx,
+  #aa:exclude debian ubuntu
+  @{sbin}/ip  rix,
+  @{sbin}/ss  rPx,
+
+  #aa:only debian ubuntu
+  @{bin}/ip  rix, #aa:lint ignore=sbin
+  @{bin}/ss mrPx, #aa:lint ignore=sbin
 
   @{lib}/bup/cmd/bup         rix,
-  @{lib}/gtk3_preview        rPx,
   @{lib}/kf6/kdesu           rPx,
-  @{lib}/kwin-tabbox-preview rPx,
 
   @{lib}/{,@{multiarch}/libexec/}kinfocenter-{opengl,vulkan}-helper rix,
 
+  #aa:exec gtk3_preview
   #aa:exec kauth-fontinst
   #aa:exec kfontprint
   #aa:exec kioworker
   #aa:exec knshandler
   #aa:exec kwin-applywindowdecoration
+  #aa:exec kwin-tabbox-preview
   #aa:exec plasma-apply
   #aa:exec qdbus
 
@@ -147,6 +192,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /usr/share/i18n/locales/{,*} r,
   /usr/share/iproute2/group r,
   /usr/share/iso-codes/json/*.json r,
+  /usr/share/flatpak/remotes.d/{,*} r,
   /usr/share/kcm_networkmanagement/{,**} r,
   /usr/share/kcm_recentFiles/{,**} r,
   /usr/share/kcmsolidactions/solid-action-template.desktop r,
@@ -169,6 +215,8 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /usr/share/misc/usb.ids r,
   /usr/share/myspell/ r,
   /usr/share/plasma/{,**} r,
+  /usr/share/plymouth/themes/{,**} r,
+  /usr/share/publicsuffix/{,*} r,
   /usr/share/sddm/themes/{,**} r,
   /usr/share/solid/{,**} r,
   /usr/share/thumbnailers/{,**} r,
@@ -177,13 +225,16 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /usr/share/wallpapers/{,**} r,
   /usr/share/wayland-sessions/{,*.desktop} r,
 
+  /etc/cron.*/ r,
   /etc/cups/cupsd.conf r,
   /etc/exports r,
   /etc/flatpak/remotes.d/{,*} r,
   /etc/fstab r,
   /etc/ImageMagick-@{int}/{,*.xml} r,
+  /etc/kubuntu-default-settings/directory-* r,
   /etc/OpenCL/vendors/{,*} r,
   /etc/plasmalogin.conf r,
+  /etc/plymouth/plymouthd.conf r,
   /etc/sddm.conf r,
   /etc/sddm.conf.d/{,**} r,
   /etc/sysconfig/displaymanager r,
@@ -194,6 +245,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{etc_ro}/vdpau_wrapper.cfg r,
 
   / r,
+  /*/ r,
   @{bin}/ r,
   # ToDo: deny or change to all directories there?
   @{bin}/*_perl/ r,
@@ -208,6 +260,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   # ToDo: dictionaries?
   /var/lib/flatpak/runtime/org.kde.Platform.Locale/ r,
   /var/lib/flatpak/runtime/org.kde.Platform.Locale/@{arch}/{,**} r,
+  /{var/lib/snapd/,}snap/i*/@{uid}/**.@{icon_ext} r,
 
   owner @{HOME}/.face r,
   owner @{HOME}/.icons/{,**} w,
@@ -223,6 +276,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_cache_dirs}/plasma* rw,
   owner @{user_cache_dirs}/flatpak/system-cache/ r,
   owner @{user_cache_dirs}/plasma_engine_potd/{,*} rw,
+  owner @{user_cache_dirs}/org.kde.kunifiedpush/{,**} rw,
   owner @{user_cache_dirs}/org.kde.ki18n/{,**} rw,
   owner @{user_cache_dirs}/QtLocation/{,**} rw,
 
@@ -256,6 +310,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_config_dirs}/libaccounts-glib/ rw,
   owner @{user_config_dirs}/libaccounts-glib/accounts.db{,-shm,-wal,-journal} rwk,
   owner @{user_config_dirs}/mimeapps.list@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/notificationhelper@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/plasma*/{,**} r,
   owner @{user_config_dirs}/plasma-localerc@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/plasma-nm@{atomic} rwlk, #-> @{user_config_dirs}/#@{int},
@@ -301,6 +356,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_share_dirs}/plasma/wallpapers/{,**} rw,
   owner link @{user_share_dirs}/plasma/wallpapers/** -> @{user_share_dirs}/plasma/wallpapers/**#@{int},
   owner @{user_share_dirs}/recently-used.xbel l,  #-> @{user_share_dirs}/#@{int},
+  owner @{user_share_dirs}/qtposition-geoclue2@{atomic} rwlk, #-> @{user_share_dirs}/#@{int},
   owner @{user_share_dirs}/solid/ w,
   owner @{user_share_dirs}/solid/actions/ rw,
   owner @{user_share_dirs}/solid/actions/#@{int} rwk,
@@ -309,6 +365,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{user_share_dirs}/user-places.xbel r,
   owner @{user_share_dirs}/wallpapers/{,**} rw,
 
+  owner @{user_state_dirs}/kdirselectstaterc.lock rwk,
   owner @{user_state_dirs}/kinfocenterstaterc@{atomic} rwlk, # -> @{user_state_dirs}/#@{int},
   owner @{user_state_dirs}/kiostaterc r,
   owner @{user_state_dirs}/UserFeedback.org.kde.systemsettings@{atomic} rwlk, #-> @{user_state_dirs}/#@{int},
@@ -329,6 +386,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   owner @{tmp}/systemsettings-@{rand6}/plasmalogin.conf.lock k,
 
         @{run}/ r,
+        @{run}/blkid/ r,
         @{run}/motd.d/{,*} r,
         @{run}/mount/utab r,
   owner @{run}/user/@{uid}/#@{int} rw,
@@ -409,11 +467,20 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
     include <abstractions/base>
     include <abstractions/app/systemctl>
     include <abstractions/bus-session>
+    include <abstractions/bus/system/org.freedesktop.systemd1>
     include <abstractions/journal-read>
     include <abstractions/nameservice-strict>
 
-    # For some reason journal-read was not enough, why?
-    #@{log}/journal/@{hex32}/user-@{uid}@@{hex32}-@{hex16}-@{hex16}.journal r,
+    dbus send bus=system path=/org/freedesktop/systemd1
+         interface=org.freedesktop.systemd1.Manager
+         member=GetUnitProcesses
+         peer=(name=org.freedesktop.systemd1, label="@{p_systemd}"),
+    dbus send bus=system path=/org/freedesktop/systemd1/unit/firewalld_2eservice
+         interface=org.freedesktop.DBus.Properties
+         member={Get,GetAll}
+         peer=(name=org.freedesktop.systemd1, label="@{p_systemd}"),
+
+    owner @{run}/user/@{uid}/systemd/private rw,
 
     @{PROC}/@{pids}/comm r,
 
