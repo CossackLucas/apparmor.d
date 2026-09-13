@@ -17,14 +17,8 @@ profile kauth-fontinst @{exec_path} {
   include <abstractions/fonts-strict>
   include <abstractions/qt>
 
-  dbus receive bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=remoteSignal
-       peer=(name=@{busname}, label=unconfined),
-  dbus send bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=performAction
-       peer=(name=org.kde.fontinst, label=unconfined),
+  #ToDo: check when profile transition is fixed
+  #aa:dbus talk bus=system name=org.kde.fontinst path=/ interface+=org.kde.kf[56]auth label=unconfined
 
   @{exec_path} mr,
 

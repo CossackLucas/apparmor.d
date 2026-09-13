@@ -59,9 +59,6 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   # ToDo: backups probably require this, or even more
   # include <abstractions/user-read>
 
-  #ToDo: ????
-  #mqueue getattr type=posix @{att}/,
-
   network inet dgram,
   network inet stream,
   network inet6 dgram,
@@ -73,9 +70,11 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   ptrace read peer=plasmashell,
   ptrace read peer=systemsettings//&systemsettings//webengine,
 
-  signal send set=term peer=kioworker,
+  mqueue getattr type=posix,
+
   signal send set=kill peer=knshandler,
   signal send set=kill peer=plasma-discover,
+  signal send set=term peer=kioworker,
 
   #aa:dbus own bus=session name=org.kde.internal.KSettingsWidget_kcm_networkmanagement
   #aa:dbus own bus=session name=org.kde.systemsettings
@@ -85,7 +84,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
 
   #aa:dbus talk bus=session name=org.kde.kf[56]auth path=/ label=kauth-chargethresholdhelper
   #aa:dbus talk bus=session name=org.kde.kf[56]auth path=/ label=kauth-kinfocenter-dmidecode-helper
-  
+
   #aa:dbus talk bus=system name=org.freedesktop.login1 path=/org/freedesktop/login1{,/**} label=systemd-logind
   #aa:dbus talk bus=system name=org.freedesktop.Accounts path=/org/freedesktop/Accounts{,/**} label=accounts-daemon
   #aa:dbus talk bus=system name=org.freedesktop.NetworkManager path=/{,org/freedesktop/NetworkManager**} label=NetworkManager
@@ -141,49 +140,11 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   dbus receive bus=system path=/
        interface=org.kde.kf[56]auth
        member=remoteSignal
-       peer=(name=@{busname}, label=unconfined), # kcmkwallet5, kcmsddm, kcmplymouth
-  dbus receive bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=remoteSignal
-       peer=(name=@{busname}, label=kauth-kinfocenter-dmidecode-helper),
-  dbus receive bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=remoteSignal
-       peer=(name=@{busname}, label=kauth-chargethresholdhelper),
+       peer=(name=@{busname}),
   dbus send bus=system path=/
        interface=org.kde.kf[56]auth
        member=performAction
-       peer=(name=org.kde.kcontrol.kcmplymouth, label=unconfined),
-  dbus send bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=performAction
-       peer=(name=org.kde.kcontrol.kcmsddm, label=unconfined),
-  dbus send bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=performAction
-       peer=(name=org.kde.kcontrol.kcmkwallet5, label=unconfined),
-  dbus send bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=performAction
-       peer=(name=org.kde.kinfocenter.dmidecode, label=kauth-kinfocenter-dmidecode-helper),
-  dbus send bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=performAction
-       peer=(name=org.kde.powerdevil.chargethresholdhelper, label=kauth-chargethresholdhelper),
-  dbus send bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=performAction
-       peer=(name=org.kde.ufw, label=unconfined),
-
-  # ToDo: reduce to this?
-  dbus receive bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=remoteSignal
-       peer=(name=@{busname}, label=*),
-  dbus send bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=performAction
-       peer=(name=org.kde.**, label=*),
+       peer=(name=org.kde.**),
 
   # ToDo: probably temp
   dbus send bus=system path=/org/freedesktop/systemd1
@@ -264,11 +225,13 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{bin}/wayland-info                      rix,
   @{bin}/xdpyinfo                          rPx,
   @{bin}/xrdb                              rPx,
-  # ToDo: ip in @{bin} on Debian and Ubuntu!
-  @{bin}/ip  rix, #aa:only apt
-  @{sbin}/ip  rix, #aa:exclude apt
-  @{bin}/ss  rPx, #aa:only apt
-  @{sbin}/ss  rPx, #aa:exclude apt
+  #aa:exclude debian ubuntu
+  @{sbin}/ip  rix,
+  @{sbin}/ss  rPx,
+
+  #aa:only debian ubuntu
+  @{bin}/ip  rix, #aa:lint ignore=sbin
+  @{bin}/ss  rPx, #aa:lint ignore=sbin
 
   @{lib}/bup/cmd/bup         rix,
   @{lib}/kf6/kdesu           rPx -> kdesu,
@@ -352,7 +315,6 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{bin}/*_perl/ r,
   @{bin}/db5.3/ r,
   @{sbin}/ r,
-
 
   /var/cache/cracklib/cracklib_dict.* r,
   /var/cache/samba/ rw,
@@ -567,10 +529,10 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
     include <abstractions/journal-read>
     include <abstractions/nameservice-strict>
 
-    #dbus send bus=system path=/org/freedesktop/systemd1/unit/firewalld_2eservice
-       #interface=org.freedesktop.DBus.Properties
-       #member=GetAll
-       #peer=(name=org.freedesktop.systemd1, label=unconfined),
+     audit dbus send bus=system path=/org/freedesktop/systemd1/unit/firewalld_2eservice
+       interface=org.freedesktop.DBus.Properties
+       member=GetAll
+       peer=(name=org.freedesktop.systemd1, label=unconfined),
 
     owner @{run}/user/@{uid}/systemd/private rw,
 
