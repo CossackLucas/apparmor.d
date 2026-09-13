@@ -132,49 +132,11 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   dbus receive bus=system path=/
        interface=org.kde.kf[56]auth
        member=remoteSignal
-       peer=(name=@{busname}, label=unconfined), # kcmkwallet5, kcmsddm, kcmplymouth
-  dbus receive bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=remoteSignal
-       peer=(name=@{busname}, label=kauth-kinfocenter-dmidecode-helper),
-  dbus receive bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=remoteSignal
-       peer=(name=@{busname}, label=kauth-chargethresholdhelper),
+       peer=(name=@{busname}),
   dbus send bus=system path=/
        interface=org.kde.kf[56]auth
        member=performAction
-       peer=(name=org.kde.kcontrol.kcmplymouth, label=unconfined),
-  dbus send bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=performAction
-       peer=(name=org.kde.kcontrol.kcmsddm, label=unconfined),
-  dbus send bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=performAction
-       peer=(name=org.kde.kcontrol.kcmkwallet5, label=unconfined),
-  dbus send bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=performAction
-       peer=(name=org.kde.kinfocenter.dmidecode, label=kauth-kinfocenter-dmidecode-helper),
-  dbus send bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=performAction
-       peer=(name=org.kde.powerdevil.chargethresholdhelper, label=kauth-chargethresholdhelper),
-  dbus send bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=performAction
-       peer=(name=org.kde.ufw, label=unconfined),
-
-  # ToDo: reduce to this?
-  dbus receive bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=remoteSignal
-       peer=(name=@{busname}, label=*),
-  dbus send bus=system path=/
-       interface=org.kde.kf[56]auth
-       member=performAction
-       peer=(name=org.kde.**, label=*),
+       peer=(name=org.kde.**),
 
   # ToDo: probably temp
   dbus send bus=system path=/org/freedesktop/systemd1
