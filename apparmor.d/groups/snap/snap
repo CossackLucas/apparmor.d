@@ -73,8 +73,9 @@ profile snap @{exec_path} flags=(attach_disconnected) {
 
   @{bin_dirs}/xdelta3                 ix,
   @{lib_dirs}/**                      mr,
+  @{lib_dirs}/snapd/apparmor_parser  rPx -> apparmor_parser,
   @{lib_dirs}/snapd/snap-confine     rPx,
-  @{lib_dirs}/snapd/snap-seccomp     rPx,
+  @{lib_dirs}/snapd/snap-seccomp     rPx -> snap-seccomp,
   @{lib_dirs}/snapd/snapd            rPx,
 
   /etc/fstab r,
