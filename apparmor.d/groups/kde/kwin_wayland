@@ -77,6 +77,8 @@ profile kwin_wayland @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   /etc/machine-id r,
   /etc/xdg/** r,
 
+  /{var/lib/snapd/,}snap/*/@{uid}/**.@{icon_ext} r,
+
   / r,
   owner @{HOME}/ r,
 

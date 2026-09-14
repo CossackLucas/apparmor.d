@@ -10,12 +10,13 @@ include <tunables/global>
 @{lib_dirs} = @{lib}/ /snap/{snapd,core}/{,x}@{int}@{lib}
 
 @{exec_path} = @{lib_dirs}/snapd/snapd
-profile snapd @{exec_path} {
+profile snapd @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>
   include <abstractions/authentication>
   include <abstractions/bus-system>
   include <abstractions/bus/system/org.freedesktop.PolicyKit1>
   include <abstractions/bus/system/org.freedesktop.timedate1>
+  include <abstractions/consoles>
   include <abstractions/disks-write>
   include <abstractions/fontconfig-cache-write>
   include <abstractions/fonts>
@@ -45,10 +46,12 @@ profile snapd @{exec_path} {
   network unix stream,
 
   mount fstype=squashfs /dev/loop@{int} -> /tmp/syscheck-mountpoint-@{int}/,
+  mount options=(rw move) -> /tmp/syscheck-mountpoint-@{int}/,
   umount /tmp/syscheck-mountpoint-@{int}/,
-  umount /snap/*/*/,
+  umount /{var/lib/snapd/,}snap/*/@{uid}/,
 
   ptrace read peer=@{p_systemd},
+  ptrace read peer=plasma-discover,
   ptrace read peer=snap{,.*},
 
   signal send set=kill peer=snapd//journalctl,
@@ -82,11 +85,12 @@ profile snapd @{exec_path} {
   @{bin}/systemctl                rCx -> systemctl,
   @{bin}/systemd-detect-virt      rPx,
   @{bin}/tar                      rix,
-  @{bin}/udevadm                  rPx,
+  @{bin}/udevadm                  rCx -> udevadm,
   @{bin}/umount                   rix,
   @{bin}/unsquashfs               rix,
   @{bin}/update-desktop-database  rPx,
   @{sbin}/useradd                 rPx,
+  @{bin}/xdg-settings             rPx,
 
   @{bin_dirs}/fc-cache-*              mr,
   @{bin_dirs}/snap                  rPUx,
@@ -94,6 +98,7 @@ profile snapd @{exec_path} {
   @{lib_dirs}/@{multiarch}/**         mr,
   @{lib_dirs}/@{multiarch}/ld-*.so   rix,
   @{lib_dirs}/snapd/apparmor_parser  rPx,
+  @{lib_dirs}/snapd/snap-confine     rPx,
   @{lib_dirs}/snapd/snap-discard-ns  rPx,
   @{lib_dirs}/snapd/snap-seccomp     rPx,
   @{lib_dirs}/snapd/snap-update-ns   rPx,
@@ -108,13 +113,15 @@ profile snapd @{exec_path} {
   @{etc_ro}/environment r,
   /etc/apparmor.d/*snapd.snap* r,
   /etc/dbus-1/system.d/{,**/} r,
+  /etc/dbus-1/ w,
+  /etc/dbus-1/system.d/ w,
   /etc/fstab r,
   /etc/modprobe.d/{,**/} r,
   /etc/modules-load.d/{,**/} r,
   /etc/modules-load.d/*snap* rw,
   /etc/polkit-1/rules.d/{,**/} r,
   /etc/systemd/system/{,**/} r,
-  /etc/systemd/system/snap* rw,
+  /etc/systemd/system/{var-lib-snapd-,}snap* rw,
   /etc/systemd/user/{,**/} rw,
   /etc/systemd/user/**/*snap* rw,
   /etc/systemd/user/*snap* rw,
@@ -148,11 +155,12 @@ profile snapd @{exec_path} {
   owner @{run}/mount/utab{,.*} rw,
   owner @{run}/mount/utab.lock wk,
 
-  @{run}/user/ r,
-  @{run}/user/@{uid}/ r,
-  @{run}/user/@{uid}/snap.*/{,**} rw,
-  @{run}/user/@{uid}/snapd-session-agent.socket rw,
-  @{run}/user/snap.*/{,**} rw,
+        @{run}/user/ r,
+        @{run}/user/@{uid}/ r,
+        @{run}/user/@{uid}/snap.*/{,**} rw,
+        @{run}/user/@{uid}/snapd-session-agent.socket rw,
+        @{run}/user/snap.*/{,**} rw,
+  owner @{run}/user/@{uid}/xauth_@{rand6} r,
 
   @{run}/mount/utab.act rk,
   @{run}/snapd*.socket rw,
@@ -164,6 +172,7 @@ profile snapd @{exec_path} {
   @{sys}/fs/cgroup/*.slice/ r,
   @{sys}/fs/cgroup/*.slice/{,**/} r,
   @{sys}/fs/cgroup/*.slice/**/cgroup.procs r,
+  @{sys}/fs/cgroup/*.slice/**/cpu.max r,
   @{sys}/fs/cgroup/cgroup.controllers r,
   @{sys}/fs/cgroup/net_cls/*/ r,
   @{sys}/fs/cgroup/system.slice/snapd.service/cpu.max r,
@@ -177,8 +186,10 @@ profile snapd @{exec_path} {
         @{PROC}/@{pid}/stat r,
         @{PROC}/cgroups r,
         @{PROC}/cmdline r,
+        @{PROC}/sys/kernel/random/uuid r,
         @{PROC}/sys/kernel/seccomp/actions_avail r,
         @{PROC}/version r,
+  owner @{PROC}/@{pids}/attr/apparmor/current r,
   owner @{PROC}/@{pids}/cmdline r,
   owner @{PROC}/@{pids}/mountinfo r,
 
@@ -224,10 +235,13 @@ profile snapd @{exec_path} {
 
   profile runuser {
     include <abstractions/base>
+    include <abstractions/bus-session>
     include <abstractions/authentication>
     include <abstractions/nameservice-strict>
 
     capability audit_write,
+    capability dac_read_search,
+    capability net_admin,
     capability setgid,
     capability setuid,
 
@@ -239,9 +253,41 @@ profile snapd @{exec_path} {
     @{bin}/gzip  ix,
     @{bin}/tar   ix,
 
+    @{etc_ro}/default/runuser r,
+
+    /var/lib/lastlog/ r,
+    /var/lib/lastlog/* rw,
+    /var/lib/lastlog/*.db rwk,
+
     owner @{HOME}/snap/*/{,**} r,
 
+    @{run}/motd.d/{,*} r,
+
+    @{PROC}/@{pid}/loginuid w,
+    @{PROC}/@{pid}/uid_map r,
+
+    /dev/tty rw,
+
     include if exists <local/snapd_runuser>
+  }
+
+  profile udevadm {
+    include <abstractions/base>
+    include <abstractions/app/udevadm>
+
+    capability net_admin,
+
+    network netlink raw,
+
+    @{bin}/udevadm r,
+
+    @{run}/udev/data/b@{int}:* r,           # For block devices
+    @{run}/udev/data/n@{int} r,             # For network interfaces
+    @{run}/udev/io.systemd.Udev rw,
+
+    @{sys}/devices/**/uevent w,
+
+    include if exists <local/snapd_udevadm>
   }
 
   include if exists <local/snapd>
