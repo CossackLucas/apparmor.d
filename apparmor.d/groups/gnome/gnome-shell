@@ -392,6 +392,8 @@ profile gnome-shell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   @{run}/udev/data/c10:@{int} r,          # for non-serial mice, misc features
   @{run}/udev/data/n@{int} r,             # For network interfaces
 
+  owner @{run}/user/@{uid}/wayland-@{int}.lock rwk,
+
   @{sys}/**/uevent r,
   @{sys}/class/backlight/ r,
   @{sys}/class/net/ r,
