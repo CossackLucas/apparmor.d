@@ -114,6 +114,7 @@ profile sddm @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{sddm_cache_dirs}/sddm-greeter/qmlcache/*.qmlc mrw,
 
   owner @{HOME}/ r,
+  owner @{HOME}/.pam_environment r,
   owner @{HOME}/.Xauthority rw,
 
   owner @{user_config_dirs}/menus/{,**} r,
