@@ -18,4 +18,12 @@
 
   owner @{run}/user/@{uid}/dconf/ r,
 
+  if "cosmic" in @{DE} {
+    /usr/share/dconf/profile/cosmic r,
+
+    owner @{user_config_dirs}/dconf/cosmic r,
+
+    owner @{run}/user/@{uid}/dconf/cosmic r,
+  }
+
 # vim:syntax=apparmor

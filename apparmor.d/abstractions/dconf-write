@@ -18,6 +18,10 @@
   owner @{run}/user/@{uid}/dconf/ w,
   owner @{run}/user/@{uid}/dconf/user w,
 
+  if "cosmic" in @{DE} {
+    owner @{run}/user/@{uid}/dconf/cosmic w,
+  }
+
   include if exists <abstractions/dconf-write.d>
 
 # vim:syntax=apparmor
