@@ -169,7 +169,7 @@ profile flatpak @{exec_path} flags=(attach_disconnected,mediate_deleted) {
 
   }
 
-  @{bin}/fusermount{,3}         Cx -> fusermount,
+  @{bin}/fusermount{,3}         Px -> flatpak-fusermount
   @{bin}/gpg                    Cx -> gpg,
   @{bin}/gpgconf                Cx -> gpg,
   @{bin}/gpgsm                  Cx -> gpg,
@@ -221,6 +221,8 @@ profile flatpak @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_share_dirs}/ r,
   owner @{user_share_dirs}/flatpak/ rw,
   owner @{user_share_dirs}/flatpak/** rwlk,
+  owner @{user_share_dirs}/gvfs-metadata/home r,
+  owner @{user_share_dirs}/gvfs-metadata/home-@{hex8}.log r,
   owner @{user_share_dirs}/sddm/{wayland,xorg}-session.log w,
 
   owner @{tmp}/#@{int} rw,
@@ -338,25 +340,6 @@ profile flatpak @{exec_path} flags=(attach_disconnected,mediate_deleted) {
     owner @{PROC}/@{pid}/task/@{tid}/comm rw,
 
     include if exists <local/flatpak_gpg>
-  }
-
-  profile fusermount {
-    include <abstractions/base>
-    include <abstractions/app/fusermount>
-
-    capability setuid,
-
-    unix type=seqpacket peer=(label=flatpak-system-helper),
-    unix type=stream    peer=(label=flatpak),
-
-    mount fstype=fuse.revokefs-fuse options=(rw, nosuid, nodev) revokefs-fuse -> /var/tmp/flatpak-cache-*/*/,
-    umount /var/tmp/flatpak-cache-*/*/,
-
-    #aa:only test
-    mount fstype=fuse.revokefs-fuse options=(rw, nosuid, nodev) revokefs-fuse -> /tmp/test-flatpak.*/**,
-    umount /tmp/test-flatpak-@{rand6}/**,
-
-    include if exists <local/flatpak_fusermount>
   }
 
   include if exists <local/flatpak>

@@ -1,0 +1,101 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+# NEEDS-VARIABLE: appid
+
+# Abstractions for stores managing flatpaks
+# profile should take care of fusermount and revokefs-fuse as well
+#
+# !!! quote ""
+#
+#     ```
+#     @{appid} = @{word}.@{word}.@{word}{,.@{word}}
+#     ```
+#
+#
+
+  abi <abi/5.0>,
+
+  unix (send receive) type=seqpacket peer=(label=flatpak-system-helper),
+
+  #aa:dbus talk bus=system name=org.freedesktop.Flatpak.SystemHelper label=flatpak-system-helper
+
+  @{bin}/bwrap rPx -> fbwrap,
+
+  /usr/share/flatpak/remotes.d/{,**} r,
+  /usr/share/flatpak/triggers/{,*} r,
+
+  /etc/flatpak/remotes.d/{,**} r,
+
+  /var/cache/swcatalog/cache/??-??-flatpak-@{word}-@{arch}.xb r,
+
+  /var/lib/flatpak/app/{,**} r,
+  /var/lib/flatpak/appstream/{,**} r,
+  /var/lib/flatpak/repo/{,**} r,
+  /var/lib/flatpak/runtime/{,**} r,
+
+  /var/tmp/flatpak-cache-@{rand6}/ rw,
+  /var/tmp/flatpak-cache-@{rand6}/** rwk,
+
+  owner @{HOME}/.var/{,app/} rw,
+  owner @{HOME}/.var/app/@{appid}/{,**} rw,
+
+  owner @{user_cache_dirs}/flatpak/{,**} rw,
+
+  owner @{user_share_dirs}/flatpak/.changed w,
+  owner @{user_share_dirs}/flatpak/.removed/{,**} rwl -> @{user_share_dirs}/flatpak/.removed/@{appid}*-@{hex64}/files/#@{int},
+  #owner @{user_share_dirs}/flatpak/.removed/@{appid}*-@{hex64}/files/tmp.@{rand6} l, #-> @{user_share_dirs}/flatpak/.removed/@{appid}*-@{hex64}/files/#@{int},
+
+  owner @{user_share_dirs}/flatpak/app/{,**} rw,
+  owner @{user_share_dirs}/flatpak/app/@{appid}/@{arch}/@{word}/.@{hex64}-@{rand6}/export/share/applications/@{appid}.desktop l, #-> @{user_share_dirs}/flatpak/repo/objects/@{hex2}/@{hex38}@{hex16}@{hex8}.file,
+  owner @{user_share_dirs}/flatpak/app/@{appid}/@{arch}/@{word}/.@{hex64}-@{rand6}/export/share/app-info/** l, #-> @{user_share_dirs}/flatpak/repo/objects/@{hex2}/@{hex38}@{hex16}@{hex8}.file,
+  owner @{user_share_dirs}/flatpak/app/@{appid}/@{arch}/@{word}/.@{hex64}-@{rand6}/export/share/icons/hicolor/**.@{icon_ext} l, #-> @{user_share_dirs}/flatpak/repo/objects/@{hex2}/@{hex38}@{hex16}@{hex8}.file,
+  owner @{user_share_dirs}/flatpak/app/@{appid}/@{arch}/@{word}/.@{hex64}-@{rand6}/export/share/metainfo/@{appid}.metainfo.xml l, #-> @{user_share_dirs}/flatpak/repo/objects/@{hex2}/@{hex38}@{hex16}@{hex8}.file,
+  owner @{user_share_dirs}/flatpak/app/@{appid}/@{arch}/@{word}/.@{hex64}-@{rand6}/files/** l, #-> @{user_share_dirs}/flatpak/repo/objects/@{hex2}/@{hex38}@{hex16}@{hex8}.file,
+  owner @{user_share_dirs}/flatpak/app/@{appid}/@{arch}/@{word}/.@{hex64}-@{rand6}/files/share/**/tmp.@{rand6} l, #-> @{user_share_dirs}/flatpak/app/@{appid}/@{arch}/@{word}/.@{hex64}-@{rand6}/files/share/**/#@{int},
+  owner @{user_share_dirs}/flatpak/app/@{appid}/@{arch}/@{word}/.@{hex64}-@{rand6}/metadata l, #-> @{user_share_dirs}/flatpak/repo/objects/@{hex2}/@{hex38}@{hex16}@{hex8}.file,
+  owner @{user_share_dirs}/flatpak/app/@{appid}/@{arch}/@{word}/.@{hex64}-@{rand6}/metainfo/@{appid}.metainfo.xml l, #-> @{user_share_dirs}/flatpak/repo/objects/@{hex2}/@{hex38}@{hex16}@{hex8}.file,
+
+  owner @{user_share_dirs}/flatpak/appstream/{,**} rw,
+  owner @{user_share_dirs}/flatpak/appstream/@{word}/@{arch}/.@{hex64}-@{rand6}/appstream.xml l, #-> @{user_share_dirs}/flatpak/repo/objects/@{hex2}/@{hex38}@{hex16}@{hex8}.file,
+  owner @{user_share_dirs}/flatpak/appstream/@{word}/@{arch}/.@{hex64}-@{rand6}/icons/*/@{appid}* l, #-> @{user_share_dirs}/flatpak/repo/objects/@{hex2}/@{hex38}@{hex16}@{hex8}.file,
+
+  owner @{user_share_dirs}/flatpak/exports/{,**/} rw,
+  owner @{user_share_dirs}/flatpak/exports/**/.export-symlink-@{rand6} rw,
+  owner @{user_share_dirs}/flatpak/exports/bin/@{appid} w,
+  owner @{user_share_dirs}/flatpak/exports/share/applications/@{appid}.desktop w,
+  owner @{user_share_dirs}/flatpak/exports/share/icons/{,**} rw,
+  owner @{user_share_dirs}/flatpak/exports/share/metainfo/@{appid}.metainfo.xml w,
+
+  owner @{user_share_dirs}/flatpak/lock rwk,
+
+  owner @{user_share_dirs}/flatpak/repo/ rw,
+  owner @{user_share_dirs}/flatpak/repo/** rw,
+  #owner @{user_share_dirs}/flatpak/repo/** rwlk, #-> @{user_share_dirs}/flatpak/repo/**,
+  owner @{user_share_dirs}/flatpak/repo/**tmp.@{rand6} l, #-> @{user_share_dirs}/flatpak/repo/**#@{int},
+  owner @{user_share_dirs}/flatpak/repo/tmp/staging-@{uuid}-@{rand6}/** l, #-> @{user_share_dirs}/flatpak/repo/tmp/staging-@{uuid}-@{rand6}/#@{int},
+  owner @{user_share_dirs}/flatpak/repo/.lock k,
+  owner @{user_share_dirs}/flatpak/repo/tmp/staging-@{uuid}-@{rand6}-lock k,
+  owner @{user_share_dirs}/flatpak/repo-lock rwk,
+  #owner @{user_share_dirs}/flatpak/repo/refs/{heads,remotes}/**/tmp.@{rand6} l, #-> @{user_share_dirs}/flatpak/repo/refs/{heads,remotes}/**/#@{int},
+  #owner @{user_share_dirs}/flatpak/repo/tmp.@{rand6} l, #-> @{user_share_dirs}/flatpak/repo/#@{int},
+
+  owner @{user_share_dirs}/flatpak/runtime/{,**} rw,
+  owner @{user_share_dirs}/flatpak/runtime/*/@{arch}/**/files/** l, #-> @{user_share_dirs}/flatpak/repo/objects/@{hex2}/@{hex38}@{hex16}@{hex8}.file,
+  owner @{user_share_dirs}/flatpak/runtime/*/@{arch}/**/files/**/tmp.@{rand6} l, #-> @{user_share_dirs}/flatpak/runtime/*/@{arch}/*/.@{hex64}-@{rand6}/files/**/#@{int},
+  owner @{user_share_dirs}/flatpak/runtime/*/@{arch}/**/metadata l, #-> @{user_share_dirs}/flatpak/repo/objects/@{hex2}/@{hex38}@{hex16}@{hex8}.file,
+
+  #owner @{user_share_dirs}/flatpak/runtime/*/@{arch}/*/.@{hex64}-@{rand6}/files/** l, #-> @{user_share_dirs}/flatpak/repo/objects/@{hex2}/@{hex38}@{hex16}@{hex8}.file,
+  #owner @{user_share_dirs}/flatpak/runtime/*/@{arch}/*/.@{hex64}-@{rand6}/files/**/tmp.@{rand6} l, #-> @{user_share_dirs}/flatpak/runtime/*/@{arch}/*/.@{hex64}-@{rand6}/files/**/#@{int},
+  #owner @{user_share_dirs}/flatpak/runtime/*/@{arch}/*/.@{hex64}-@{rand6}/metadata l, #-> @{user_share_dirs}/flatpak/repo/objects/@{hex2}/@{hex38}@{hex16}@{hex8}.file,
+  
+  owner @{tmp}/ostree-gpg-@{rand6}/ rw,
+  owner @{tmp}/ostree-gpg-@{rand6}/** rwlk, #-> @{tmp}/ostree-gpg-@{rand6}/**,
+
+  owner @{run}/user/@{uid}/.flatpak-cache rw,
+  owner @{run}/user/@{uid}/.flatpak/ rw,
+  owner @{run}/user/@{uid}/.flatpak/** rwlk, #-> @{run}/user/@{uid}/.flatpak/**/#@{int},
+
+  include if exists <abstractions/flatpak/store/base.d>
+
+# vim:syntax=apparmor

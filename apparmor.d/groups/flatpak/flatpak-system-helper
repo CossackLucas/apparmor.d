@@ -45,7 +45,8 @@ profile flatpak-system-helper @{exec_path} flags=(attach_disconnected,mediate_de
   unix (send receive) type=seqpacket peer=(label=plasma-discover//fusermount),
   unix (send receive) type=seqpacket peer=(label=plasma-discover//revokefs-fuse),
   # Requested on Ubuntu with global installation
-  #unix (send receive) type=seqpacket peer=(label=unconfined),
+  # ToDo: check ubuntu-insigh and flatpak-session-helper-app shells
+  unix (send receive) type=seqpacket peer=(label=unconfined),
 
   #aa:dbus own bus=system name=org.freedesktop.Flatpak.SystemHelper
 
