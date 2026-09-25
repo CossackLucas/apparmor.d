@@ -483,7 +483,7 @@ profile systemsettings @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   @{sys}/bus/cpu/devices/ r,
   @{sys}/class/hidraw/ r,
   @{sys}/class/video4linux/ r,
-  @{sys}/devices/**/uevent r,
+  #@{sys}/devices/**/uevent r,
   @{sys}/devices/@{pci_bus}/uevent r,
   @{sys}/devices/platform/i8042/serio@{u8}/uevent r,
   @{sys}/devices/platform/i8042/uevent r,
