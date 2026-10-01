@@ -74,8 +74,8 @@ profile flatpak-system-helper @{exec_path} flags=(attach_disconnected,mediate_de
   /var/lib/flatpak/{,**} rwlk,
   /var/tmp/flatpak-cache-*/{,**} rw,
 
-  owner /{var/,}tmp/#@{int} rw,
-  owner /{var/,}tmp/ostree-gpg-@{rand6}/ rw,
+  owner @{tmp}/#@{int} rw,
+  owner @{tmp}/ostree-gpg-@{rand6}/ rw,
   owner @{tmp}/ostree-gpg-@{rand6}/** rwlk -> /tmp/ostree-gpg-@{rand6}/**,
 
   @{tmp}/remote-summary-sig.@{rand6} r,
@@ -124,6 +124,7 @@ profile flatpak-system-helper @{exec_path} flags=(attach_disconnected,mediate_de
 
     @{bin}/bsdtar  ix,
     @{bin}/cp      ix,
+    @{bin}/gzip    ix,
     @{bin}/install ix,
     @{bin}/mv      ix,
     @{bin}/rm      ix,
@@ -155,6 +156,7 @@ profile flatpak-system-helper @{exec_path} flags=(attach_disconnected,mediate_de
     @{user_share_dirs}/**/icon-theme.cache w,
     @{user_share_dirs}/applications/.mimeinfo.cache.* w,
     @{user_share_dirs}/applications/mimeinfo.cache w,
+    @{user_share_dirs}/flatpak/exports/share/icons/hicolor/index.theme w,
     @{user_share_dirs}/mime/{,**} w,
     @{user_share_dirs}/mimeinfo.cache w,
 
