@@ -1,0 +1,51 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/polychromatic-tray-applet
+profile polychromatic-tray-applet flags=(attach_disconnected) @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/cgroup-limits>
+  include <abstractions/dconf-write>
+  include <abstractions/desktop>
+  include <abstractions/nameservice-strict>
+  include <abstractions/python>
+  include <abstractions/sys/usb>
+
+  network inet stream,
+  network inet6 stream,
+
+  signal receive set=(usr1,usr2) peer=polychromatic-controller,
+  signal send    set=usr2        peer=polychromatic-controller,
+
+  @{exec_path} mrix,
+
+  @{bin}/polychromatic-controller Px,
+
+  /usr/share/polychromatic/img/**.svg r,
+
+  owner @{user_cache_dirs}/glycin@{lib}/{,glycin-loaders/} w,
+  owner @{user_cache_dirs}/glycin@{lib}/glycin-loaders/@{d}+/{,glycin-svg/} w,
+  owner @{user_cache_dirs}/glycin@{lib}/glycin-loaders/@{d}+/glycin-svg/fontconfig/ w,
+  owner @{user_cache_dirs}/polychromatic/assets/@{hex32}.svg rw,
+
+  owner @{user_config_dirs}/polychromatic/*.json r,
+  owner @{user_config_dirs}/polychromatic/backends/** r,
+  owner @{user_config_dirs}/polychromatic/dpi/* r,
+  owner @{user_config_dirs}/polychromatic/effects/{,*} r,
+  owner @{user_config_dirs}/polychromatic/states/IO@{hex}.json rw,
+
+  owner @{run}/user/@{uid}/polychromatic/IO@{hex}.pid r,
+  owner @{run}/user/@{uid}/polychromatic/tray-applet.pid rw,
+
+  owner @{PROC}/@{pid}/cmdline r,
+  owner @{PROC}/@{pid}/mounts r,
+
+  include if exists <local/polychromatic-tray-applet>
+}
+
+# vim:syntax=apparmor

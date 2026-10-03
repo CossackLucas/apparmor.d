@@ -1,0 +1,76 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/openrazer-daemon
+profile openrazer-daemon @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/bus-session>
+  include <abstractions/dev/read/input>
+  include <abstractions/nameservice-strict>
+  include <abstractions/python>
+
+  network netlink raw,
+
+  @{exec_path} mr,
+
+  @{sbin}/ldconfig rix,
+
+  /usr/share/openrazer/razer.conf.example r,
+
+  owner @{sddm_config_dirs}/openrazer/{,*} rw,
+  owner @{sddm_share_dirs}/ w,
+  owner @{sddm_share_dirs}/openrazer/{,**} w,
+
+  owner @{user_config_dirs}/openrazer/{,**} rw,
+
+  owner @{user_share_dirs}/openrazer/ w,
+  owner @{user_share_dirs}/openrazer/logs/{,*} rw,
+
+  owner @{run}/user/@{uid}/openrazer-daemon.pid rwk,
+
+  @{sys}/bus/ r,
+  @{sys}/bus/hid/devices/ r,
+  @{sys}/class/ r,
+  @{sys}/devices/@{pci}/uevent r,
+  @{sys}/devices/@{pci}/usb@{int}/**/ r,
+  @{sys}/devices/@{pci}/usb@{int}/**/device_mode w,
+  @{sys}/devices/@{pci}/usb@{int}/**/device_serial r,
+  @{sys}/devices/@{pci}/usb@{int}/**/device_type r,
+  @{sys}/devices/@{pci}/usb@{int}/**/dpi rw,
+  @{sys}/devices/@{pci}/usb@{int}/**/dpi_stages rw,
+  @{sys}/devices/@{pci}/usb@{int}/**/firmware_version r,
+  @{sys}/devices/@{pci}/usb@{int}/**/game_led_state rw,
+  @{sys}/devices/@{pci}/usb@{int}/**/kbd_layout r,
+  @{sys}/devices/@{pci}/usb@{int}/**/key_* w,
+  @{sys}/devices/@{pci}/usb@{int}/**/matrix_brightness w,
+  @{sys}/devices/@{pci}/usb@{int}/**/matrix_custom_frame w,
+  @{sys}/devices/@{pci}/usb@{int}/**/matrix_effect_* w,
+  @{sys}/devices/@{pci}/usb@{int}/**/poll_rate w,
+  @{sys}/devices/@{pci}/usb@{int}/**/uevent r,
+  @{sys}/devices/@{pci}/usb@{int}/**/version r,
+  @{sys}/devices/@{pci}/usb@{int}/uevent r,
+  @{sys}/devices/@{pci_bus}/uevent r,
+
+  owner @{PROC}/@{pid}/cmdline r,
+  owner @{PROC}/@{pid}/mounts r,
+  owner @{PROC}/@{pid}/stat r,
+
+  /dev/input/by-id/ r,
+
+  # Inherit Silencer
+  deny /usr/share/qt6/resources/qtwebengine_* r,
+  deny /usr/share/qt6/resources/v8_context_snapshot.bin r,
+  deny /usr/share/qt6/translations/qtwebengine_locales/* r,
+
+  deny /dev/dri/* rw,
+  deny /dev/shm/.org.chromium.Chromium.@{rand6} rw,
+
+  include if exists <local/openrazer-daemon>
+}
+
+# vim:syntax=apparmor
