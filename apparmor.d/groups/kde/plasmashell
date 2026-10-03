@@ -107,6 +107,7 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   /usr/share/metainfo/{,**} r,
   /usr/share/plasma/{,**} r,
   /usr/share/plasma5support/** r,
+  /usr/share/polychromatic/img/tray/*.svg r,
   /usr/share/qalculate/{,**} r,
   /usr/share/rider/{,**} r,
   /usr/share/solid/actions/{,**} r,

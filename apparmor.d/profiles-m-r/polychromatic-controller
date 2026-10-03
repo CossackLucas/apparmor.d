@@ -1,0 +1,151 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{domain} = org.chromium.Chromium
+
+@{exec_path} = @{bin}/polychromatic-controller
+profile polychromatic-controller @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/common/qt-webengine>
+  include <abstractions/desktop>
+  include <abstractions/graphics>
+  include <abstractions/nameservice-strict>
+  include <abstractions/python>
+  include <abstractions/qt-shader-cache>
+  include <abstractions/ssl_certs>
+  include <abstractions/sys/usb>
+
+  network inet dgram,
+  network inet6 dgram,
+  network inet stream,
+  network inet6 stream,
+  network netlink raw,
+
+  signal receive set=usr2        peer=polychromatic-tray-applet,
+  signal send    set=(usr1,usr2) peer=polychromatic-tray-applet,
+
+  ptrace read peer=polychromatic-controller//&polychromatic-controller//webengine,
+
+  unix type=seqpacket peer=(label=polychromatic-controller//webengine),
+  unix type=stream    peer=(label=polychromatic-controller//webengine),
+
+  @{exec_path} mrix,
+
+  @{sh_path}      rix,
+  @{open_path}    rPx -> child-open-help,
+  @{browsers_path} Px,
+
+  @{bin}/killall                  rCx -> killall,
+  @{bin}/kmod                      Px,
+  @{bin}/openrazer-daemon         rPx,
+  @{bin}/polychromatic-helper     rix,
+  @{bin}/polychromatic-tray-applet Px,
+  @{bin}/xdg-settings              Px,
+
+  #aa:only apt
+  @{bin}/dpkg        rPx -> child-dpkg,
+  @{bin}/dpkg-divert rPx -> child-dpkg,
+  @{bin}/fgrep       rix,
+  @{bin}/{,e}grep    rix,
+  @{bin}/md5sum      rix,
+
+  @{lib}/{,@{multiarch}/}qt{5,6}/{,libexec/}QtWebEngineProcess Px -> polychromatic-controller//&polychromatic-controller//webengine,
+
+  /usr/share/polychromatic/** r,
+
+  #aa:only apt
+  /usr/share/dpkg/*table r,
+  /etc/apt/apt.conf.d/{,*} r,
+  /etc/default/apport r,
+
+  # needed for troubleshooting module
+  /usr/src/linux-headers-*/{,**/} r,
+
+  owner @{user_cache_dirs}/polychromatic/{,**} rw,
+  owner @{user_cache_dirs}/polychromatic-controller/{,**} rw,
+
+  owner @{user_config_dirs}/openrazer/razer.conf rw,
+  owner @{user_config_dirs}/polychromatic/** rw,
+
+  owner @{run}/user/@{uid}/openrazer-daemon.pid r,
+  owner @{run}/user/@{uid}/polychromatic/ rw,
+  owner @{run}/user/@{uid}/polychromatic/IO@{hex}.pid rw,
+  owner @{run}/user/@{uid}/polychromatic/tray-applet.pid r,
+
+  @{sys}/bus/hid/drivers/ r,
+  @{sys}/bus/hid/drivers/razerkbd/ r,
+  @{sys}/bus/hid/drivers/razermouse/ r,
+  @{sys}/devices/@{pci}/usb@{int}/**/ r,
+  @{sys}/firmware@{efi}/efivars/ r,
+  @{sys}/firmware@{efi}/efivars/SecureBoot-@{uuid} r,
+  @{sys}/module/razerkbd/ r,
+  @{sys}/module/razermouse/ r,
+
+  owner @{PROC}/@{pid}/oom_score_adj w,
+  owner @{PROC}/@{pid}/mounts r,
+  owner @{PROC}/@{pid}/stat r,
+  owner @{PROC}/@{pid}/task/ r,
+  owner @{PROC}/@{pid}/task/@{tid}/status r,
+
+  /dev/tty rw,
+
+  profile killall {
+    include <abstractions/base>
+    include <abstractions/consoles>
+
+    capability sys_ptrace,
+
+    audit signal (send) set=(term, kill),
+
+    ptrace (read),
+
+    @{bin}/killall mr,
+
+    # The /proc/ dir is needed to avoid the following error:
+    #  /proc: Permission denied
+    @{PROC}/ r,
+    @{PROC}/@{pids}/ r,
+    @{PROC}/@{pids}/cmdline r,
+    @{PROC}/@{pids}/stat r,
+
+    # Inherit Silencer
+    deny network netlink raw,
+
+    deny unix type=seqpacket peer=(label=openrazer-daemon),
+    deny unix peer=(label=polychromatic-controller),
+    deny unix peer=(label=polychromatic-controller//webengine),
+
+    deny /usr/share/qt6/** r,
+
+    deny /dev/dri/* rw,
+    deny /dev/shm/.org.chromium.Chromium.@{rand6} rw,
+
+    include if exists <local/polychromatic-controller_killall>
+  }
+
+  profile webengine {
+    include <abstractions/base>
+    include <abstractions/common/qt-webengine>
+
+    signal receive set=term peer=polychromatic-controller,
+
+    unix type=seqpacket peer=(label=polychromatic-controller),
+    unix type=stream    peer=(label=polychromatic-controller),
+
+    #@{sys}/devices/system/cpu/present r,
+
+    # Silencer
+    deny unix peer=(label=openrazer-daemon),
+
+    include if exists <local/polychromatic-controller_webengine>
+  }
+
+  include if exists <local/polychromatic-controller>
+}
+
+# vim:syntax=apparmor
