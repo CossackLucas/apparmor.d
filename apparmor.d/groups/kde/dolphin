@@ -54,6 +54,7 @@ profile dolphin @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   #aa:exec kioworker
   #aa:exec utempter
 
+  /usr/share/desktop-directories/{,**} r, # Needed by kmenuedit
   /usr/share/kf5/kmoretools/{,**} r,
   /usr/share/kf6/purpose/{,*} r,
   /usr/share/kio/{,**} r,

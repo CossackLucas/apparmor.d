@@ -1,0 +1,33 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/keditfiletype
+profile keditfiletype @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/kde-strict>
+  include <abstractions/nameservice-strict>
+
+  @{exec_path} mr,
+
+  @{bin}/baloo_filemetadata_temp_extractor rix,
+
+  /usr/share/applications/{,*} r,
+
+  owner @{user_config_dirs}/baloofileinformationrc r,
+
+  owner @{user_share_dirs}/applications/{,*} r,
+  owner @{user_share_dirs}/baloo/ r,
+  owner @{user_share_dirs}/baloo/index r,
+  owner @{user_share_dirs}/baloo/index-lock rwk,
+
+  owner @{PROC}/@{pid}/mountinfo r,
+
+  include if exists <local/keditfiletype>
+}
+
+# vim:syntax=apparmor
