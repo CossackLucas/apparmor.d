@@ -1,0 +1,74 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{export_ext} = shortcuts pdf
+
+@{exec_path} = @{bin}/kmenuedit
+profile kmenuedit @{exec_path} flags=(attach_disconnected,mediate_deleted) {
+  include <abstractions/base>
+  include <abstractions/audio-client>
+  include <abstractions/common/kde>
+  include <abstractions/disks-read>
+  include <abstractions/kde-export-settings>
+  include <abstractions/kde-sonnet>
+  include <abstractions/nameservice-strict>
+
+  network netlink raw,  # needed for edit file properties
+
+  signal send set=term peer=kioworker,
+
+  ptrace read peer=plasmashell, # needed for dir creation
+
+  @{exec_path} mr,
+
+  @{open_path} Px -> child-open-help,
+
+  @{bin}/baloo_filemetadata_temp_extractor rix,
+  @{bin}/kbuildsycoca{,5,6}                 Px,
+  @{bin}/keditfiletype                      Px,
+  @{bin}/net                                PUx,
+  @{bin}/testparm                           PUx,
+
+  #aa:exec kioworker
+
+  /usr/share/desktop-directories/kf5-*.directory r,
+  /usr/share/thumbnailers/{,**} r,
+
+  /{var/lib/snapd/,}snap/*/@{uid}/**.@{icon_ext} r,
+
+        @{system_games_dirs}/**.@{icon_ext} r,
+  owner @{user_games_dirs}/**.@{icon_ext} r,
+
+  owner @{user_config_dirs}/baloofileinformationrc@{atomic} rwlk -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/kservicemenurc r,
+  owner @{user_config_dirs}/menus/ w,
+  owner @{user_config_dirs}/menus/applications-kmenuedit.menu rw,
+
+  owner @{user_share_dirs}/applications/ w,
+  owner @{user_share_dirs}/applications/#@{int} rwk,
+  owner @{user_share_dirs}/applications/*.desktop@{atomic} rwlk -> @{user_share_dirs}/applications/#@{int},
+  owner @{user_share_dirs}/baloo/index r,
+  owner @{user_share_dirs}/baloo/index-lock rwk,
+  owner @{user_share_dirs}/desktop-directories/ rw,
+  owner @{user_share_dirs}/desktop-directories/#@{int} rwk,
+  owner @{user_share_dirs}/desktop-directories/*.directory@{atomic} rwlk -> @{user_share_dirs}/desktop-directories/#@{int},
+  owner @{user_share_dirs}/flatpak/runtime/org.kde.Platform.Locale/{,@{arch}/} r,
+  owner @{user_share_dirs}/flatpak/runtime/org.kde.Platform.Locale/@{arch}/*/@{hex64}-??/files/ r,
+  owner @{user_share_dirs}/user-places.xbel r,
+
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/kmenuedit@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
+
+  owner @{PROC}/@{pid}/mountinfo r, # needed for edit file properties
+
+  /dev/tty r,
+
+  include if exists <local/kmenuedit>
+}
+
+# vim:syntax=apparmor
