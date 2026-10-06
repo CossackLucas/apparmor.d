@@ -26,6 +26,9 @@ profile e2fsck @{exec_path} {
 
   /usr/share/file/misc/magic.mgc r,
 
+  @{etc_ro}/blkid.conf r,
+  /etc/blkid.conf.d/{,*} r,
+
   # A place for file images
   owner @{user_img_dirs}/{,**} rwk,
 
@@ -36,6 +39,8 @@ profile e2fsck @{exec_path} {
 
         @{PROC}/swaps r,
   owner @{PROC}/@{pid}/mounts r,
+
+  /dev/.blkid.tab r,
 
   include if exists <local/e2fsck>
 }

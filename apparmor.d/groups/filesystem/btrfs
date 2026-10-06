@@ -7,7 +7,8 @@ abi <abi/5.0>,
 
 include <tunables/global>
 
-@{exec_path} = @{sbin}/btrfs @{sbin}/btrfsck
+@{exec_path}  = @{sbin}/btrfs @{sbin}/btrfsck
+@{exec_path} += @{bin}/btrfs @{bin}/btrfsck #aa:lint ignore=sbin
 profile btrfs @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>
   include <abstractions/disks-write>
@@ -18,6 +19,9 @@ profile btrfs @{exec_path} flags=(attach_disconnected) {
   capability sys_rawio,
 
   @{exec_path} mr,
+
+  @{etc_ro}/blkid.conf r,
+  /etc/blkid.conf.d/{,*} r,
 
   /var/lib/btrfs/ rw,
   /var/lib/btrfs/scrub.progress.@{uuid} rw,
@@ -49,6 +53,9 @@ profile btrfs @{exec_path} flags=(attach_disconnected) {
   # For fsck of the btrfs filesystem directly from gparted
   owner @{tmp}/gparted-*/ rw,
 
+  # For fsck of the btrfs filesystem directly from partitionmanager
+  /tmp/partitionmanager-@{rand6}/ r,
+
   @{run}/blkid/blkid.tab{,-@{rand6}} rw,
   @{run}/blkid/blkid.tab.old rwl -> @{run}/blkid/blkid.tab,
   @{run}/snapper-tools-*/ r,
@@ -61,6 +68,9 @@ profile btrfs @{exec_path} flags=(attach_disconnected) {
         @{PROC}/partitions r,
   owner @{PROC}/@{pid}/mounts r,
 
+  /dev/.blkid.tab rw,
+  /dev/.blkid.tab-@{rand6} rw,
+  /dev/.blkid.tab.old wl -> /dev/.blkid.tab,
   /dev/btrfs-control rw,
   /dev/pts/@{u16} rw,
   /dev/tty@{u8} rw,

@@ -7,16 +7,63 @@ abi <abi/5.0>,
 
 include <tunables/global>
 
-@{exec_path} = @{bin}/{mkntfs,mkfs.ntfs}
+# ToDo: check additions!
+@{exec_path} = @{sbin}/{mkntfs,mkfs.ntfs}
 profile mkntfs @{exec_path} {
   include <abstractions/base>
   include <abstractions/disks-write>
+  include <abstractions/nameservice-strict>
 
   capability sys_admin,
+  capability sys_rawio,
+  capability syslog, # optional: no audit
 
   @{exec_path} mr,
 
+  @{sh_path}      rix,
+  @{sbin}/acpidump PUx,
+  @{bin}/kmod      Cx -> kmod,
+  @{bin}/lsscsi    Px,
+  @{bin}/udevadm   Px,
+
+  /usr/share/hwinfo/ISDN.CDB.hwdb r,
+
+  @{sys}/bus/ r,
+  @{sys}/bus/*/devices/ r,
+  @{sys}/bus/*/drivers/ r,
+  @{sys}/bus/*/drivers/*/ r,
+  @{sys}/class/input/ r,
+  @{sys}/class/net/ r,
+  @{sys}/class/scsi_generic/ r,
+  @{sys}/class/scsi_tape/ r,
+  @{sys}/class/tty/ r,
+  @{sys}/devices/** r,
+  @{sys}/firmware/dmi/tables/DMI r,
+  @{sys}/firmware/dmi/tables/smbios_entry_point r,
+
+        @{PROC}/cmdline r,
+        @{PROC}/modules r,
+        @{PROC}/partitions r,
+        @{PROC}/sys/dev/cdrom/info r,
+        @{PROC}/version r,
   owner @{PROC}/@{pids}/mounts r,
+
+  /dev/mem r,
+  /dev/tty rw,
+
+  profile kmod flags=(attach_disconnected) {
+    include <abstractions/base>
+    include <abstractions/app/kmod>
+
+    capability sys_module,
+
+    @{sys}/module/compression r,
+    @{sys}/module/*/initstate r,
+
+    deny /dev/{s,v}d[a-z]*@{int} rw,
+
+    include if exists <local/mkntfs_kmod>
+  }
 
   include if exists <local/mkntfs>
 }

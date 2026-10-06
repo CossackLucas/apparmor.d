@@ -466,6 +466,7 @@ mkfs.ext4
 mkfs.f2fs
 mkfs.fat
 mkfs.minix
+mkfs.ntfs
 mkfs.xfs
 mkhomedir_helper
 mkill

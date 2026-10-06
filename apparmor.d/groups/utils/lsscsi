@@ -19,6 +19,9 @@ profile lsscsi @{exec_path} {
 
   /dev/** r,
 
+  # Inherit Silencer
+  deny /dev/** w,
+
   include if exists <local/lsscsi>
 }
 

@@ -24,6 +24,7 @@ profile cryptsetup @{exec_path} {
   @{run}/cryptsetup/ r,
   @{run}/cryptsetup/* rwk,
 
+  @{sys}/devices/virtual/bdi/**/read_ahead_kb r,
   @{sys}/fs/ r,
 
   @{PROC}/@{pid}/mountinfo r,

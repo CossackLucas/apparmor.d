@@ -12,6 +12,7 @@ profile lvm @{exec_path} flags=(attach_disconnected) {
   include <abstractions/bus-system>
   include <abstractions/consoles>
   include <abstractions/disks-write>
+  include <abstractions/nameservice-strict>
 
   capability dac_read_search,
   capability fowner,
@@ -23,10 +24,16 @@ profile lvm @{exec_path} flags=(attach_disconnected) {
 
   ptrace read,
 
-  mqueue (getattr r) type=posix /,
+  mqueue (getattr r) type=posix,
+  #mqueue (getattr r) type=posix /,
+  #mqueue (getattr)   type=posix @{att}/,
 
   @{exec_path} rm,
 
+  /usr/share/terminfo/** r,
+
+  @{etc_ro}/inputrc r,
+  @{etc_ro}/inputrc.keys r,
   @{etc_rw}/lvm/** rwlk,
   /etc/multipath.conf r,
   /etc/multipath/* r,
