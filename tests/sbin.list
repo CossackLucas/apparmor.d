@@ -208,6 +208,7 @@ eventlogadm
 execsnoop-bpfcc
 execsnoop.bt
 exfat2img
+exfatfsck
 exfatlabel
 exicyclog
 exigrep
@@ -454,6 +455,7 @@ mk_isdnhwdb
 mkdict
 mkdosfs
 mke2fs
+mkexfatfs
 mkfs
 mkfs.
 mkfs.bfs

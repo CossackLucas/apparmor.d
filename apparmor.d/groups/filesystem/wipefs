@@ -1,0 +1,21 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{sbin}/wipefs
+profile wipefs @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/disks-write>
+
+  capability sys_rawio,
+
+  @{exec_path} mr,
+
+  include if exists <local/wipefs>
+}
+
+# vim:syntax=apparmor

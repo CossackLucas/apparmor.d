@@ -1,0 +1,28 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{sbin}/mkfs.xfs
+profile mkfs.xfs @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/disks-write>
+
+  capability sys_admin,
+
+  @{exec_path} mr,
+
+  / r,
+  @{efi}@{efi}/ r,
+
+  @{PROC}/@{pid}/mounts r,
+  @{PROC}/sys/vm/max_map_count r,
+
+  include if exists <local/mkfs.xfs>
+}
+
+# vim:syntax=apparmor
+

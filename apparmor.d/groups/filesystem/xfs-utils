@@ -1,0 +1,33 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{sbin}/xfs_repair @{sbin}/xfs_db @{sbin}/xfs_copy @{sbin}/xfs_growfs
+profile xfs-utils @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/disks-write>
+
+  capability dac_read_search, # needed by xfs_growfs
+  capability sys_admin,
+
+  @{exec_path} mr,
+
+  / r,
+  @{efi}@{efi}/ r,
+
+  /tmp/partitionmanager-@{rand6}/ r, # needed by xfs_growfs
+  /var/tmp/xfs_copy.log.@{rand6} rw,
+
+  @{PROC}/ r, # needed by xfs_growfs
+  @{PROC}/@{pid}/mounts r,
+  @{PROC}/sys/vm/max_map_count r,
+
+  include if exists <local/xfs-utils>
+}
+
+# vim:syntax=apparmor
+
