@@ -1,0 +1,202 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{lib}/{,@{multiarch}/libexec/}kpmcore_externalcommand
+profile partitionmanager-helper @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/bus-system>
+  include <abstractions/disks-write>
+  include <abstractions/qt>
+
+  capability dac_override,
+  capability dac_read_search,
+  capability net_admin,
+  capability sys_admin,
+
+  #aa:dbus own bus=system name=org.kde.kpmcore.helperinterface path=/Helper
+
+  dbus receive bus=system path=/Helper
+       interface=org.kde.kpmcore.externalcommand
+       member={CopyFileData,ReadData,RunCommand,WriteData,WriteFstab}
+       peer=(name=@{busname}, label=partitionmanager),
+  dbus send bus=system path=/Helper
+       interface=org.kde.kpmcore.externalcommand
+       member={progress,report}
+       peer=(name=org.freedesktop.DBus, label=partitionmanager),
+
+  dbus receive bus=system path=/org/freedesktop/PolicyKit1/Authority
+       interface=org.freedesktop.PolicyKit1.Authority
+       member=Changed
+       peer=(name=@{busname}, label=polkitd),
+
+  dbus send bus=system path=/org/freedesktop/DBus
+       interface=org.freedesktop.DBus
+       member=RequestName
+       peer=(name=org.freedesktop.DBus, label=dbus-system//&unconfined),
+  dbus send bus=system path=/org/freedesktop/PolicyKit1/Authority
+       interface=org.freedesktop.DBus.Properties
+       member=GetAll
+       peer=(name=@{busname}, label=polkitd),
+  dbus send bus=system path=/org/freedesktop/PolicyKit1/Authority
+       interface=org.freedesktop.PolicyKit1.Authority
+       member=CheckAuthorization
+       peer=(name=@{busname}, label=polkitd),
+
+  @{exec_path} mr,
+
+  @{sbin}/blkid      Px,
+  @{sbin}/blockdev   Px,
+  @{bin}/chmod      rix,
+  @{sbin}/cryptsetup Px,
+  @{sbin}/dmsetup    Px,
+  @{bin}/lsblk       Px,
+  @{sbin}/lvm        Px,
+  @{bin}/mount     mrCx -> mount,
+  @{sbin}/smartctl   Px,
+  @{bin}/udevadm     Cx -> udevadm,
+  @{bin}/umount    mrCx -> umount,
+
+  @{sbin}/ntfsclone  Px,
+  @{bin}/ntfsinfo    Px,
+  @{bin}/hformat     PUx,
+  @{sbin}/ntfslabel  Px,
+  @{sbin}/ntfsresize Px,
+  @{bin}/udfinfo     Px,
+  @{sbin}/mkfs.fat   Px, # ToDo: test on arch and clean main profile
+  #aa:only apt
+  @{bin}/btrfs       Px, #aa:lint ignore=sbin
+  @{bin}/btrfstune   Px, #aa:lint ignore=sbin
+  @{bin}/partx      rix, #aa:lint ignore=sbin
+
+  #aa:exclude apt
+  @{sbin}/btrfs      Px,
+  @{sbin}/btrfstune  Px,
+  @{sbin}/partx     rix,
+
+  @{sbin}/bcachefs   Px,
+  @{sbin}/debugfs.ocfs2 PUx,
+  @{sbin}/debugreiserfs PUx,
+  @{sbin}/dumpe2fs   Px,
+  @{sbin}/e2fsck     Px,
+  @{sbin}/e2label    Px,
+  @{sbin}/exfatfsck  Px,
+  @{sbin}/exfatlabel Px,
+  @{sbin}/fatlabel   Px,
+  @{sbin}/fatresize  Px,
+  @{sbin}/fsck.exfat Px,
+  @{sbin}/fsck.f2fs  Px,
+  @{sbin}/fsck.fat   Px,
+  @{sbin}/fsck.hfsplus PUx,
+  @{sbin}/fsck.jfs   PUx,
+  @{sbin}/fsck.minix PUx,
+  @{sbin}/fsck.ocfs2 Px,
+  @{sbin}/jfs_debugfs PUx,
+  @{sbin}/jfs_tune   PUx,
+  @{sbin}/mke2fs     Px,
+  @{sbin}/mkfs.btrfs Px,
+  @{sbin}/mkfs.exfat Px,
+  @{sbin}/mkfs.ext2  Px,
+  @{sbin}/mkfs.ext3  Px,
+  @{sbin}/mkfs.ext4  Px,
+  @{sbin}/mkfs.f2fs  Px,
+  @{sbin}/mkfs.hfsplus PUx,
+  @{sbin}/mkfs.jfs   PUx, #ToDo: issue with transition on suse
+  @{sbin}/mkfs.minix PUx,
+  @{sbin}/mkfs.nilfs2 PUx,
+  @{sbin}/mkfs.ocfs2 PUx,
+  @{sbin}/mkfs.xfs   Px,
+  @{sbin}/mkexfatfs  Px,
+  @{sbin}/mkntfs     Px,
+  @{sbin}/mkreiserfs PUx,
+  @{sbin}/mkswap     Px,
+  @{sbin}/mkudffs    Px,
+  @{sbin}/nilfs-resize PUx,
+  @{sbin}/nilfs-tune PUx,
+  @{sbin}/resize2fs  PUx,
+  @{sbin}/reiserfsck PUx,
+  @{sbin}/reiserfstune PUx,
+  @{sbin}/resize_reiserfs PUx,
+  @{sbin}/sfdisk     Px,
+  @{sbin}/swaplabel  Px,
+  @{sbin}/tune.exfat Px,
+  @{sbin}/tune2fs    Px,
+  @{sbin}/tunefs.ocfs2 PUx,
+  @{sbin}/udflabel   Px,
+  @{sbin}/wipefs     Px,
+  @{sbin}/xfs_copy   Px,
+  @{sbin}/xfs_db     Px,
+  @{sbin}/xfs_growfs Px,
+  @{sbin}/xfs_repair Px,
+  @{sbin}/zpool      Px,
+
+  /etc/fstab rw,
+
+  /tmp/partitionmanager-@{rand6}/ rw,
+  /tmp/partitionmanager-@{rand6}/lost+found/ rw,
+
+  /dev/tty r,
+
+  profile mount flags=(attach_disconnected) {
+    include <abstractions/base>
+    include <abstractions/disks-read>
+
+    capability setgid,
+    capability setuid,
+    capability sys_admin,
+
+    mount /dev/{s,v}d[a-z]*@{int} -> /tmp/partitionmanager-@{rand6}/,
+    mount options=(rw move) -> /tmp/partitionmanager-@{rand6}/,
+
+    @{bin}/mount r,
+
+    @{sbin}/bcachefs Px,
+    @{sbin}/mount.nilfs2 Px,
+
+    include if exists <local/partitionmanager-helper_mount>
+  }
+
+  profile udevadm {
+    include <abstractions/base>
+    include <abstractions/app/udevadm>
+    include <abstractions/disks-read>
+
+    @{run}/udev/io.systemd.Udev rw,
+
+    @{sys}/devices/**/uevent w,
+
+    include if exists <local/partitionmanager-helper_udevadm>
+  }
+
+  profile umount {
+    include <abstractions/base>
+    include <abstractions/disks-read>
+
+    capability sys_admin,
+
+    umount @{MOUNTS}/,
+    umount /tmp/partitionmanager-@{rand6}/,
+
+    @{bin}/umount r,
+
+    /tmp/partitionmanager-@{rand6}/ r,
+
+    @{run}/mount/utab rw,
+    @{run}/mount/utab.@{rand6} rw,
+    @{run}/mount/utab.act rwk,
+    @{run}/mount/utab.event rw,
+    @{run}/mount/utab.lock rwk,
+
+    @{PROC}/@{pid}/mountinfo r,
+
+    include if exists <local/partitionmanager-helper_umount>
+  }
+
+  include if exists <local/partitionmanager-helper>
+}
+
+# vim:syntax=apparmor

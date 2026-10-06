@@ -1,0 +1,91 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/partitionmanager
+profile partitionmanager @{exec_path} flags=(attach_disconnected,mediate_deleted) {
+  include <abstractions/base>
+  include <abstractions/audio-client>
+  include <abstractions/bus-session>
+  include <abstractions/bus/system/org.freedesktop.UDisks2>
+  include <abstractions/common/kde>
+  include <abstractions/disks-read>
+  include <abstractions/kde-globals-write>
+  include <abstractions/nameservice-strict>
+  include <abstractions/qt-settings-write>
+
+  network netlink raw,
+
+  mqueue getattr type=posix,
+
+  signal send set=term peer=kioworker,
+
+  #aa:dbus talk bus=system name=org.freedesktop.PolicyKit1.Authority label=polkitd
+
+  dbus receive bus=system path=/Helper
+       interface=org.kde.kpmcore.externalcommand
+       member={progress,report}
+       peer=(name=@{busname}, label=partitionmanager-helper),
+  dbus send bus=system path=/Helper
+       interface=org.kde.kpmcore.externalcommand
+       member={CopyFileData,ReadData,WriteData,WriteFstab}
+       peer=(name=org.kde.kpmcore.helperinterface, label=partitionmanager-helper),
+  dbus send bus=system path=/Helper
+       interface=org.kde.kpmcore.externalcommand
+       member=RunCommand
+       peer=(name=org.kde.kpmcore.helperinterface),
+
+  @{exec_path} mr,
+
+  @{open_path} Px -> child-open-help,
+
+  @{bin}/net PUx,
+  @{bin}/testparm PUx,
+
+  #aa:exec kioworker
+
+  @{etc_ro}/blkid.conf r,
+  /etc/blkid.conf.d/{,*} r,
+  /etc/fstab r,
+  /etc/mdadm.conf r,
+
+  / r,
+  /*/ r,
+  @{MOUNTS}/ r,
+
+  # ToDo: var @{snap}?
+  /snap/*/@{int}/ r,
+
+  owner @{user_config_dirs}/kservicemenurc r,
+
+        /tmp/ r,
+  owner @{tmp}/#@{int} rw,
+  owner @{tmp}/partitionmanager-@{rand6}/ rw,
+  owner @{tmp}/partitionmanager-@{rand6}.html rwl -> @{tmp}/#@{int}, # Reports
+
+        @{run}/ r,
+        @{run}/blkid/blkid.tab r,
+        @{run}/mount/utab r,
+  owner @{run}/blkid/ w, # ToDo: check
+  owner @{run}/user/@{uid}/ r,
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/doc/ r,
+  owner @{run}/user/@{uid}/partitionmanager@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
+
+        @{PROC}/mdstat r, # ToDo: check
+        @{PROC}/swaps r,
+  owner @{PROC}/@{pid}/cgroup r,
+  owner @{PROC}/@{pid}/fdinfo/@{int} r,
+  owner @{PROC}/@{pid}/mountinfo r,
+  owner @{PROC}/@{pid}/stat r,
+
+  /dev/tty r,
+
+  include if exists <local/partitionmanager>
+}
+
+# vim:syntax=apparmor
