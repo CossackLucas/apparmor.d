@@ -159,6 +159,7 @@ dcstat-bpfcc
 ddns-confgen
 deadlock-bpfcc
 debugfs
+debugfs.ocfs2
 debugreiserfs
 decode
 delpart
@@ -266,8 +267,11 @@ fsck.ext3
 fsck.ext4
 fsck.f2fs
 fsck.fat
+fsck.hfsplus
+fsck.jfs
 fsck.minix
 fsck.msdos
+fsck.ocfs2
 fsck.reiserfs
 fsck.vfat
 fsck.xfs
@@ -394,6 +398,8 @@ javagc-bpfcc
 javaobjnew-bpfcc
 javastat-bpfcc
 javathreads-bpfcc
+jfs_debugfs
+jfs_tune
 kbdrate
 kbdsettings
 kdump-config
@@ -468,8 +474,12 @@ mkfs.ext3
 mkfs.ext4
 mkfs.f2fs
 mkfs.fat
+mkfs.hfsplus
+mkfs.jfs
 mkfs.minix
+mkfs.nilfs2
 mkfs.ntfs
+mkfs.ocfs2
 mkfs.xfs
 mkhomedir_helper
 mkill
@@ -489,6 +499,7 @@ mount.fuse3
 mount.lowntfs-3g
 mount.nfs
 mount.nfs4
+mount.nilfs2
 mount.ntfs
 mount.ntfs-3g
 mount.smb3
@@ -518,6 +529,8 @@ nfsslower-bpfcc
 nfsstat
 nft
 nginx
+nilfs-resize
+nilfs-tune
 nmbd
 nodegc-bpfcc
 nodestat-bpfcc
@@ -781,6 +794,7 @@ tune.exfat
 tune2fs
 tuned
 tuned-adm
+tunefs.ocfs2
 tunelp
 u-d-c-print-pci-ids
 ucalls

@@ -1,0 +1,23 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{sbin}/tunefs.ocfs2
+profile tunefs.ocfs2 @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/disks-write>
+
+  @{exec_path} mr,
+
+  @{sys}/fs/o2cb/interface_revision r,
+  @{sys}/fs/ocfs2/cluster_stack r,
+  @{sys}/kernel/config/cluster/ r,
+
+  include if exists <local/tunefs.ocfs2>
+}
+
+# vim:syntax=apparmor

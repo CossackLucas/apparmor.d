@@ -1,0 +1,18 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{sbin}/debugfs.ocfs2
+profile debugfs.ocfs2 @{exec_path} {
+  include <abstractions/base>
+
+  @{exec_path} mr,
+
+  include if exists <local/debugfs.ocfs2>
+}
+
+# vim:syntax=apparmor
