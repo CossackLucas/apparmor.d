@@ -1,0 +1,19 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/udfinfo
+profile udfinfo @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/disks-read>
+
+  @{exec_path} mr,
+
+  include if exists <local/udfinfo>
+}
+
+# vim:syntax=apparmor

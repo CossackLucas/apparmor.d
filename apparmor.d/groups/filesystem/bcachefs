@@ -1,0 +1,84 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{sbin}/bcachefs
+profile bcachefs @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/disks-write>
+  include <abstractions/nameservice-strict>
+
+  capability sys_admin,
+
+  mount options=(rw move) -> /tmp/partitionmanager-@{rand6}/,
+
+  @{exec_path} mr,
+
+  @{bin}/gzip    rix,
+  @{bin}/kmod    Cx -> kmod,
+  @{bin}/udevadm Cx -> udevadm,
+  @{bin}/uname   rix,
+  @{bin}/zcat    rix,
+
+  /etc/fstab r,
+
+  @{efi}/config-* r,
+
+  @{run}/bcachefs/ w,
+  @{run}/bcachefs/@{int}.sock w,
+
+  @{sys}/bus/ r,
+  @{sys}/class/ r,
+  @{sys}/devices/@{pci}/uevent r,
+  @{sys}/devices/@{pci_bus}/uevent r,
+  @{sys}/fs/bcachefs/** r,
+  @{sys}/fs/cgroup/system.slice/cpu.max r,
+  @{sys}/fs/cgroup/system.slice/dbus.service/cpu.max r,
+  @{sys}/fs/cgroup/system.slice/system-dbus**.slice/cpu.max r,
+  @{sys}/module/bcachefs/parameters/version r,
+
+  @{PROC}/cmdline r,
+  @{PROC}/config.gz r,
+  @{PROC}/@{pid}/cgroup r,
+  @{PROC}/@{pid}/task/@{tid}/comm rw,
+
+  /dev/bcachefs@{int}-ctl rw,
+  /dev/console wk, # ToDo: check
+  /dev/tty rw,
+
+  profile kmod {
+    include <abstractions/base>
+    include <abstractions/app/kmod>
+
+    capability sys_module,
+
+    @{sys}/module/bcachefs/initstate r,
+    @{sys}/module/compression r,
+
+    include if exists <local/bcachefs_kmod>
+  }
+
+  profile udevadm {
+    include <abstractions/base>
+    include <abstractions/app/udevadm>
+
+    capability net_admin,
+
+    network netlink raw,
+
+    @{sys}/devices/**/uevent w,
+
+    # Inherit Silencer
+    deny /dev/{s,v}d[a-z]*@{int} rw,
+
+    include if exists <local/bcachefs_udevadm>
+  }
+
+  include if exists <local/bcachefs>
+}
+
+# vim:syntax=apparmor

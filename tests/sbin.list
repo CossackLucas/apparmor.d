@@ -61,6 +61,7 @@ badblocks
 bashreadline-bpfcc
 bashreadline.bt
 bcache-super-show
+bcachefs
 bindsnoop-bpfcc
 biolatency-bpfcc
 biolatency-kp.bt
@@ -479,6 +480,7 @@ mkpostfixcert
 mkreiserfs
 mksubvolume
 mkswap
+mkudffs
 ModemManager
 mount.cifs
 mount.ddi
@@ -782,6 +784,7 @@ tuned-adm
 tunelp
 u-d-c-print-pci-ids
 ucalls
+udflabel
 uflow
 ufw
 ugc
