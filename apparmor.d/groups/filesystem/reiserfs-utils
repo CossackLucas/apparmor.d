@@ -6,8 +6,8 @@ abi <abi/5.0>,
 
 include <tunables/global>
 
-@{exec_path} = @{sbin}/mkfs.nilfs2
-profile mkfs.nilfs2 @{exec_path} {
+@{exec_path} = @{sbin}/debugreiserfs @{sbin}/mkreiserfs @{sbin}/reiserfsck @{sbin}/reiserfstune @{sbin}/resize_reiserfs
+profile reiserfs-utils @{exec_path} {
   include <abstractions/base>
   include <abstractions/disks-write>
 
@@ -15,7 +15,7 @@ profile mkfs.nilfs2 @{exec_path} {
 
   @{PROC}/@{pid}/mounts r,
 
-  include if exists <local/mkfs.nilfs2>
+  include if exists <local/reiserfs-utils>
 }
 
 # vim:syntax=apparmor

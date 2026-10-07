@@ -6,20 +6,17 @@ abi <abi/5.0>,
 
 include <tunables/global>
 
-@{exec_path} = @{sbin}/fsck.jfs
-profile fsck.jfs @{exec_path} {
+@{exec_path} = @{sbin}/fsck.minix @{sbin}/mkfs.minix
+profile minix-utils @{exec_path} {
   include <abstractions/base>
-  include <abstractions/disks-write>
-
-  capability sys_admin,
+  include <abstractions/disks-read>
 
   @{exec_path} mr,
 
-  /etc/fstab r,
-
   @{PROC}/@{pid}/mounts r,
+  @{PROC}/swaps r,
 
-  include if exists <local/fsck.jfs>
+  include if exists <local/minix-utils>
 }
 
 # vim:syntax=apparmor
