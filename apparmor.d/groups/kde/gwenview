@@ -1,0 +1,50 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/gwenview
+profile gwenview @{exec_path} flags=(attach_disconnected,mediate_deleted) {
+  include <abstractions/base>
+  include <abstractions/common/kde>
+  include <abstractions/kde-file-dialog>
+  include <abstractions/nameservice-strict>
+  include <abstractions/thumbnails-cache-write>
+  # ToDo: Probably should be limited to image extensions
+  # include <abstractions/user-read-strict>
+  include <abstractions/user-write-strict>
+
+  network netlink raw,
+
+  signal send set=term peer=kioworker,
+
+  @{exec_path} mr,
+
+  audit @{open_path} Px -> child-open-browsers,
+
+  #aa:exec kioworker
+
+  /etc/fstab r,
+
+  /usr/share/kImageAnnotator/** r,
+
+        @{MOUNTS}/ r,
+  owner @{HOME}/ r,
+  owner @{HOME}/** rk,
+  owner @{MOUNTS}/** rk,
+
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/gwenview@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
+
+  owner @{PROC}/@{pid}/mountinfo r,
+
+  /dev/tty r,
+
+  include if exists <local/gwenview>
+}
+
+# vim:syntax=apparmor
+
