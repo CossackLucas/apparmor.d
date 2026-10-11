@@ -24,7 +24,7 @@
 @{emails_path} = @{thunderbird_path} @{bin}/@{emails_names} "/opt/proton-mail/Proton Mail"
 
 # UI Editors
-@{editor_ui_names} = gnome-text-editor gedit mousepad
+@{editor_ui_names} = gnome-text-editor gedit kate kwrite mousepad
 @{editor_ui_path} = @{bin}/@{editor_ui_names}
 
 # File explorers
@@ -32,7 +32,7 @@
 @{file_explorers_path} = @{bin}/@{file_explorers_names}
 
 # Text editors
-@{text_editors_names} = code gedit mousepad gnome-text-editor zeditor zedit zed-cli
+@{text_editors_names} = code gedit mousepad gnome-text-editor kate kwrite zeditor zedit zed-cli
 @{text_editors_path} = @{bin}/@{text_editors_names} /usr/share/code/{bin/,}code
 
 # Document viewers

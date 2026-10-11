@@ -1,0 +1,77 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{export_ext} = pdf shortcuts
+
+@{exec_path} = @{bin}/kwrite
+profile kwrite @{exec_path} flags=(attach_disconnected,mediate_deleted) {
+  include <abstractions/base>
+  include <abstractions/audio-client>
+  include <abstractions/common/kde>
+  include <abstractions/disks-read>
+  include <abstractions/kde-export-settings>
+  include <abstractions/kde-sonnet>
+  include <abstractions/nameservice-strict>
+  include <abstractions/user-read-strict>
+  include <abstractions/user-write-strict>
+
+  network netlink raw,
+
+  signal send set=term peer=kioworker,
+
+  @{exec_path} mr,
+
+  @{bin}/baloo_filemetadata_temp_extractor rix,
+  @{bin}/net      PUx,
+  @{bin}/testparm PUx,
+
+  #aa:exec kioworker
+
+  /usr/share/org.kde.syntax-highlighting/syntax-bundled/* r,
+  /usr/share/thumbnailers/{,*} r,
+
+  /etc/fstab r,
+
+  / r,
+  @{HOMEDIRS}/ r,
+  @{MOUNTS}/ r,
+
+  owner @{user_config_dirs}/baloofileinformationrc@{atomic} rwlk -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/katevirc@{atomic} rwlk -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/KDE/UserFeedback.conf r,
+  owner @{user_config_dirs}/kioslaverc r,
+  owner @{user_config_dirs}/kservicemenurc r,
+  owner @{user_config_dirs}/kwritemetainfos@{atomic} rwlk -> @{user_config_dirs}/#@{int},
+
+  owner @{user_share_dirs}/baloo/index r,
+  owner @{user_share_dirs}/baloo/index-lock rwk,
+  owner @{user_share_dirs}/user-places.xbel r,
+  
+  # Text editor could edit any file?
+  owner @{tmp}/* rwl,
+  #owner link /tmp/kTejJR.m3u8 -> /tmp/#436,
+  #owner link /tmp/kwrite.fFgcpn -> /tmp/oslwzv.m3u8,
+  #owner link /tmp/kwrite.lPvyCM -> /tmp/#438,
+
+        @{run}/mount/utab r,
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/kwrite@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
+
+  @{sys}/bus/ r,
+  @{sys}/bus/usb/devices/ r,
+  @{sys}/devices/virtual/input/input@{int}/event@{int}/uevent r,
+  @{sys}/devices/virtual/input/input@{int}/uevent r,
+
+  owner @{PROC}/@{pid}/mountinfo r,
+
+  /dev/tty r,
+
+  include if exists <local/kwrite>
+}
+
+# vim:syntax=apparmor
