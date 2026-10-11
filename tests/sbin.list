@@ -907,6 +907,7 @@ zdump
 zerofree
 zfsdist-bpfcc
 zfsslower-bpfcc
+zgenhostid
 zic
 zramctl
 zypp-refresh

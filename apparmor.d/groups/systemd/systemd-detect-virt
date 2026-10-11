@@ -43,6 +43,10 @@ profile systemd-detect-virt @{exec_path} flags=(attach_disconnected) {
   deny capability perfmon,
   deny network (send receive) netlink raw,
 
+  # Inherit Silencer
+  deny /var/tmp/dracut.@{rand6}/systemd-cat w,
+  deny /var/tmp/dracut.@{rand6}@{w}/systemd-cat w,
+
   include if exists <local/systemd-detect-virt>
 }
 

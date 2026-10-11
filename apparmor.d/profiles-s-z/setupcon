@@ -1,0 +1,69 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/setupcon
+profile setupcon @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/consoles>
+
+  capability dac_read_search,
+
+  @{exec_path} mr,
+
+  @{sh_path}      mr,
+  @{bin}/cat      mrix,
+  @{bin}/chmod    mrix,
+  @{bin}/{,e}grep mrix,
+  @{bin}/gzip     mrix,
+  @{bin}/kbd_mode r,
+  @{bin}/loadkeys r,
+  @{bin}/mkdir    mrix,
+  @{bin}/mktemp   mrix,
+  @{bin}/rm       mrix,
+  @{bin}/sed      mrix,
+  @{bin}/sort     mrix,
+  @{bin}/stty     mrix,
+  @{bin}/uname    mrix,
+  @{bin}/uniq     mrix,
+  @{bin}/zcat      rix,
+
+  /usr/share/consolefonts/{,**} r,
+
+  /etc/console-setup/{,*} r,
+  /etc/default/console-setup r,
+  /etc/default/keyboard r,
+
+  /var/lib/dracut/console-setup-dir/bin/ w,
+  /var/lib/dracut/console-setup-dir/bin/setupcon w,
+  /var/lib/dracut/console-setup-dir/etc/ w,
+  /var/lib/dracut/console-setup-dir/etc/console-setup/ w,
+  /var/lib/dracut/console-setup-dir/etc/console-setup/*.kmap w,
+  /var/lib/dracut/console-setup-dir/morefiles w,
+
+  / r,
+
+  @{run}/tmpkbd.@{rand6} rw,
+
+  @{sys}/fs/cgroup/system.slice/cpu.max r,
+  @{sys}/fs/cgroup/system.slice/dbus.service/cpu.max r,
+  @{sys}/fs/cgroup/user.slice/cpu.max r,
+  @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/cpu.max r,
+  @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/**/cpu.max r,
+
+  @{PROC}/@{pids}/cgroup r,
+  @{PROC}/@{pids}/maps r,
+
+  /dev/ r,
+
+  # Inherit Silencer
+  deny @{HOME}/{,**} r,
+
+  include if exists <local/setupcon>
+}
+
+# vim:syntax=apparmor

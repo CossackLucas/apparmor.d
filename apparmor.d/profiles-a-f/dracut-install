@@ -12,6 +12,8 @@ profile dracut-install @{exec_path} {
   include <abstractions/consoles>
   include <abstractions/nameservice-strict>
 
+  capability dac_read_search,
+  capability fsetid,
   capability syslog,
 
   @{exec_path} mr,
@@ -19,21 +21,34 @@ profile dracut-install @{exec_path} {
   @{bin}/cp rix,
 
   /usr/share/btrfsprogs/dracut* r,
+  /usr/share/dbus-1/system-services/org.freedesktop.network1.service r,
+  /usr/share/dbus-1/system.d/org.freedesktop.network1.conf r,
   /usr/share/kbd/{,**} r,
 
   /etc/ r,
   /etc/depmod.d/{,**} r,
+  /etc/hostid r,
   /etc/hostname r,
   /etc/machine-id r,
+  /etc/modules r,
   /etc/modules-load.d/{,**} r,
   /etc/sysctl.d/{,**} r,
+  /etc/systemd/journald.conf r,
   /etc/systemd/journald.conf.d/{,**} r,
+  /etc/systemd/network/{,*} r,
+  /etc/systemd/networkd.conf r,
+  /etc/systemd/networkd.conf.d/{,*} r,
+  /etc/systemd/system.conf r,
   /etc/systemd/system.conf.d/{,**} r,
   /etc/sysusers.d/{,*.conf} r,
+  /etc/tmpfiles.d/{,*} r,
   /etc/udev/hwdb.bin r,
   /etc/udev/rules.d/{,**} r,
+  /etc/udev/udev.conf r,
   /etc/udev/udev.conf.d/{,**} r,
   /etc/vconsole.conf r,
+  /etc/xattr.conf r,
+  /etc/zfs/zpool.cache r,
 
   /etc/modprobe.d/{,**} r,
   @{lib}/modprobe.d/{,**} r,
@@ -61,6 +76,9 @@ profile dracut-install @{exec_path} {
 
   @{PROC}/cmdline r,
   @{PROC}/modules r,
+
+  # Inherit Silencer
+  deny @{HOME}/{,**} r,
 
   include if exists <local/dracut-install>
 }

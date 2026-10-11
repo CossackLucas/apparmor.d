@@ -1,0 +1,90 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{lib}/plymouth/plymouth-populate-initrd
+profile plymouth-populate-initrd @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/consoles>
+  include <abstractions/fonts-strict>
+  include <abstractions/nameservice-strict>
+
+  capability dac_read_search,
+
+  @{exec_path} mr,
+
+  @{sh_path} r,
+
+  @{bin}/basename            ix,
+  @{bin}/chmod               ix,
+  @{bin}/cp                  ix,
+  @{bin}/dirname             ix,
+  @{bin}/find                ix,
+  @{bin}/{e,f,}grep         rix,
+  @{bin}/{m,g,}awk          rix,
+  @{bin}/head                ix,
+  @{ldd_path}               rix,
+  @{bin}/ln                  ix,
+  @{bin}/mkdir               ix,
+  @{bin}/plymouth            Px,
+  @{bin}/readlink            ix,
+  @{bin}/sed                 ix,
+  @{bin}/sort                ix,
+  @{bin}/update-alternatives Px,
+  @{bin}/xargs               ix,
+
+  @{sbin}/plymouth-set-default-theme Px,
+
+  #aa:exec fc-list
+
+  @{bin}/plymouth   mr,
+  @{sbin}/plymouthd mr,
+  @{lib}/plymouth/plymouthd-fd-escrow mr,
+
+  /usr/share/pixmaps/**.png r,
+  /usr/share/plymouth/** r,
+  /usr/share/X11/locale/ r,
+  /usr/share/xkeyboard-config-2/** r,
+
+  /etc/default/keyboard r,
+  /etc/plymouth/plymouthd.conf r,
+  /etc/xattr.conf r,
+
+  / r,
+
+  /var/tmp/dracut.@{rand6}/initramfs/@{bin}/plymouth rw,
+  /var/tmp/dracut.@{rand6}/initramfs/@{sbin}/plymouthd rw,
+  /var/tmp/dracut.@{rand6}/initramfs/@{lib}/{,**} rw,
+  /var/tmp/dracut.@{rand6}/initramfs/etc/** rw,
+  /var/tmp/dracut.@{rand6}/initramfs/usr/share/** w,
+
+  /var/tmp/dracut.@{rand6}@{w}/initramfs/@{bin}/plymouth rw,
+  /var/tmp/dracut.@{rand6}@{w}/initramfs/@{sbin}/plymouthd rw,
+  /var/tmp/dracut.@{rand6}@{w}/initramfs/@{lib}/{,**} rw,
+  /var/tmp/dracut.@{rand6}@{w}/initramfs/etc/** rw,
+  /var/tmp/dracut.@{rand6}@{w}/initramfs/usr/share/** rw,
+
+  @{sys}/fs/cgroup/system.slice/cpu.max r,
+  @{sys}/fs/cgroup/system.slice/dbus.service/cpu.max r,
+  @{sys}/fs/cgroup/user.slice/cpu.max r,
+  @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/cpu.max r,
+  @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/**/cpu.max r,
+
+  @{PROC}/@{pids}/cgroup r,
+  @{PROC}/@{pids}/fd/ r,
+
+  # Silencer
+  deny @{HOME}/{,**} r,
+
+  # Inherit Silencer
+  deny /var/tmp/dracut.@{rand6}/systemd-cat w,
+  deny /var/tmp/dracut.@{rand6}@{w}/systemd-cat w,
+
+  include if exists <local/plymouth-populate-initrd>
+}
+
+# vim:syntax=apparmor

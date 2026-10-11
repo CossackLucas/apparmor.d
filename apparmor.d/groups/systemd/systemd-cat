@@ -20,6 +20,9 @@ profile systemd-cat @{exec_path} flags=(attach_disconnected) {
   @{bin}/echo  ix,
   @{bin}/pwd   ix,
 
+  /var/tmp/dracut.@{rand6}/systemd-cat r,
+  /var/tmp/dracut.@{rand6}@{w}/systemd-cat r,
+
   include if exists <local/systemd-cat>
 }
 

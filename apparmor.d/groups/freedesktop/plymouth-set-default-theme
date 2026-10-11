@@ -25,6 +25,10 @@ profile plymouth-set-default-theme @{exec_path} flags=(attach_disconnected) {
 
   /etc/plymouth/{,*} r,
 
+  # Inherit Silencer
+  deny /var/tmp/dracut.@{rand6}/systemd-cat w,
+  deny /var/tmp/dracut.@{rand6}@{w}/systemd-cat w,
+
   include if exists <local/plymouth-set-default-theme>
 }
 

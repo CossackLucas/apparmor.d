@@ -18,6 +18,10 @@ profile fc-list @{exec_path} {
 
   @{exec_path} mr,
 
+  # Inherit Silencer
+  deny /var/tmp/dracut.@{rand6}/systemd-cat w,
+  deny /var/tmp/dracut.@{rand6}@{w}/systemd-cat w,
+
   include if exists <local/fc-list>
 }
 

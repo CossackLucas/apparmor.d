@@ -9,16 +9,21 @@ include <tunables/global>
 @{exec_path} = @{bin}/dracut
 profile dracut @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>
+  include <abstractions/cgroup-limits>
   include <abstractions/consoles>
   include <abstractions/disks-read>
   include <abstractions/nameservice-strict>
   include <abstractions/path>
 
   capability dac_override,
+  capability dac_read_search,
   capability mknod,
+  capability sys_admin,
   capability sys_chroot,
 
   network alg seqpacket, # kernel crypto API
+
+  mqueue getattr type=posix,
 
   @{exec_path} mrix,
 
@@ -29,27 +34,31 @@ profile dracut @{exec_path} flags=(attach_disconnected) {
   @{bin}/@{multiarch}-pkg-config rix,
   @{bin}/3cpio                rix,
   @{bin}/eu-strip             rix,
-  @{bin}/logger rix,
+  @{bin}/logger               rix,
   @{bin}/findmnt               Px,
+  @{sbin}/fsfreeze           mrix,
   @{bin}/getopt               rix,
   @{bin}/hardlink             rix,
   @{bin}/kmod                  Cx -> kmod,
   @{bin}/mountpoint           rix,
   @{bin}/pkgconf              rix,
+  @{bin}/setupcon              Px,
   @{bin}/sync                 rix,
   @{bin}/systemctl             Cx -> systemctl,
   @{bin}/systemd-cat           Px,
   @{bin}/systemd-detect-virt   Px,
   @{bin}/systemd-escape        Px,
+  @{bin}/systemd-sysusers      Px,
   @{bin}/udevadm               Px,
   @{bin}/zgrep                rix,
   @{sbin}/blkid                Px,
   @{sbin}/btrfs                Px,
   @{sbin}/ldconfig            rix,
-  @{lib}/plymouth/plymouth-populate-initrd PUx,
+  @{sbin}/zgenhostid          rix,
 
   @{lib}/dracut/dracut-util    rix,
   @{lib}/dracut/dracut-install Px,
+  @{lib}/plymouth/plymouth-populate-initrd Px,
 
   @{lib}/ r,
   @{lib}/dracut/{,**} r,
@@ -68,17 +77,27 @@ profile dracut @{exec_path} flags=(attach_disconnected) {
   @{lib}/modprobe.d/{,**} r,
 
   /etc/crypttab r,
+  /etc/default/keyboard r,
   /etc/fstab r,
+  /etc/modules r,
   /etc/modules-load.d/{,**} r,
   /etc/plymouth/plymouthd.conf r,
   /etc/shadow r,
   /etc/sysconfig/{,**} r,
+  /etc/sysctl.d/{,*} r,
   /etc/systemd/{,**} r,
+  /etc/udev/rules.d/{,*} r,
   /etc/vconsole.conf r,
+  /etc/xattr.conf r,
 
+  @{efi}/ r,
   @{efi}/initrd* rw,
+  @{efi}/initramfs-linux*.img* rw,
+
+  /usr/src/linux-headers-*/.config r,
 
   /var/lib/bluetooth/{,**/} r,
+  /var/lib/dracut/** rw,
 
   /var/tmp/dracut.@{rand6}/{,**} rwl,
   /var/tmp/dracut.@{rand6}@{w}/{,**} rwl,
@@ -89,13 +108,22 @@ profile dracut @{exec_path} flags=(attach_disconnected) {
   @{sys}/class/drm/ r,
   @{sys}/bus/*/devices/ r,
   @{sys}/devices/**/modalias r,
+  @{sys}/fs/cgroup/system.slice/*.service/cpu.max r,
+  @{sys}/fs/cgroup/system.slice/cpu.max r,
   @{sys}/module/firmware_class/parameters/path r,
+  @{sys}/module/scsi_mod/parameters/scan r,
+  @{sys}/power/resume r,
 
   @{PROC}/@{pid}/cgroup r,
   @{PROC}/@{pid}/fd/ r,
   @{PROC}/@{pid}/mountinfo r,
   @{PROC}/cmdline r,
   @{PROC}/swaps r,
+
+  # Silencer
+  deny network inet dgram,
+  deny network inet6 dgram,
+  deny @{HOME}/{,**} r,
 
   profile systemctl {
     include <abstractions/base>
@@ -113,20 +141,24 @@ profile dracut @{exec_path} flags=(attach_disconnected) {
     include <abstractions/base>
     include <abstractions/app/kmod>
 
-    /var/tmp/dracut.@{rand6}/initramfs/@{lib}/modules/*/ r,
-    /var/tmp/dracut.@{rand6}/initramfs/@{lib}/modules/*/kernel/{,**} r,
+    /var/tmp/dracut.@{rand6}/initramfs/@{lib}/modules/*/{,**} r,
+    /var/tmp/dracut.@{rand6}/initramfs/@{lib}/modules/*/modules.* rw,
     /var/tmp/dracut.@{rand6}/modules/*/ r,
     /var/tmp/dracut.@{rand6}/modules/*/kernel/{,**} r,
     /var/tmp/dracut.@{rand6}/modules/*/modules.* rw,
 
-    /var/tmp/dracut.@{rand6}@{w}/initramfs/@{lib}/modules/*/ r,
-    /var/tmp/dracut.@{rand6}@{w}/initramfs/@{lib}/modules/*/kernel/{,**} r,
+    /var/tmp/dracut.@{rand6}@{w}/initramfs/@{lib}/modules/*/{,**} r,
+    /var/tmp/dracut.@{rand6}@{w}/initramfs/@{lib}/modules/*/modules.* rw,
     /var/tmp/dracut.@{rand6}@{w}/modules/*/ r,
     /var/tmp/dracut.@{rand6}@{w}/modules/*/kernel/{,**} r,
     /var/tmp/dracut.@{rand6}@{w}/modules/*/modules.* rw,
 
     @{sys}/module/compression r,
     @{sys}/module/**/initstate r,
+
+    # Inherit Silencer
+    deny /var/tmp/dracut.@{rand6}/systemd-cat w,
+    deny /var/tmp/dracut.@{rand6}@{w}/systemd-cat w,
 
     include if exists <local/dracut_kmod>
   }
@@ -136,11 +168,17 @@ profile dracut @{exec_path} flags=(attach_disconnected) {
     include <abstractions/consoles>
     include <abstractions/nameservice-strict>
 
+    capability dac_read_search,
+
     @{ldd_path}  mrix,
 
     @{bin}/* mr,
     @{sbin}/* mr,
     @{lib}/**  mr,
+
+    # Inherit Silencer
+    deny /var/tmp/dracut.@{rand6}/systemd-cat w,
+    deny /var/tmp/dracut.@{rand6}@{w}/systemd-cat w,
 
     include if exists <local/dracut_ldd>
   }
