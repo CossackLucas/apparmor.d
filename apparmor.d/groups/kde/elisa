@@ -1,0 +1,61 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{export_ext} = pdf shortcuts
+
+@{exec_path} = @{bin}/elisa
+profile elisa @{exec_path} flags=(attach_disconnected,mediate_deleted) {
+  include <abstractions/base>
+  include <abstractions/audio-client>
+  include <abstractions/common/kde>
+  include <abstractions/kde-export-settings>
+  include <abstractions/kde-file-dialog>
+  include <abstractions/nameservice-strict>
+
+  network netlink raw,
+
+  signal send set=term peer=kioworker,
+
+  @{exec_path} mr,
+
+  @{open_path} Px -> child-open-browsers,
+
+  @{bin}/baloo_filemetadata_temp_extractor rix,
+  @{bin}/net                               rPx,
+  @{bin}/testparm                          rPx,
+
+  #aa:exec kioworker
+
+  /etc/fstab r,
+
+  @{bin}/ r,
+
+  owner @{user_music_dirs}/{,**} r,
+  owner @{user_music_dirs}/**.m3u{,8} w,
+
+  owner @{user_cache_dirs}/vlc/art/artistalbum/*/ w,
+  owner @{user_cache_dirs}/vlc/art/artistalbum/*/*/ w,
+  owner @{user_cache_dirs}/vlc/art/artistalbum/*/*/art.@{image_ext} w,
+
+  owner @{user_config_dirs}/kde.org/elisa.conf@{atomic} rwlk -> @{user_config_dirs}/kde.org/#@{int},
+  owner @{user_config_dirs}/kservicemenurc r,
+
+  owner @{tmp}/#@{int} rw,
+
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/elisa@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
+
+  owner @{PROC}/@{pid}/mountinfo r,
+  owner @{PROC}/@{pid}/task/@{tid}/comm w,
+
+  /dev/tty r,
+
+  include if exists <local/elisa>
+}
+
+# vim:syntax=apparmor
