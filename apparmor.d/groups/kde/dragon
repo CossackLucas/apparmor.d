@@ -1,0 +1,39 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/dragon
+profile dragon @{exec_path} flags=(attach_disconnected,mediate_deleted) {
+  include <abstractions/base>
+  include <abstractions/audio-client>
+  include <abstractions/common/kde>
+  include <abstractions/nameservice-strict>
+  include <abstractions/sys/dmi>
+
+  @{exec_path} mr,
+
+  @{open_path} Px -> child-open-browsers,
+
+  @{bin}/ r,
+
+  owner @{user_download_dirs}/{,**} r,
+  owner @{user_torrents_dirs}/{,**} r,
+  owner @{user_videos_dirs}/{,**} r,
+
+  owner @{user_cache_dirs}/dragonplayer/ rw,
+  owner @{user_cache_dirs}/dragonplayer/** rwlk,
+
+  owner @{user_config_dirs}/kde.org/dragonplayer.conf@{atomic} rwlk -> @{user_config_dirs}/kde.org/#@{int},
+
+  owner @{PROC}/@{pid}/task/@{tid}/comm w,
+
+  /dev/tty r,
+
+  include if exists <local/dragon>
+}
+
+# vim:syntax=apparmor

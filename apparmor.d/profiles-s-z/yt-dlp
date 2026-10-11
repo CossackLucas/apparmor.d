@@ -24,6 +24,8 @@ profile yt-dlp @{exec_path} {
   network inet6 stream,
   network netlink raw,
 
+  signal receive set=kill peer=haruna,
+
   @{exec_path} r,
   @{python_path} r,
 

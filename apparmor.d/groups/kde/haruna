@@ -1,0 +1,73 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/haruna
+profile haruna @{exec_path} flags=(attach_disconnected,mediate_deleted) {
+  include <abstractions/base>
+  include <abstractions/audio-client>
+  include <abstractions/cgroup-limits>
+  include <abstractions/common/kde>
+  include <abstractions/nameservice-strict>
+  include <abstractions/p11-kit>
+  include <abstractions/ssl_certs>
+  include <abstractions/sys/dmi>
+
+  network inet stream,
+  network inet dgram,
+  network inet6 dgram,
+  network netlink raw,
+
+  signal send set=kill peer=youtube-dl,
+  signal send set=kill peer=yt-dlp,
+
+  @{exec_path} mr,
+
+  @{bin}/youtube-dl Px,
+  @{bin}/yt-dlp     Px,
+
+  @{bin}/ r,
+
+  @{MOUNTS}/ r,
+  @{MOUNTS}/**/ r,
+  @{MOUNTS}/**.@{video_ext} r,
+  @{MOUNTS}/**.@{subtitles_ext} r,
+
+  owner @{user_download_dirs}/{,**} r,
+  owner @{user_torrents_dirs}/{,**} r,
+  owner @{user_videos_dirs}/{,**} r,
+
+  # Default screenshots directory
+  owner "@{user_pictures_dirs}/Haruna screenshots/" w,
+  owner "@{user_pictures_dirs}/Haruna screenshots/*.{jpg,jxl,png,webp}" w,
+
+  owner @{user_cache_dirs}/KDE/haruna/ rw,
+  owner @{user_cache_dirs}/KDE/haruna/** rwlk -> @{user_cache_dirs}/KDE/haruna/**,
+
+  owner @{user_config_dirs}/haruna/ rw,
+  owner @{user_config_dirs}/haruna/** rwlk -> @{user_config_dirs}/haruna/**,
+
+  owner @{user_share_dirs}/haruna/ rw,
+  owner @{user_share_dirs}/haruna/** rwk,
+
+  owner @{tmp}/kdsingleapp-@{user}-@{int}-haruna w,
+  owner @{tmp}/kdsingleapp-@{user}-@{int}-haruna.lock rwk,
+
+  @{run}/mount/utab r,
+
+        @{PROC}/version r,
+  owner @{PROC}/@{pid}/cmdline r,
+  owner @{PROC}/@{pid}/comm r,
+  owner @{PROC}/@{pid}/mountinfo r,
+  owner @{PROC}/@{pid}/task/@{tid}/comm w,
+
+  /dev/tty r,
+
+  include if exists <local/haruna>
+}
+
+# vim:syntax=apparmor
