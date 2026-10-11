@@ -1,0 +1,150 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{export_ext} = pdf shortcuts
+
+@{exec_path} = @{bin}/kate
+profile kate @{exec_path} flags=(attach_disconnected,mediate_deleted) {
+  include <abstractions/base>
+  include <abstractions/audio-client>
+  include <abstractions/common/kde>
+  include <abstractions/disks-read>
+  include <abstractions/kde-export-settings>
+  include <abstractions/kde-sonnet>
+  include <abstractions/nameservice-strict>
+  include <abstractions/user-read-strict>
+  include <abstractions/user-write-strict>
+
+  network netlink raw,
+
+  signal send set=hup  peer=kate//shell,
+  # ToDo: signal send to LSPs, to restart servers
+  signal send set=term,
+
+  ptrace read peer=kate//shell,
+
+  @{exec_path} mr,
+
+  @{shells_path} Cx -> shell,
+  @{bin}/git     Cx -> git,
+
+  #aa:exec kioworker
+  @{lib}/utempter/utempter Px,
+
+  # ToDo: map the rest LSPs or user development/devtools
+  @{bin}/clangd                          PUx,
+  @{bin}/gleam                           PUx,
+  @{bin}/gopls                           PUx,
+  @{bin}/haskell-language-server-wrapper PUx,
+  @{bin}/julia                           PUx,
+  @{bin}/lua-language-server             PUx,
+  @{bin}/marksman                        PUx,
+  @{bin}/pylsp                           PUx,
+  @{bin}/rust-analyzer                   PUx,
+  @{bin}/texlab                          PUx,
+  @{bin}/tinymist                        PUx,
+  @{bin}/vscode-css-languageserver       PUx,
+  @{bin}/vscode-html-languageserver      PUx,
+  @{bin}/vscode-json-languageserver      PUx,
+  @{bin}/zls                             PUx,
+  @{lib}/node_modules/dockerfile-language-server/bin/docker-langserver PUx,
+  @{lib}/node_modules/typescript-language-server/lib/cli.mjs PUx,
+  @{lib}/node_modules/@vue/language-server/bin/vue-language-server.js  PUx,
+
+  /opt/dart-sdk/bin/dart PUx,
+
+  /etc/fstab r,
+
+  /usr/share/thumbnailers/{,*} r,
+  /usr/share/org.kde.syntax-highlighting/syntax-bundled/* r,
+
+  / r,
+
+  owner @{user_config_dirs}/baloofileinformationrc r,
+  owner @{user_config_dirs}/kate-externaltoolspluginrc@{atomic} rwlk -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/kate/ rw,
+  owner @{user_config_dirs}/kate/** rwlk -> @{user_config_dirs}/kate/**,
+  owner @{user_config_dirs}/katemetainfos@{atomic} rwlk -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/katevirc@{atomic} rwlk -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/KDE/UserFeedback.conf r,
+  owner @{user_config_dirs}/kioslaverc r,
+  owner @{user_config_dirs}/konsolerc r,
+
+  owner @{user_share_dirs}/baloo/index r,
+  owner @{user_share_dirs}/baloo/index-lock rwk,
+  owner @{user_share_dirs}/konsole/{,*.profile} r,
+
+  owner @{tmp}/* rwl -> @{tmp}/*,
+  #owner @{tmp}/#@{int} rw,
+  #owner @{tmp}/@{rand6}.m3u8 rwl -> @{tmp}/#@{int},
+  #owner @{tmp}/@{rand6}.m3u8.part rw,
+  #owner @{tmp}/kate.@{rand6} rwl -> @{tmp}/#@{int},
+  #owner @{tmp}/kate.@{rand6} rwl -> @{tmp}/@{rand6}.m3u8,
+
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/kate@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
+
+  owner @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/app.slice/app-org.kde.kate-@{int}.scope/cgroup.controllers r,
+  owner @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/app.slice/app-org.kde.kate-@{int}.scope/cgroup.subtree_control w,
+  owner @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/app.slice/app-org.kde.kate-@{int}.scope/main.scope/ w,
+  owner @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/app.slice/app-org.kde.kate-@{int}.scope/main.scope/cgroup.procs w,
+  owner @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/app.slice/app-org.kde.kate-@{int}.scope/tab(@{int}).scope/ w,
+  owner @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/app.slice/app-org.kde.kate-@{int}.scope/tab(@{int}).scope/cgroup.procs w,
+
+  owner @{PROC}/@{pid}/cgroup r,
+  owner @{PROC}/@{pid}/environ r,
+  owner @{PROC}/@{pid}/mountinfo r,
+  owner @{PROC}/@{pid}/stat r,
+  owner @{PROC}/@{pid}/task/@{tid}/children r,
+
+        /dev/ptmx rw,
+        /dev/tty r,
+  owner /dev/pts/@{u8} rw,
+
+  profile git {
+    include <abstractions/base>
+    include <abstractions/app/git>
+
+    owner @{user_projects_dirs}/ r,
+    owner @{user_projects_dirs}/** rwlk -> @{user_projects_dirs}/**,
+
+    # Inherit Silencer
+    owner @{user_share_dirs}/baloo/index r,
+
+    include if exists <local/kate_git>
+  }
+
+  profile shell {
+    include <abstractions/base>
+    include <abstractions/consoles>
+    include <abstractions/development>
+    include <abstractions/nameservice-strict>
+    include <abstractions/shells>
+
+    network inet dgram,
+    network inet6 dgram,
+    network inet stream,
+    network inet6 stream,
+    network netlink raw,
+
+    signal receive set=hup peer=kate,
+
+    @{shells_path} r,
+
+    /etc/debuginfod/{,*} r,
+
+    owner @{user_projects_dirs}/ r,
+    owner @{user_projects_dirs}/** rwlk -> @{user_projects_dirs}/**,
+
+    include if exists <local/kate_shell>
+  }
+
+  include if exists <local/kate>
+}
+
+# vim:syntax=apparmor
