@@ -1,0 +1,145 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{domain} = org.chromium.Chromium
+@{export_ext} = pdf shortcuts
+
+@{exec_path} = @{bin}/digikam @{bin}/showfoto
+profile digikam @{exec_path} flags=(attach_disconnected,mediate_deleted) {
+  include <abstractions/base>
+  include <abstractions/audio-client>
+  include <abstractions/common/qt-webengine>
+  include <abstractions/cgroup-limits>
+  include <abstractions/devices-usb>
+  include <abstractions/disks-read>
+  include <abstractions/common/kde>
+  include <abstractions/kde-export-settings>
+  include <abstractions/kde-file-dialog>
+  include <abstractions/nameservice-strict>
+  include <abstractions/qt-settings-write>
+  include <abstractions/ssl_certs>
+  include <abstractions/sys/dmi>
+  include <abstractions/thumbnails-cache-write>
+
+  network inet dgram,
+  network inet6 dgram,
+  network inet stream,
+  network inet6 stream,
+  network netlink raw,
+
+  signal send set=term peer=kioworker,
+
+  ptrace read peer=digikam//&digikam//webengine,
+
+  @{exec_path} mrix,
+
+  audit @{open_path} Px -> child-open-browsers,
+
+  @{bin}/vendor_perl/exiftool rPx,
+
+  @{bin}/darktable PUx,
+  @{bin}/gwenview  PUx,
+  @{bin}/krita     PUx,
+  @{bin}/okular    Px,
+
+  @{bin}/mariadb-admin      PUx,
+  @{bin}/mariadb-install-db PUx,
+  @{bin}/mariadb-upgrade    PUx,
+  @{sbin}/mariadbd          PUx,
+
+  @{lib}/{,@{multiarch}/}qt{5,6}/{,libexec/}QtWebEngineProcess Px -> digikam//&digikam//webengine,
+
+  #aa:exec kioworker
+
+  /etc/fstab r,
+  /etc/ImageMagick-7/{,*} r,
+  /etc/sane.d/{,**} r,
+
+  /usr/share/color/icc/{,**} r,
+  /usr/share/desktop-directories/kf5-* r,
+  /usr/share/kxmlgui5/showfoto/* r,
+  /usr/share/ImageMagick-7/{,*} r,
+  /usr/share/snmp/mibs/{,*} r,
+
+  owner @{user_pictures_dirs}/{,**} rw,
+  owner @{user_pictures_dirs}/**.db k,
+  owner @{user_pictures_dirs}/Camera-@{rand6}-@{hex8}.digikamtempfile* l -> @{user_pictures_dirs}/**#@{int},
+
+  owner @{user_cache_dirs}/showfoto/ rw,
+  owner @{user_cache_dirs}/showfoto/** rwlk -> @{user_cache_dirs}/showfoto/**,
+
+  owner @{user_config_dirs}/akonadi/akonadiconnectionrc r,
+  owner @{user_config_dirs}/digikam_oauthrc@{atomic} rwlk -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/digikam_systemrc@{atomic} rwlk -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/showfotorc@{atomic} rwlk -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/KDE/Sonnet.conf r,
+
+  owner @{user_share_dirs}/showfoto/ w,
+  owner @{user_share_dirs}/showfoto/* rw,
+  owner @{user_share_dirs}/user-places.xbel r,
+
+  owner @{user_state_dirs}/showfotostaterc@{atomic} rwlk -> @{user_state_dirs}/#@{int},
+
+  owner @{tmp}/#@{int} rw,
+  owner @{tmp}/digikam-smug-@{int}/ rw,
+
+  # Check if could be limited
+  @{run}/udev/data/+acpi:* r,             # Exposes ACPI objects (power buttons, batteries, thermal)
+  @{run}/udev/data/+dmi:* r,              # for motherboard info
+  @{run}/udev/data/+drm:card@{int}-* r,   # For screen outputs
+  @{run}/udev/data/+input:input@{int} r,  # For mouse, keyboard, touchpad
+  @{run}/udev/data/+leds:* r,             # Identifies all LEDs (keyboard, mouse, etc.)
+  @{run}/udev/data/+pci:* r,              # Identifies all PCI devices (CPU, GPU, Network, Disks, USB, etc.)
+  @{run}/udev/data/+platform:* r,         # Identifies onboard devices (laptop/board model, power controllers, thermal sensors)
+  @{run}/udev/data/c1:@{int}    r,        # For RAM disk
+  @{run}/udev/data/c10:@{int}   r,        # For non-serial mice, misc features
+  @{run}/udev/data/c13:@{int}  r,         # For /dev/input/*
+  @{run}/udev/data/c202:@{int} r,         # CPU model-specific registers
+  @{run}/udev/data/c203:@{int} r,         # CPU CPUID information
+  @{run}/udev/data/c@{dynamic}:@{int} r,  # For dynamic assignment range 234 to 254, 384 to 511
+  @{run}/udev/data/c29:@{int} r,          # For /dev/fb[0-9]*
+  @{run}/udev/data/c4:@{int} r,           # For /dev/tty[0-9]*
+  @{run}/udev/data/c5:@{int} r,           # For /dev/tty, /dev/console, /dev/ptmx
+  @{run}/udev/data/c7:@{int} r,           # For Virtual console capture devices
+  @{run}/udev/data/c89:@{int} r,          # For I2C bus interface
+  @{run}/udev/data/n@{int} r,             # For network interfaces
+
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/digikam@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
+  owner @{run}/user/@{uid}/showfoto@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
+
+        @{PROC}/sys/vm/nr_hugepages r,
+  owner @{PROC}/@{pid}/mountinfo r,
+  owner @{PROC}/@{pid}/mounts r,
+  owner @{PROC}/@{pid}/oom_score_adj w,
+  owner @{PROC}/@{pid}/stat r,
+  owner @{PROC}/@{pid}/task/ r,
+  owner @{PROC}/@{pid}/task/@{tid}/comm w,
+  owner @{PROC}/@{pid}/task/@{tid}/status r,
+
+  @{sys}/bus/*/devices/ r,
+  @{sys}/class/*/ r,
+  @{sys}/devices/**/uevent r,
+
+  /dev/tty r,
+
+  profile webengine {
+    include <abstractions/base>
+    include <abstractions/common/qt-webengine>
+
+    signal receive set=term peer=digikam,
+
+    @{sys}/devices/system/cpu/present r,
+
+    include if exists <local/digikam_webengine>
+  }
+
+  include if exists <local/digikam>
+}
+
+# vim:syntax=apparmor
