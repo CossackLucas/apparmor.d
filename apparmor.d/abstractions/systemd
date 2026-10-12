@@ -16,8 +16,9 @@
   abi <abi/5.0>,
 
   # Systemd: allow to receive any signal from the systemd profiles
-  signal receive peer=@{p_systemd},
-  signal receive peer=@{p_systemd_user},
+  signal receive                 peer=@{p_systemd},
+  signal receive                 peer=@{p_systemd_user},
+  signal receive set=(cont term) peer=@{p_sd},
 
   # Systemd's notification write only socket
   @{run}/systemd/notify w,

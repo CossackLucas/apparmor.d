@@ -79,6 +79,7 @@ profile systemd-user @{exec_path} flags=(attach_disconnected,mediate_deleted,com
 
         @{sys}/fs/bpf/ r,
         @{sys}/devices/**/uevent r,
+        @{sys}/fs/cgroup/cgroup.controllers r,
         @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/{,**} r,
   owner @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/{,**} rw,
 
@@ -95,7 +96,9 @@ profile systemd-user @{exec_path} flags=(attach_disconnected,mediate_deleted,com
         @{PROC}/sys/kernel/overflowuid r,
         @{PROC}/sys/kernel/pid_max r,
         @{PROC}/sys/kernel/threads-max r,
+        @{PROC}/version_signature r,
   owner @{PROC}/@{pid}/cmdline r,
+  owner @{PROC}/@{pid}/coredump_filter r,
   owner @{PROC}/@{pid}/fdinfo/@{int} r,
   owner @{PROC}/@{pid}/gid_map r,
   owner @{PROC}/@{pid}/mountinfo r,

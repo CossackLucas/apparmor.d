@@ -89,6 +89,7 @@ profile dbus-system flags=(attach_disconnected) {
         @{tmp}/*.@{archive_ext} r,
   @{att}@{tmp}/*.@{archive_ext} r,
 
+        @{run}/systemd/inhibit/@{int}.ref rw,
   @{att}@{run}/systemd/inhibit/@{int}.ref rw,
   @{att}@{run}/systemd/sessions/{,@{l}}@{int}.ref rw,
 

@@ -14,6 +14,7 @@ profile systemd-nsresourcework @{exec_path} flags=(attach_disconnected) {
   capability sys_resource,
 
   signal send set=usr2 peer=systemd-nsresourced,
+  signal send set=usr2 peer=@{p_sd}//&systemd-nsresourced,
 
   @{exec_path} mr,
 

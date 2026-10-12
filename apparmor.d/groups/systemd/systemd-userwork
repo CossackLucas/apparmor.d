@@ -14,7 +14,8 @@ profile systemd-userwork @{exec_path} flags=(attach_disconnected) {
 
   capability sys_resource,
 
-  signal (send) peer=@{p_systemd},
+  signal (send)          peer=@{p_systemd},
+  signal (send) set=usr2 peer=@{p_sd}//&systemd-userdbd,
 
   @{exec_path} mr,
 

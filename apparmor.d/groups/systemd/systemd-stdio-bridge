@@ -15,6 +15,7 @@ profile systemd-stdio-bridge @{exec_path} flags=(attach_disconnected) {
   include <abstractions/consoles>
 
   signal send set=term peer=@{p_systemd},
+  signal send set=term peer=sd,
 
   unix bind type=stream addr=@@{udbus}/bus/systemd-stdio-b/,
   unix bind type=stream addr=@@{udbus}/bus/systemd-stdio-b/session,

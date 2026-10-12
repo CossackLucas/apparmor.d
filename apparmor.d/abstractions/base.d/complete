@@ -14,6 +14,7 @@
   # Systemd: allow to receive any signal from the systemd profiles
   signal receive                           peer=@{p_systemd},
   signal receive                           peer=@{p_systemd_user},
+  signal receive set=(cont term)           peer=@{p_sd},
 
   # Htop like programs can send any signals to any processes
   signal receive                           peer=btop,
