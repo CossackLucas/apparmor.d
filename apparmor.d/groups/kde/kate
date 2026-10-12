@@ -36,27 +36,7 @@ profile kate @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   #aa:exec kioworker
   @{lib}/utempter/utempter Px,
 
-  # ToDo: map the rest LSPs or user development/devtools
-  @{bin}/clangd                          PUx,
-  @{bin}/gleam                           PUx,
-  @{bin}/gopls                           PUx,
-  @{bin}/haskell-language-server-wrapper PUx,
-  @{bin}/julia                           PUx,
-  @{bin}/lua-language-server             PUx,
-  @{bin}/marksman                        PUx,
-  @{bin}/pylsp                           PUx,
-  @{bin}/rust-analyzer                   PUx,
-  @{bin}/texlab                          PUx,
-  @{bin}/tinymist                        PUx,
-  @{bin}/vscode-css-languageserver       PUx,
-  @{bin}/vscode-html-languageserver      PUx,
-  @{bin}/vscode-json-languageserver      PUx,
-  @{bin}/zls                             PUx,
-  @{lib}/node_modules/dockerfile-language-server/bin/docker-langserver PUx,
-  @{lib}/node_modules/typescript-language-server/lib/cli.mjs PUx,
-  @{lib}/node_modules/@vue/language-server/bin/vue-language-server.js  PUx,
-
-  /opt/dart-sdk/bin/dart PUx,
+  @{lsp_path} PUx,
 
   /etc/fstab r,
 

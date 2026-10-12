@@ -17,6 +17,17 @@
 
 @{devtools} = @{devtools_name}
 
+@{lsp_name}  = clangd gleam gopls haskell-language-server-wrapper julia lua-language-server
+@{lsp_name} += marksman pylsp rust-analyzer texlab tinymist vscode-css-languageserver
+@{lsp_name} += vscode-html-languageserver vscode-json-languageserver zls docker-langserver 
+@{lsp_name} += typescript-language-server vue-language-server dart
+
+@{lsp_path}  = @{bin}/@{lsp_name}
+@{lsp_path} += @{lib}/node_modules/dockerfile-language-server/bin/docker-langserver
+@{lsp_path} += @{lib}/node_modules/typescript-language-server/lib/cli.mjs
+@{lsp_path} += @{lib}/node_modules/@vue/language-server/bin/vue-language-server.js
+@{lsp_path} += /opt/dart-sdk/bin/dart
+
 include if exists <tunables/path/dev.d>
 
 # vim:syntax=apparmor
