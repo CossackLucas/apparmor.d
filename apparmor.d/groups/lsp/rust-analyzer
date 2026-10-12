@@ -1,0 +1,24 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/rust-analyzer
+profile rust-analyzer @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/cgroup-limits>
+
+  #signal receive set=term peer=kate,
+  signal receive set=term,
+
+  @{exec_path} mr,
+
+  owner @{user_projects_dirs}/{,**} r,
+
+  include if exists <local/rust-analyzer>
+}
+
+# vim:syntax=apparmor

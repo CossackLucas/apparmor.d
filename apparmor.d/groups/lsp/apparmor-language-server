@@ -1,0 +1,33 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/apparmor-language-server
+profile apparmor-language-server @{exec_path} flags=(attach_disconnected) {
+  include <abstractions/base>
+
+  @{exec_path} mr,
+
+  @{sbin}/apparmor_parser Px,
+  @{bin}/journalctl       Px -> child-journalctl-read,
+
+  /etc/apparmor/severity.db r,
+  /etc/apparmor.d/{,**} r,
+
+  @{log}/audit/audit.log r,
+
+  / r,
+  @{bin}/ r,
+
+  @{att}/profiles/{,**} r,
+
+  owner @{user_projects_dirs}/{,**} r,
+
+  include if exists <local/apparmor-language-server>
+}
+
+# vim:syntax=apparmor

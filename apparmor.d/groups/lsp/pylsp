@@ -1,0 +1,35 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/pylsp
+profile pylsp @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/python>
+
+  signal receive set=term peer=kate,
+ 
+  @{exec_path} mr,
+
+  @{python_path} ix,
+
+  owner @{HOME}/ r,
+
+  owner @{user_projects_dirs}/{,**} r,
+
+  owner @{user_cache_dirs}/black/*/*.pickle r,
+  owner @{user_cache_dirs}/black/*/tmp@{word8} w,
+  owner @{user_cache_dirs}/jedi/ r,
+  owner @{user_cache_dirs}/jedi/CPython-@{int}-@{int}/ r,
+  owner @{user_cache_dirs}/jedi/CPython-@{int}-@{int}/@{hex64}-@{hex64}.pkl rw,
+
+  owner @{PROC}/@{pid}/mounts r,
+
+  include if exists <local/pylsp>
+}
+
+# vim:syntax=apparmor

@@ -1,0 +1,34 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/gopls
+profile gopls @{exec_path} {
+  include <abstractions/base>
+
+  #signal receive set=term peer=kate,
+  signal receive set=term,
+
+  @{exec_path} mr,
+
+  @{lib}/go/bin/go rix,
+
+  owner @{HOME}/go/** r,
+  owner @{HOME}/go/**.tmp w,
+  owner @{HOME}/go/**.lock wk,
+
+  owner @{user_cache_dirs}/go-build/@{hex2}/@{hex64}-? r,
+
+        @{tmp}/ r,
+  owner @{tmp}/gopls-tempmod@{int10}/ rw,
+  owner @{tmp}/gopls-tempmod@{int10}/go.mod w,
+  owner @{tmp}/gopls-tempmod@{int10}/go.sum w,
+
+  include if exists <local/gopls>
+}
+
+# vim:syntax=apparmor
