@@ -1,0 +1,62 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/ark
+profile ark @{exec_path} flags=(attach_disconnected,mediate_deleted) {
+  include <abstractions/base>
+  include <abstractions/bus/system/org.freedesktop.UDisks2>
+  include <abstractions/common/kde>
+  include <abstractions/devices-usb>
+  include <abstractions/disks-read>
+  include <abstractions/kde-globals-write>
+  # ToDo: should be limited?
+  include <abstractions/user-read-strict>
+  include <abstractions/user-write-strict>
+
+  network netlink raw,
+
+  signal send set=term peer=kioworker,
+
+  @{exec_path} mr,
+
+  @{ldd_path}     rix,
+  @{bin}/net      PUx,
+  @{bin}/testparm PUx,
+
+  #aa:exec kioworker
+
+  /usr/share/templates/{,*.desktop} r,
+  /usr/share/thumbnailers/{,*} r,
+
+  /etc/fstab r,
+  /etc/xdg/arkrc r,
+
+        @{MOUNTS}/ r,
+  owner @{MOUNTS}/** rw,
+  owner @{HOME}/ r,
+
+  owner @{user_config_dirs}/kioslaverc r,
+  owner @{user_config_dirs}/kservicemenurc r,
+
+  owner @{user_share_dirs}/user-places.xbel r,
+
+  owner @{user_state_dirs}/kiostaterc r,
+
+        @{run}/mount/utab r,
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/ark@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
+
+        @{PROC}/sys/kernel/random/boot_id r,
+  owner @{PROC}/@{pid}/mountinfo r,
+
+  /dev/tty rw,
+
+  include if exists <local/ark>
+}
+
+# vim:syntax=apparmor
