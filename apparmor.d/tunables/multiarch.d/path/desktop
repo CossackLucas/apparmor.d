@@ -44,7 +44,7 @@
 @{image_viewers_path} = @{bin}/@{image_viewers_names}
 
 # Archive viewers
-@{archive_viewers_names} = engrampa file-roller xarchiver
+@{archive_viewers_names} = ark engrampa file-roller xarchiver
 @{archive_viewers_path} = @{bin}/@{archive_viewers_names}
 
 # Office suites
