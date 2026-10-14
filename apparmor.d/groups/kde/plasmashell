@@ -136,8 +136,10 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   @{snap}/*/@{uid}/**.@{icon_ext} r,
   /var/lib/swcatalog/icons/**.@{icon_ext} r,
 
-  @{MOUNTS}/ r,
-  @{system_games_dirs}/**.@{icon_ext} r,
+        @{system_games_dirs}/**.@{icon_ext} r,
+        @{MOUNTS}/ r,
+  owner @{MOUNTS}/** rwl,
+  owner @{HOME}/** rwl,
 
         /home/ r,
         @{HOME}/ r,
