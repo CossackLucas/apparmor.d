@@ -15,6 +15,8 @@ profile akonadi_mailfilter_agent @{exec_path} {
 
   ptrace read peer=akonadi_archivemail_agent,
   ptrace read peer=akonadi_control,
+  ptrace read peer=akonadi_newmailnotifier_agent,
+  ptrace read peer=kalendarac,
 
   @{exec_path} mr,
 
@@ -26,9 +28,8 @@ profile akonadi_mailfilter_agent @{exec_path} {
   owner @{user_config_dirs}/akonadi/ rw,
   owner @{user_config_dirs}/akonadi/** rwlk -> @{user_config_dirs}/akonadi/**,
 
-  owner @{user_config_dirs}/emaildefaults r,
-  owner @{user_config_dirs}/emailidentities.lock rwk,
-  owner @{user_config_dirs}/emailidentities* rwl,
+  owner @{user_config_dirs}/emaildefaults@{atomic} rwlk -> @{user_config_dirs}/#@{int},
+  owner @{user_config_dirs}/emailidentities@{atomic} rwlk -> @{user_config_dirs}/#@{int},
 
   owner @{user_config_dirs}/kmail2rc r,
 
