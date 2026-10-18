@@ -10,7 +10,7 @@ include <tunables/global>
 @{exec_path} += @{lib}/@{multiarch}/{,libexec/}kf{5,6}/kiod{5,6}
 profile kiod @{exec_path} {
   include <abstractions/base>
-  include <abstractions/devices-usb-read>
+  include <abstractions/devices-usb>
   include <abstractions/graphics>
   include <abstractions/kde-strict>
   include <abstractions/nameservice-strict>
@@ -28,6 +28,8 @@ profile kiod @{exec_path} {
   /etc/fstab r,
 
   @{run}/mount/utab r,
+
+  @{sys}/devices/**/uevent r,
 
   owner @{PROC}/@{pid}/mountinfo r,
   owner @{PROC}/@{pid}/mounts r,

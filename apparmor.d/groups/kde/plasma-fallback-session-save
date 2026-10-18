@@ -22,6 +22,8 @@ profile plasma-fallback-session-save @{exec_path} {
 
   owner @{user_state_dirs}/plasmasessionrestorestaterc@{atomic} rwlk -> @{user_state_dirs}/#@{int},
 
+        @{run}/mount/utab r,
+
         @{PROC}/sys/kernel/random/boot_id r,
   owner @{PROC}/@{pid}/mountinfo r,
 

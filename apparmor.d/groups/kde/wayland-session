@@ -67,6 +67,8 @@ profile wayland-session @{exec_path} {
 
     /etc/profile.d/{,**} r,
 
+    owner @{user_share_dirs}/sddm/wayland-session.log w, # file_inherit
+
     include if exists <local/wayland-session_run-parts>
   }
 

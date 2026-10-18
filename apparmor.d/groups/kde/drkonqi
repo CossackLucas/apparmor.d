@@ -13,6 +13,7 @@ profile drkonqi @{exec_path} {
   include <abstractions/common/kde>
   include <abstractions/journal-read>
   include <abstractions/kde-globals-write>
+  include <abstractions/kde-sonnet>
   include <abstractions/nameservice-strict>
   include <abstractions/qt-settings-write>
   include <abstractions/ssl_certs>
@@ -68,6 +69,7 @@ profile drkonqi @{exec_path} {
   owner @{PROC}/@{pid}/mountinfo r,
   owner @{PROC}/@{pid}/oom_score_adj w,
   owner @{PROC}/@{pid}/stat r,
+  owner @{PROC}/@{pid}/task/@{tid}/comm w,
 
   /dev/tty r,
 
@@ -94,6 +96,8 @@ profile drkonqi @{exec_path} {
     /usr/ r,
     /usr/share/drkonqi/gdb/** r,
     /usr/share/gdb/{,**} r,
+    /usr/share/glib-2.0/gdb/ r,
+    /usr/share/glib-2.0/gdb/__pycache__/*.pyc r,
     /usr/share/guile/{,**} r,
     /usr/share/qt6/translations/* r,
     /usr/share/terminfo/{,**} r,
@@ -121,6 +125,9 @@ profile drkonqi @{exec_path} {
 
     # Silencer
     deny owner /usr/share/gdb/python/gdb/**__pycache__/ w,
+
+    # Inherit Silencer
+    deny /dev/dri/renderD12[89] rw,
 
     include if exists <local/drkonqi_gdb>
   }

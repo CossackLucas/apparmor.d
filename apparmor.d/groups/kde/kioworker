@@ -113,9 +113,14 @@ profile kioworker @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_share_dirs}/kactivitymanagerd/resources/database-wal rw,
   owner @{user_share_dirs}/kservices{5,6}/{,**} r,
 
+        /tmp/packagekit-alpm-updates r,
   owner @{tmp}/#@{int} rw,
 
         @{run}/mount/utab r,
+        @{run}/libvirtd.pid r,
+        @{run}/nmbd.pid r,
+        @{run}/qga.state r,
+        @{run}/smbd.pid r,
         @{run}/sshd.pid r,
         @{run}/utmp r,
   owner @{run}/user/@{uid}/kio_*.socket rwl -> @{run}/user/@{uid}/#@{int},
@@ -128,6 +133,9 @@ profile kioworker @{exec_path} flags=(attach_disconnected,mediate_deleted) {
 
   /dev/tty r,
 
+  # Silencer
+  priority=-1 deny @{etc_rw}/* r,
+
   profile ddjvu {
     include <abstractions/base>
 
@@ -138,7 +146,7 @@ profile kioworker @{exec_path} flags=(attach_disconnected,mediate_deleted) {
     /usr/share/djvu/osi/** r,
 
     #aa:lint ignore=too-wide
-    @{MOUNTS}/** r,
+          @{MOUNTS}/** r,
     owner @{HOME}/** r,
 
     include if exists <local/kioworker_ddjvu>
@@ -159,7 +167,7 @@ profile kioworker @{exec_path} flags=(attach_disconnected,mediate_deleted) {
     /etc/paperspecs r,
 
     #aa:lint ignore=too-wide
-    @{MOUNTS}/** r,
+          @{MOUNTS}/** r,
     owner @{HOME}/** r,
 
     owner @{tmp}/gs_@{rand6} rw,

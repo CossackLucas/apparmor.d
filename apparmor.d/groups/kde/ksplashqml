@@ -36,6 +36,8 @@ profile ksplashqml @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_share_dirs}/plasma/look-and-feel/*/contents/splash/{,**} r,
   owner @{user_share_dirs}/sddm/xorg-session.log w,
 
+  owner @{PROC}/@{pid}/task/@{tid}/comm w,
+
   include if exists <local/ksplashqml>
 }
 

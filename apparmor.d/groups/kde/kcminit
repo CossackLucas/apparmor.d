@@ -7,7 +7,7 @@ abi <abi/5.0>,
 include <tunables/global>
 
 @{exec_path} = @{bin}/kcminit
-profile kcminit @{exec_path} {
+profile kcminit @{exec_path} flags=(mediate_deleted) {
   include <abstractions/base>
   include <abstractions/bus-session>
   include <abstractions/bus/session/org.freedesktop.systemd1>

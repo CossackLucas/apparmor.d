@@ -10,6 +10,7 @@ include <tunables/global>
 profile plasma-login-wallpaper @{exec_path} {
   include <abstractions/base>
   include <abstractions/common/kde>
+  include <abstractions/fontconfig-cache-write>
 
   @{exec_path} mr,
 

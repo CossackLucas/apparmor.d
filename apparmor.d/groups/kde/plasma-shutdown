@@ -18,6 +18,7 @@ profile plasma-shutdown @{exec_path} {
   #aa:exec plasma-fallback-session-save
 
   /usr/share/desktop-base/kf5-settings/kdeglobals r,
+  /usr/share/kubuntu-default-settings/kf5-settings/kdeglobals r, #aa:only ubuntu
 
   /etc/xdg/kdeglobals r,
 
@@ -28,6 +29,8 @@ profile plasma-shutdown @{exec_path} {
   owner @{user_config_dirs}/kdeglobals r,
   owner @{user_config_dirs}/ksmserverrc r,
   owner @{user_config_dirs}/plasma-workspace/shutdown/ r,
+
+  /dev/tty r,
 
   include if exists <local/plasma-shutdown>
 }

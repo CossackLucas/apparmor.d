@@ -13,6 +13,7 @@ profile kded @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   include <abstractions/audio-client>
   include <abstractions/bluetooth-observe>
   include <abstractions/bus/system/org.bluez.AgentManager1>
+  include <abstractions/bus/system/org.cups.cupsd.Notifier>
   include <abstractions/bus/system/org.freedesktop.login1>
   include <abstractions/bus/system/org.freedesktop.UDisks2>
   include <abstractions/consoles>
@@ -26,6 +27,8 @@ profile kded @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   include <abstractions/nameservice-strict>
   include <abstractions/network-manager-observe>
   include <abstractions/ssl_certs>
+  include <abstractions/sys/dmi>
+  include <abstractions/trash-strict>
   include <abstractions/wutmp>
 
   capability sys_ptrace,
@@ -114,6 +117,9 @@ profile kded @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   #aa:exec kconf_update
   #aa:exec kioworker
 
+  #aa:only ubuntu
+  /usr/share/apport/apport-checkreports Px,
+
   /usr/share/color-schemes/{,**} r,
   /usr/share/desktop-directories/kf5-*.directory r,
   /usr/share/distro-info/{,**} r,
@@ -138,7 +144,7 @@ profile kded @{exec_path} flags=(attach_disconnected,mediate_deleted) {
 
   / r,
   @{efi}/ r,
-  /home/ r,
+  @{HOMEDIRS}/ r,
   /snap/*/@{uid}/ r,
 
         /var/lib/update-notifier/user.d/ r,
@@ -146,7 +152,7 @@ profile kded @{exec_path} flags=(attach_disconnected,mediate_deleted) {
 
   /var/crash/ r,
 
-  owner @{MOUNTS}/ r,
+        @{MOUNTS}/ r,
   owner @{HOME}/ r,
   owner @{HOME}/.gtkrc-2.0 rw,
 
@@ -199,10 +205,11 @@ profile kded @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_state_dirs}/plasmashellstaterc@{atomic} rwlk, #-> @{user_state_dirs}/#@{int},
 
         @{run}/mount/utab r,
-        @{run}/user/@{uid}/gvfs/ r,
   owner @{run}/user/@{uid}/#@{int} rw,
   owner @{run}/user/@{uid}/kded[56]*kioworker.socket rwl,
 
+        /tmp/partitionmanager-@{rand6}/ r,
+  owner @{tmp}/#@{int} rw,
   owner @{tmp}/kded6.@{rand6} rwl -> /tmp/#@{int},
   owner @{tmp}/plasma-csd-generator.@{rand6}/{,**} rw,
 
@@ -222,6 +229,7 @@ profile kded @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{PROC}/@{pid}/cmdline r,
   owner @{PROC}/@{pid}/mountinfo r,
   owner @{PROC}/@{pid}/mounts r,
+  owner @{PROC}/@{pid}/task/@{tid}/comm w,
 
   /dev/disk/by-label/ r,
   /dev/ptmx rw,

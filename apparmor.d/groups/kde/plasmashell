@@ -13,6 +13,7 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   include <abstractions/audio-client>
   include <abstractions/bus-session>
   include <abstractions/bus/session/com.canonical.Unity.LauncherEntry>
+  include <abstractions/bus/system/org.cups.cupsd.Notifier>
   include <abstractions/bus/system/org.freedesktop.login1>
   include <abstractions/bus/system/org.freedesktop.UDisks2>
   include <abstractions/common/kde>
@@ -96,6 +97,7 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   /usr/share/akonadi/{,**} r,
   /usr/share/byobu/{,**} r,
   /usr/share/desktop-directories/kf5-*.directory r,
+  /usr/share/iso-codes/json/*.json r,
   /usr/share/kf{5,6}/{,**} r,
   /usr/share/kglobalaccel/{,**} r,
   /usr/share/kio/servicemenus/{,*.desktop} r,
@@ -114,6 +116,7 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   /usr/share/swcatalog/{,**} r,
   /usr/share/templates/{,*.desktop} r,
   /usr/share/thumbnailers/{,*} r,
+  /usr/share/timezonefiles/timezones.json r,
   /usr/share/wallpapers/{,**} r,
 
   /etc/appstream.conf r,
@@ -161,6 +164,7 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_cache_dirs}/plasma_theme_*.kcache rw,
   owner @{user_cache_dirs}/plasma-svgelements@{atomic} rwlk,
   owner @{user_cache_dirs}/plasmashell/** rwlk -> @{user_cache_dirs}/plasmashell/**,
+  owner @{user_cache_dirs}/QtLocation/{,**} rw,
   owner @{user_cache_dirs}/org.kde.*/ rw,
   owner @{user_cache_dirs}/org.kde.*/** rwlk,
 
@@ -170,6 +174,7 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_config_dirs}/*rc r,
   owner @{user_config_dirs}/akonadi* r,
   owner @{user_config_dirs}/akonadi/akonadi*rc r,
+  owner @{user_config_dirs}/akonadi-firstrunrc@{atomic} rwlk -> @{user_config_dirs}/#@{int},
   owner @{user_config_dirs}/kactivitymanagerd@{atomic} rwlk,
   owner @{user_config_dirs}/kactivitymanagerd-statsrc@{atomic} rwlk,
   owner @{user_config_dirs}/knfsshare r,
@@ -213,9 +218,9 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_state_dirs}/plasma/ w,
   owner @{user_state_dirs}/plasma/#@{int} wk,
   owner @{user_state_dirs}/plasma/activitiesstaterc@{atomic} wlk -> @{user_state_dirs}/plasma/#@{int},
-  owner @{user_state_dirs}/UserFeedback.org.kde.plasmashell@{atomic} rwlk,
 
         @{tmp}/.mount_nextcl@{rand6}/{,*} r,
+        /tmp/partitionmanager-@{rand6}/ r,
   owner @{tmp}/#@{int} rw,
   owner @{tmp}/plasma-browser-integration_artwork_@{rand6}.@{image_ext} r,
 

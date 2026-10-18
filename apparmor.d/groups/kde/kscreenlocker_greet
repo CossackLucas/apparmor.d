@@ -117,6 +117,7 @@ profile kscreenlocker_greet @{exec_path} {
         @{PROC}/@{pids}/mountinfo r,
         @{PROC}/@{pids}/mounts r,
         @{PROC}/@{pids}/status r,
+        @{PROC}/@{pids}/task/@{tid}/comm w,
   owner @{PROC}/@{pid}/loginuid r,
 
   /dev/tty r,
