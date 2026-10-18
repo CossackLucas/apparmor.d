@@ -9,7 +9,7 @@ include <tunables/global>
 @{exec_path}  = @{bin}/plasma-apply-{colorscheme,cursortheme,desktoptheme,lookandfeel,wallpaperimage}
 @{exec_path} += @{lib}/plasma-apply-aurorae @{lib}/@{multiarch}/libexec/plasma-apply-aurorae
 @{exec_path} += @{lib}/plasma-changeicons @{lib}/@{multiarch}/libexec/plasma-changeicons
-profile plasma-apply @{exec_path} {
+profile plasma-apply @{exec_path} flags=(mediate_deleted) {
   include <abstractions/base>
   include <abstractions/common/kde>
   include <abstractions/kde-globals-write>

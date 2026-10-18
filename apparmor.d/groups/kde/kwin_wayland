@@ -34,6 +34,9 @@ profile kwin_wayland @{exec_path} flags=(attach_disconnected,mediate_deleted) {
 
   ptrace read,
 
+  unix type=stream peer=(label=kscreenlocker_greet),
+  unix type=stream peer=(label=kscreenlocker_greet//worker),
+  unix type=stream peer=(label=plasma-keyboard),
   unix type=stream peer=(label=xkbcomp),
   unix type=stream peer=(label=xwayland),
 
@@ -64,6 +67,7 @@ profile kwin_wayland @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   /etc/xdg/Xwayland-session.d/10-ibus-x11 Cx -> ibus,
   #aa:exec kscreenlocker_greet
 
+  /usr/share/*/color{,-}schemes/*.colors r, # KDE apps own color schemes
   /usr/share/color/icc/{,**} r,
   /usr/share/desktop-directories/*.directory r,
   /usr/share/kf6/searchproviders/{,*} r,
@@ -119,6 +123,7 @@ profile kwin_wayland @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_config_dirs}/kdedefaults/* r,
   owner @{user_config_dirs}/kglobalshortcutsrc@{atomic} rwlk,
   owner @{user_config_dirs}/khotkeysrc r,
+  owner @{user_config_dirs}/kioslaverc r,
   owner @{user_config_dirs}/klaunchrc r,
   owner @{user_config_dirs}/krunnerrc r,
   owner @{user_config_dirs}/kscreenlockerrc r,
@@ -150,6 +155,7 @@ profile kwin_wayland @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{att}/dev/shm/.org.chromium.Chromium.@{rand6} rw,
 
   @{sys}/bus/ r,
+  @{sys}/bus/usb/devices/ r,
   @{sys}/devices/**/uevent r,
 
   @{run}/mount/utab r,
@@ -166,6 +172,8 @@ profile kwin_wayland @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   @{run}/udev/data/c10:@{int} r,          # for non-serial mice, misc features
   @{run}/udev/data/c189:@{int} r,         # for /dev/bus/usb/**
 
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/kwin@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
   owner @{run}/user/@{uid}/kwin-xwayland-eis-socket.@{int} w,
   owner @{run}/user/@{uid}/kwin-xwayland-eis-socket.@{int}.lock rwk,
   owner @{run}/user/@{uid}/wayland-@{int}.lock rwk,

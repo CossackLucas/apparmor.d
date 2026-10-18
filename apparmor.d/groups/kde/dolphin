@@ -21,8 +21,10 @@ profile dolphin @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   include <abstractions/disks-read>
   include <abstractions/fontconfig-cache-read>
   include <abstractions/kde-export-settings>
+  include <abstractions/kde-sonnet>
   include <abstractions/nameservice-strict>
   include <abstractions/recent-documents-write>
+  include <abstractions/recently-used>
   include <abstractions/ssl_certs>
   include <abstractions/thumbnails-cache-write>
 
@@ -105,7 +107,7 @@ profile dolphin @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   owner @{user_share_dirs}/kactivitymanagerd/resources/database{,-shm} k,
   owner link @{user_share_dirs}/user-places.xbel* -> @{user_share_dirs}/#@{int},
 
-  owner @{user_state_dirs}/UserFeedback.org.kde.dolphin@{atomic} lk -> @{user_state_dirs}/#@{int},
+  owner @{user_state_dirs}/kiostaterc@{atomic} lk -> @{user_state_dirs}/#@{int},
 
   owner @{tmp}/#@{int} rwk,
   owner @{tmp}/dolphin.@{rand6} rwl -> @{tmp}/#@{int},

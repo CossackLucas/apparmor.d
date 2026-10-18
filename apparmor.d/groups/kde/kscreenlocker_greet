@@ -9,7 +9,7 @@ include <tunables/global>
 
 @{exec_path}  = @{lib}/kscreenlocker_greet
 @{exec_path} += @{lib}/@{multiarch}/{,libexec/}kscreenlocker_greet
-profile kscreenlocker_greet @{exec_path} {
+profile kscreenlocker_greet @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   include <abstractions/base>
   include <abstractions/bus/system/org.freedesktop.login1>
   include <abstractions/common/kde>
@@ -28,6 +28,11 @@ profile kscreenlocker_greet @{exec_path} {
   signal (send)    set=(kill,term)  peer=kscreenlocker_greet//worker,
 
   unix bind type=stream addr=@@{udbus}/bus/QThread/system,
+
+  dbus send bus=system path=/org/freedesktop/login1
+       interface=org.freedesktop.login1.Manager
+       member=GetSession
+       peer=(name=org.freedesktop.login1, label="@{p_systemd_logind}"),
 
   dbus send bus=system path=/org/freedesktop/DisplayManager/Seat@{int}
        interface=org.freedesktop.DBus.Introspectable
@@ -119,9 +124,12 @@ profile kscreenlocker_greet @{exec_path} {
         @{PROC}/@{pids}/cmdline r,
         @{PROC}/@{pids}/fd/ r,
         @{PROC}/@{pids}/loginuid r,
+        @{PROC}/@{pids}/maps r,
         @{PROC}/@{pids}/mountinfo r,
         @{PROC}/@{pids}/mounts r,
+        @{PROC}/@{pid}/stat r,
         @{PROC}/@{pids}/status r,
+        @{PROC}/@{pids}/task/@{tid}/comm w,
   owner @{PROC}/@{pid}/loginuid r,
 
   /dev/tty r,
@@ -137,6 +145,12 @@ profile kscreenlocker_greet @{exec_path} {
     signal receive set=(kill,term) peer=kscreenlocker_greet,
 
     unix bind type=stream addr=@@{udbus}/bus/kscreenlocker_w/system,
+    unix      type=stream peer=(label=kwin_wayland),
+
+    dbus send bus=system path=/org/freedesktop/home1
+         interface=org.freedesktop.home1.Manager
+         member=GetUserRecordByName
+         peer=(name=org.freedesktop.home1, label="@{p_systemd_homed}"),
 
     /etc/shells r,
 

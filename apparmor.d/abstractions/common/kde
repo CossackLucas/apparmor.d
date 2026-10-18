@@ -33,6 +33,7 @@
   owner @{user_share_dirs}/kxmlgui{,5,6}/@{profile_name}/{,**} rw,
 
   owner @{user_state_dirs}/@{profile_name}{,5,6}staterc@{atomic} rwlk,
+  owner @{user_state_dirs}/UserFeedback.org.kde.@{profile_name}@{atomic} rwlk, #-> @{user_state_dirs}/#@{int},
 
   include if exists <abstractions/common/kde.d>
 

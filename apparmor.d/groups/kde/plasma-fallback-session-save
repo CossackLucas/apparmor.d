@@ -7,7 +7,7 @@ abi <abi/5.0>,
 include <tunables/global>
 
 @{exec_path} = @{lib}/{,@{multiarch}/libexec/}plasma-fallback-session-save
-profile plasma-fallback-session-save @{exec_path} {
+profile plasma-fallback-session-save @{exec_path} flags=(mediate_deleted) {
   include <abstractions/base>
   include <abstractions/graphics>
   include <abstractions/kde-strict>
@@ -21,6 +21,8 @@ profile plasma-fallback-session-save @{exec_path} {
   owner @{user_config_dirs}/menus/{,**} r,
 
   owner @{user_state_dirs}/plasmasessionrestorestaterc@{atomic} rwlk -> @{user_state_dirs}/#@{int},
+
+        @{run}/mount/utab r,
 
         @{PROC}/sys/kernel/random/boot_id r,
   owner @{PROC}/@{pid}/mountinfo r,

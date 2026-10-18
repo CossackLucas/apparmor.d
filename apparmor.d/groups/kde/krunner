@@ -41,18 +41,20 @@ profile krunner @{exec_path} {
   /usr/share/konsole/{,*} r,
   /usr/share/metainfo/{,*} r,
   /usr/share/plasma/desktoptheme/{,**} r,
-  /usr/share/qalculate/*.xml r,
+  /usr/share/qalculate/* r,
   /usr/share/swcatalog/icons/** r,
 
   /etc/fstab r,
   /etc/xdg/kshorturifilterrc r,
 
   /var/cache/swcatalog/cache/*-os-catalog.xb r,
+  /var/cache/swcatalog/cache/*-flatpak-system-@{word}-@{arch}.xb r,
   /var/lib/flatpak/appstream/{,**/} r,
   /var/lib/flatpak/appstream/*/@{arch}/@{hex64}/appstream.xml.gz r,
   /var/lib/flatpak/appstream/*/@{arch}/@{hex64}/icons/**.@{icon_ext} r,
   /var/lib/swcatalog/icons/** r,
 
+  @{system_games_dirs}/**.@{icon_ext} r,
   /snap/*/@{uid}/**.@{icon_ext} r,
 
   @{bin}/ r,
