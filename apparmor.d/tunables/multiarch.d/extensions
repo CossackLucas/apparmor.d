@@ -22,7 +22,7 @@
 @{package_ext} += [mM][sS][iI][xX] # msix
 @{package_ext} += [mM][sS][iI][xX][bB][uU][nN][dD][lL][eE] # msixbundle
 @{package_ext} += [pP][kK][gG] # pkg
-@{package_ext} += [pP][kK][gG].[tT][aA][rR]{,[zZ][sS][tT]} # pkg.tar{,.zst}
+@{package_ext} += [pP][kK][gG].[tT][aA][rR]{,.[zZ][sS][tT]} # pkg.tar{,.zst}
 @{package_ext} += [rR][pP][mM] # rpm
 @{package_ext} += [tT][gG][zZ] # tgz
 

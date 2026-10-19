@@ -223,6 +223,12 @@
   profile crashhelper flags=(attach_disconnected,complain) {
     include <abstractions/base>
 
+    capability sys_ptrace,
+
+    signal send set=(cont stop) peer=@{name},
+
+    ptrace (read,trace) peer=@{name},
+
     unix (send receive) type=seqpacket, # peer=(label=---),
     unix (send receive) type=seqpacket peer=(label=@{name}),
     unix (send receive) type=seqpacket peer=(label=@{name}//gxtest),
@@ -232,7 +238,11 @@
     owner "@{config_dirs}/" w,
     owner "@{config_dirs}/@{name}/" rw,
     owner "@{config_dirs}/@{name}/Crash Reports/" rw,
-    owner "@{config_dirs}/@{name}/Crash Reports/crash_helper_server.log" rw,
+    owner "@{config_dirs}/@{name}/Crash Reports/crash_helper_server{,-*}.log" rw,
+    owner @{config_dirs}/@{name}/*.*/minidumps/@{uuid}.dmp w,
+    owner @{config_dirs}/@{name}/*.*/minidumps/@{uuid}.extra w,
+
+    owner @{PROC}/@{pid}/task/ r,
 
     include if exists <abstractions/app/firefox_crashhelper.d>
   }

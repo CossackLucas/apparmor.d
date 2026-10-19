@@ -14,7 +14,7 @@ include <tunables/global>
 @{cache_dirs} = @{user_cache_dirs}/@{name}
 
 @{exec_path} = @{lib_dirs}/@{name}
-profile signal-desktop @{exec_path} flags=(attach_disconnected) {
+profile signal-desktop @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   include <abstractions/base>
   include <abstractions/audio-client>
   include <abstractions/bluetooth-observe>
@@ -32,6 +32,9 @@ profile signal-desktop @{exec_path} flags=(attach_disconnected) {
   network inet stream,
   network inet6 stream,
   network netlink raw,
+
+  # Signal requests random reads, for now turned off
+  #ptrace read,
 
   @{exec_path} mrix,
 

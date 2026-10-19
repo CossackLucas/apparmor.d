@@ -270,7 +270,8 @@
 
     capability sys_ptrace,
 
-    signal send peer=@{name},
+    signal receive set=(kill,term) peer=@{name}//&@{name}//crashpad_handler,
+    signal send                    peer=@{name},
 
     ptrace read peer=@{name},
     ptrace trace peer=@{name},

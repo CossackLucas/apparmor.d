@@ -52,6 +52,7 @@ profile firefox @{exec_path} flags=(attach_disconnected) {
   @{lib}/@{multiarch}/qt5/plugins/kf5/org.kde.kwindowsystem.platforms/KF5WindowSystemX11Plugin.so mr,
   @{lib}/mozilla/plugins/ r,
   @{lib}/mozilla/plugins/*.so mr,
+  @{config_dirs}/firefox/*.*/gmp-widevinecdm/@{version}.@{int}/libwidevinecdm.so mr,
 
   # Desktop integration
   @{bin}/gnome-browser-connector-host                rPx,
@@ -61,7 +62,7 @@ profile firefox @{exec_path} flags=(attach_disconnected) {
   @{bin}/speech-dispatcher                           rPx,
   @{bin}/update-mime-database                        rPx,
   @{lib}/gvfsd-metadata                              rPx,
-  @{lib}/mozilla/kmozillahelper                     rPUx,
+  @{lib}/mozilla/kmozillahelper                      rPx,
   @{open_path}                                       rPx -> child-open-any,
 
   # Common extensions
