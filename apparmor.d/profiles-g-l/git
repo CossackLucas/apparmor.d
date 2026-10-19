@@ -155,10 +155,13 @@ profile git @{exec_path} flags=(attach_disconnected) {
     include <abstractions/base>
     include <abstractions/app/editor>
 
+    signal send set=stp peer=git,
+
     owner @{user_projects_dirs}/ r,
     owner @{user_projects_dirs}/**/ r,
     owner @{user_projects_dirs}/**/.git/.COMMIT_EDITMSG* rw,
     owner @{user_projects_dirs}/**/.git/@{int} rw,
+    owner @{user_projects_dirs}/**/.git/.@{int}.swp rw,
     owner @{user_projects_dirs}/**/.git/*MSG rw,
     owner @{user_projects_dirs}/**/.git/COMMIT_EDITMSG* rw,
 

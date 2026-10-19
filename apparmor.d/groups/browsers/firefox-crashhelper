@@ -16,6 +16,12 @@ include <tunables/global>
 profile firefox-crashhelper @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>
 
+  capability sys_ptrace,
+
+  signal send set=(cont stop) peer=firefox,
+
+  ptrace (read,trace) peer=firefox,
+
   unix type=seqpacket peer=(label=firefox-crashreporter),
   unix type=seqpacket peer=(label=firefox-glxtest),
   unix type=seqpacket peer=(label=firefox-vaapitest),
@@ -25,8 +31,12 @@ profile firefox-crashhelper @{exec_path} flags=(attach_disconnected) {
 
   owner "@{config_dirs}/" w,
   owner "@{config_dirs}/firefox{,-esr}/" rw,
+  owner "@{config_dirs}/firefox{,-esr}/*.*/minidumps/@{uuid}.dmp" w,
+  owner "@{config_dirs}/firefox{,-esr}/*.*/minidumps/@{uuid}.extra" w,
   owner "@{config_dirs}/firefox{,-esr}/Crash Reports/" rw,
-  owner "@{config_dirs}/firefox{,-esr}/Crash Reports/crash_helper_server.log" rw,
+  owner "@{config_dirs}/firefox{,-esr}/Crash Reports/crash_helper_server*.log" rw,
+
+  owner @{PROC}/@{pid}/task/ r,
 
   # file_inherit
   deny owner @{user_share_dirs}/gnome-shell/session.gvdb rw,

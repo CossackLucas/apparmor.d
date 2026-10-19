@@ -28,6 +28,7 @@ profile firefox-gfxtest @{exec_path} flags=(attach_disconnected) {
 
   owner @{cache_dirs}/firefox/*/cache2/entries/@{hex} rw,
   owner @{cache_dirs}/firefox/*/cache2/entries/index rw,
+  owner @{cache_dirs}/firefox/*/cache2/index.tmp rw,
   owner @{cache_dirs}/firefox/*/startupCache/scriptCache-* r,
   owner @{cache_dirs}/firefox/*/startupCache/startupCache* r,
 
@@ -43,6 +44,8 @@ profile firefox-gfxtest @{exec_path} flags=(attach_disconnected) {
   deny @{config_dirs}/firefox/*.*/** rw,
 
   audit deny @{user_share_dirs}/gnome-shell/session.gvdb rw,
+
+  deny @{PROC}/@{pid}/mountinfo r,
 
   include if exists <local/firefox-gfxtest>
 }

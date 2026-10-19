@@ -2,6 +2,10 @@
 # Copyright (C) 2023-2024 Alexandre Pujol <alexandre@pujol.io>
 # SPDX-License-Identifier: GPL-2.0-only
 
+# !!! warning "TODO"
+#
+#     Dropped with version 155
+
 abi <abi/5.0>,
 
 include <tunables/global>
