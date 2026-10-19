@@ -57,7 +57,7 @@
 @{help_path} = @{bin}/@{help_names}
 
 # Terminal emulator
-@{terminal_names} = xdg-terminal-exec kgx terminator konsole ptyxis ghostty
+@{terminal_names} = xdg-terminal-exec kgx terminator konsole ptyxis ptyxis-agent ghostty
 @{terminal_path} = @{bin}/@{terminal_names}
 
 # Backup

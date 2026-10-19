@@ -22,6 +22,8 @@ profile nvtop @{exec_path} flags=(attach_disconnected) {
 
   ptrace read,
 
+  signal receive set=hup peer=@{terminal_names},
+
   @{exec_path} mr,
 
   /usr/share/terminfo/** r,

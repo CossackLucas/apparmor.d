@@ -101,10 +101,10 @@ profile calibre @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   /usr/local/lib{,32,64}/ r,
 
         @{MOUNTDIRS} r,
-  owner @{MOUNTS}/ r,
+        @{MOUNTS}/ r,
   owner @{MOUNTS}/** rw,
 
-        /home/ r,
+        @{HOMEDIRS}/ r,
   owner @{HOME}/ r,
   owner "@{HOME}/Calibre Library/{,**}" rwl,
   owner "@{HOME}/Calibre Library/**.{db,sqlite}" k,

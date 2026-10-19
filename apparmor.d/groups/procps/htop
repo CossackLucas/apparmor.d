@@ -30,6 +30,7 @@ profile htop @{exec_path} flags=(attach_disconnected) {
 
   signal send,
   signal receive set=hup peer=gnome-terminal-server,
+  signal receive set=hup peer=@{terminal_names},
 
   @{exec_path} mr,
 

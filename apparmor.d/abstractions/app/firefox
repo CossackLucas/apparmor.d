@@ -6,6 +6,7 @@
 # NEEDS-VARIABLE: lib_dirs
 # NEEDS-VARIABLE: config_dirs
 # NEEDS-VARIABLE: cache_dirs
+# NEEDS-VARIABLE: path
 
 # Full set of rules for all firefox based browsers. It works as a *function*
 # and requires some variables to be provided as *arguments* and set in the
@@ -82,7 +83,6 @@
 
   @{lib_dirs}/{,**}             r,
   @{lib_dirs}/*.so              mr,
-  @{lib_dirs}/crashreporter     rPx,
   @{lib_dirs}/minidump-analyzer rPx,
   @{lib_dirs}/pingsender        rPx,
   @{lib_dirs}/plugin-container  rPx,
@@ -223,6 +223,12 @@
   profile crashhelper flags=(attach_disconnected,complain) {
     include <abstractions/base>
 
+    capability sys_ptrace,
+
+    signal send set=(cont stop) peer=@{name},
+
+    ptrace (read,trace) peer=@{name},
+
     unix (send receive) type=seqpacket, # peer=(label=---),
     unix (send receive) type=seqpacket peer=(label=@{name}),
     unix (send receive) type=seqpacket peer=(label=@{name}//gxtest),
@@ -232,13 +238,18 @@
     owner "@{config_dirs}/" w,
     owner "@{config_dirs}/@{name}/" rw,
     owner "@{config_dirs}/@{name}/Crash Reports/" rw,
-    owner "@{config_dirs}/@{name}/Crash Reports/crash_helper_server.log" rw,
+    owner "@{config_dirs}/@{name}/Crash Reports/crash_helper_server{,-*}.log" rw,
+    owner @{config_dirs}/@{name}/*.*/minidumps/@{uuid}.dmp w,
+    owner @{config_dirs}/@{name}/*.*/minidumps/@{uuid}.extra w,
+
+    owner @{PROC}/@{pid}/task/ r,
 
     include if exists <abstractions/app/firefox_crashhelper.d>
   }
 
   profile crashreporter flags=(attach_disconnected,complain) {
     include <abstractions/base>
+    include <abstractions/cgroup-limits>
     include <abstractions/dconf-write>
     include <abstractions/desktop>
     include <abstractions/fontconfig-cache-read>
@@ -253,8 +264,11 @@
 
     unix (send receive) type=seqpacket peer=(label=@{name}),
     unix (send receive) type=seqpacket peer=(label=@{name}//gxtest),
+    unix (send receive) type=seqpacket peer=(label=@{name}//crashhelper),
 
-    signal receive peer=@{name},
+    signal receive                 peer=@{name},
+    signal send           set=kill peer=@{name}//&glycin,
+    signal (receive send) set=kill peer=@{name}//&@{name}//crashreporter,
 
     @{lib_dirs}/crashreporter mrix,
 
@@ -264,6 +278,7 @@
     @{firefox_path}               rPx,
     @{lib_dirs}/minidump-analyzer rPx,
 
+    owner @{config_dirs}/@{name}/*.*/breach-alerts.db-shm r,
     owner @{config_dirs}/@{name}/*.*/crashes/{,**} rw,
     owner @{config_dirs}/@{name}/*.*/crashes/events/@{uuid} rw,
     owner @{config_dirs}/@{name}/*.*/extensions/*.xpi r,
@@ -272,11 +287,13 @@
     owner @{config_dirs}/@{name}/*.*/prefs.js r,
     owner @{config_dirs}/@{name}/*.*/storage-sync-v2.sqlite-shm r,
     owner @{config_dirs}/@{name}/*.*/storage/default/* r,
+    owner @{config_dirs}/@{name}/*.*/suggest.sqlite-shm r,
     owner @{config_dirs}/@{name}/Crash?Reports/{,**} rwk,
     owner @{config_dirs}/@{name}/Pending?Pings/@{uuid}.json w,
     owner @{config_dirs}/@{name}/Profile*/*.sqlite-shm r,
 
     owner @{cache_dirs}/@{name}/*.*/** r,
+    owner @{cache_dirs}/@{name}/*.*/cache2/entries/@{hex} w,
 
           /tmp/ r,
       /var/tmp/ r,
@@ -286,8 +303,8 @@
 
     owner /dev/shm/org.mozilla.ipc.@{int}.@{int} r,
 
-    owner @{PROC}/@{pid}/cgroup r,
     owner @{PROC}/@{pid}/cmdline r,
+    owner @{PROC}/@{pid}/fd/ r,
     owner @{PROC}/@{pid}/mountinfo r,
 
     include if exists <abstractions/app/firefox_crashreporter.d>
@@ -322,6 +339,10 @@
     owner @{tmp}/org.mozilla.@{name}/.parentlock rw,
 
     owner @{PROC}/@{pid}/cmdline r,
+
+    # Inherit Silencer
+    deny @{cache_dirs}/@{name}/*/cache2/* rw,
+    deny @{config_dirs}/@{name}/*/[^.]** r,
 
     include if exists <abstractions/app/firefox_gxtest.d>
   }

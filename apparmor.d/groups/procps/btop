@@ -14,6 +14,7 @@ profile btop @{exec_path} {
   include <abstractions/hwmon>
   include <abstractions/nameservice-strict>
   include <abstractions/sys/power-supply>
+  include <abstractions/sys/statistics>
 
   capability dac_read_search,
   capability kill,
@@ -23,6 +24,8 @@ profile btop @{exec_path} {
   network netlink raw,
 
   signal send,
+  signal receive set=hup peer=@{terminal_names},
+
   ptrace read,
 
   @{exec_path} mr,
@@ -46,6 +49,7 @@ profile btop @{exec_path} {
   @{sys}/devices/virtual/net/{,**} r,
   @{sys}/devices/virtual/powercap/{,**} r,
   @{sys}/devices/virtual/thermal/thermal_zone@{int}/{,*} r,
+  @{sys}/fs/cgroup/cpuset.cpus.effective r,
 
   @{PROC} r,
   @{PROC}/@{pids}/cmdline r,

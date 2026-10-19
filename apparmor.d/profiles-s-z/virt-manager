@@ -105,6 +105,7 @@ profile virt-manager @{exec_path} flags=(attach_disconnected) {
   owner @{PROC}/@{pid}/mountinfo r,
   owner @{PROC}/@{pid}/mounts r,
   owner @{PROC}/@{pid}/stat r,
+  owner @{PROC}/@{pid}/task/@{tid}/comm w,
 
   # Silence the noise
   deny /usr/share/virt-manager/{,**} w,
