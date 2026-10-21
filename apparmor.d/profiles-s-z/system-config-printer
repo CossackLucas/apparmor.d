@@ -13,6 +13,8 @@ profile system-config-printer @{exec_path} flags=(complain) {
   include <abstractions/base>
   include <abstractions/bus/system/org.freedesktop.hostname1>
   include <abstractions/bus/system/org.freedesktop.PolicyKit1>
+  include <abstractions/cgroup-limits>
+  include <abstractions/consoles>
   include <abstractions/dconf-write>
   include <abstractions/desktop>
   include <abstractions/fontconfig-cache-read>
@@ -41,15 +43,16 @@ profile system-config-printer @{exec_path} flags=(complain) {
   owner @{HOME}/.cups/lpoptions rw,
 
         @{run}/cups/cups.sock rw,
+        @{run}/systemd/sessions/{,@{l}}@{int} r,
+        @{run}/systemd/users/@{uid} r,
   owner @{run}/user/@{uid}/gvfsd/socket-@{rand8} rw,
 
+        @{PROC}/1/cgroup r,
   owner @{PROC}/@{pid}/fd/ r,
   owner @{PROC}/@{pid}/fdinfo/@{int} r,
   owner @{PROC}/@{pid}/mountinfo r,
   owner @{PROC}/@{pid}/mounts r,
   owner @{PROC}/@{pid}/stat r,
-
-  owner /dev/tty@{u8} rw,
 
   include if exists <local/system-config-printer>
 }

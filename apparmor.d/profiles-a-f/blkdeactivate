@@ -26,6 +26,7 @@ profile blkdeactivate @{exec_path} flags=(complain) {
 
   @{sys}/devices/virtual/block/*/holders/ r,
   @{sys}/fs/cgroup/system.slice/cpu.max r,
+  @{sys}/fs/cgroup/system.slice/blk-availability.service/cpu.max r,
 
   @{PROC}/@{pid}/cgroup r,
 
