@@ -17,10 +17,10 @@ profile xrdb @{exec_path} flags=(attach_disconnected) {
   @{exec_path} mr,
 
   @{sh_path}                              rix,
-  @{bin}/{,*-}cpp-[0-9]*                  rix,
+  @{bin}/{,*-}cpp-@{d}*                   rix,
   @{bin}/cpp                              rix,
   @{lib}/gcc/@{multiarch}/@{version}/cc1  rix,
-  @{lib}/llvm-[0-9]*/bin/clang            rix,
+  @{lib}/llvm-@{d}*/bin/clang             rix,
 
   /usr/include/stdc-predef.h r,
 
@@ -58,6 +58,10 @@ profile xrdb @{exec_path} flags=(attach_disconnected) {
 
   /dev/tty rw,
   /dev/tty@{u8} rw,
+
+  # Inherit Silencer
+  deny /usr/share/sounds/** r,
+  deny @{user_share_dirs}/sounds/** r,
 
   include if exists <local/xrdb>
 }

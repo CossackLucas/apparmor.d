@@ -112,7 +112,9 @@ profile cupsd @{exec_path} flags=(attach_disconnected) {
 
   profile gs {
     include <abstractions/base>
-    include <abstractions/fonts>
+    include <abstractions/fontconfig-cache-read>
+    include <abstractions/fonts-strict>
+    include <abstractions/nameservice-strict>
 
     @{bin}/gs{,.bin} mr,
 
@@ -124,6 +126,7 @@ profile cupsd @{exec_path} flags=(attach_disconnected) {
 
           /var/lib/ghostscript/{,**} r,
     owner /var/spool/cups/tmp/gs_@{rand6} rw,
+    owner /var/spool/cups/tmp/@{hex} r, # file_inherit
 
     owner /tmp/gs_@{rand6} rw,
 

@@ -63,7 +63,7 @@ profile man @{exec_path} flags=(attach_disconnected) {
 
   owner @{tmp}/groff-*-@{rand6} rw,
   owner @{tmp}/groff@{rand6} rw,
-  owner @{tmp}/lintian-pool-@{rand10}/** r,  #aa:only apt
+  owner @{tmp}/lintian-pool-@{word10}/** r,  #aa:only apt
 
   profile shell {
     include <abstractions/base>
@@ -83,6 +83,7 @@ profile man @{exec_path} flags=(attach_disconnected) {
     include <abstractions/shells>
 
     @{shells_path}     rix,
+    @{bin}/basename   mrix,
     @{bin}/eqn        mrix,
     @{bin}/grap       mrix,
     @{bin}/groff      mrix,
