@@ -17,6 +17,7 @@ profile finalrd @{exec_path} {
   capability sys_chroot,
 
   remount options=(rw nodev nosuid relatime remount) @{run}/,
+  remount options=(rw nodev nosuid remount) @{run}/,
 
   @{exec_path} mr,
 

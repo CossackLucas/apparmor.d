@@ -34,6 +34,7 @@ profile unattended-upgrade @{exec_path} flags=(attach_disconnected) {
   network inet6 dgram,
   network netlink raw,
 
+  signal receive set=term peer=unattended-upgrade-shutdown,
   signal send peer=apt-methods-http,
 
   unix type=stream addr=@@{udbus}/bus/unattended-upgr/system,
@@ -105,6 +106,7 @@ profile unattended-upgrade @{exec_path} flags=(attach_disconnected) {
         @{PROC}/@{pid}/mounts r,
         @{PROC}/@{pids}/mountinfo r,
         @{PROC}/@{pids}/stat r,
+        @{PROC}/sys/net/ipv6/conf/all/disable_ipv6 r,
   owner @{PROC}/@{pids}/fd/ r,
 
   /dev/ptmx rw,

@@ -40,6 +40,8 @@ profile landscape-sysinfo @{exec_path} {
   @{sys}/class/hwmon/ r,
   @{sys}/class/thermal/ r,
   @{sys}/devices/virtual/thermal/thermal_zone@{int}/{,*} r,
+  @{sys}/fs/cgroup/system.slice/cpu.max r,
+  @{sys}/fs/cgroup/system.slice/system-getty.slice/cpu.max r,
 
         @{PROC}/ r,
         @{PROC}/@{pids}/cmdline r,

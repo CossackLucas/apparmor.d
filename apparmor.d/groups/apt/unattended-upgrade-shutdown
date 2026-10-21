@@ -16,9 +16,12 @@ profile unattended-upgrade-shutdown @{exec_path} flags=(attach_disconnected) {
   include <abstractions/network-manager-observe>
   include <abstractions/python>
 
+  signal send set=term peer=unattended-upgrade,
+
   @{exec_path} mr,
 
-  @{bin}/ischroot  Px,
+  @{bin}/ischroot Px,
+  @{bin}/plymouth Px,
 
   @{lib}/@{python_name}/**/__pycache__/ w,
   @{lib}/@{python_name}/**/__pycache__/**.pyc w,
@@ -28,8 +31,9 @@ profile unattended-upgrade-shutdown @{exec_path} flags=(attach_disconnected) {
 
   owner @{log}/unattended-upgrades/*.log* rw,
 
+              @{run}/unattended-upgrades.pid r,
+  owner       @{run}/unattended-upgrades.lock rwk,
   owner @{att}@{run}/systemd/inhibit/@{int}.ref rw,
-  owner @{run}/unattended-upgrades.lock rwk,
 
   owner @{PROC}/@{pid}/mounts r,
 

@@ -84,6 +84,7 @@ profile apt-methods-gpgv @{exec_path} {
   @{user_build_dirs}/** rwlk -> @{user_build_dirs}/**,
 
         /tmp/ r,
+  owner @{tmp}/apt-key-@{rand6}.asc rw,
   owner @{tmp}/apt-key-gpghome.*/ rw,
   owner @{tmp}/apt-key-gpghome.*/** rwlk -> /tmp/apt-key-gpghome.*/**,
   owner @{tmp}/apt.{conf,sig,data}.* rw,
