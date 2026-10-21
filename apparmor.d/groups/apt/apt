@@ -102,6 +102,8 @@ profile apt @{exec_path} flags=(attach_disconnected) {
   @{lib}/apt/methods/*                   rPx,
 
   # Ubuntu specificities
+  @{bin}/apt_hook_ubuntu_virt                           rPUx,
+  @{lib}/snapd/snapd                                    rPx,
   @{lib}/ubuntu-advantage/apt-esm-hook                  rPx,
   @{lib}/ubuntu-advantage/apt-esm-json-hook             rPx,
   @{lib}/ubuntu-release-upgrader/do-partial-upgrade     rPx,

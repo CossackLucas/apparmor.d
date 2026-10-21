@@ -21,6 +21,7 @@ profile dpkg-scripts @{exec_path} {
   capability setgid,
   capability setuid,
   capability sys_admin, # optional: no audit
+  capability syslog, # optional: no audit
 
   @{exec_path} mrix,
 
@@ -93,6 +94,7 @@ profile dpkg-scripts @{exec_path} {
 
   @{PROC}/@{pid}/fd/ r,
   @{PROC}/@{pid}/mountinfo r,
+  @{PROC}/kallsyms r,
 
   profile bus {
     include <abstractions/base>

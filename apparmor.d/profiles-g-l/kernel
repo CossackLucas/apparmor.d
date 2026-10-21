@@ -56,6 +56,8 @@ profile kernel @{exec_path} {
   / r,
   @{efi}/ r,
 
+  @{efi}/initrd.img-* w,
+
   /etc/apt/apt.conf.d/ r,
   /etc/apt/apt.conf.d/01autoremove-kernels{,.dpkg-new} rw,
 

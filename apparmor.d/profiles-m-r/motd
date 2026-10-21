@@ -56,8 +56,12 @@ profile motd @{exec_path} {
   @{run}/motd.dynamic.new rw,
   @{run}/reboot-required r,
 
-  @{PROC}/@{pids}/mounts r,
+  @{sys}/fs/cgroup/system.slice/cpu.max r,
+  @{sys}/fs/cgroup/system.slice/system-getty.slice/cpu.max r,
+
   @{PROC}/1/environ r,
+  @{PROC}/@{pids}/cgroup r,
+  @{PROC}/@{pids}/mounts r,
   @{PROC}/cmdline r,
 
   /dev/tty@{u8} rw,
