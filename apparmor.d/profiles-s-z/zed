@@ -48,11 +48,14 @@ profile zed @{exec_path} {
   @{sys}/bus/pci/slots/ r,
   @{sys}/bus/pci/slots/@{int}-@{int}/address r,
   @{sys}/bus/pci/slots/@{int}/address r,
+  @{sys}/devices/@{pci}/uevent r,
+  @{sys}/devices/@{pci_bus}/uevent r,
+  @{sys}/module/zfs/*/ r,
   @{sys}/module/zfs/parameters/zfs_zevent_len_max rw,
 
         @{PROC}/@{pids}/mounts r,
-  owner @{PROC}/@{pids}/fd/ r,
         @{PROC}/@{pid}/task/@{tid}/comm rw,
+  owner @{PROC}/@{pids}/fd/ r,
 
   /dev/zfs rw,
 

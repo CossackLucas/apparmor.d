@@ -909,6 +909,7 @@ zfsdist-bpfcc
 zfsslower-bpfcc
 zgenhostid
 zic
+zpool
 zramctl
 zypp-refresh
 zypper-log
