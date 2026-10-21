@@ -42,6 +42,7 @@ profile pacman @{exec_path} flags=(attach_disconnected) {
 
   signal send,
   signal receive set=(term winch) peer=makepkg//sudo,
+  signal receive set=(term winch) peer=yay//sudo,
 
   @{exec_path} mrix,
 
@@ -182,9 +183,11 @@ profile pacman @{exec_path} flags=(attach_disconnected) {
 
     signal send set=cont peer=child-pager,
     signal send set=(cont term) peer=systemd-tty-ask-password-agent,
+    signal send set=term peer=pacman//run,
     signal receive set=(term winch) peer=makepkg//sudo,
 
     @{pager_path}      rPx -> child-pager,
+    @{bin}/systemd-run  Px -> pacman//run,
     @{bin}/systemd-tty-ask-password-agent rPx,
 
     /etc/machine-id r,
@@ -247,15 +250,22 @@ profile pacman @{exec_path} flags=(attach_disconnected) {
     /etc/ld.so.cache rw,
     /etc/ld.so.cache~ rw,
     /etc/tunables.conf r,
-    /etc/tunables.conf.d/{,*.conf} r,
-
-    /etc/tunables.conf r,
     /etc/tunables.conf.d/{,**} r,
 
           /var/cache/ldconfig/ rw,
     owner /var/cache/ldconfig/aux-cache* rw,
 
     include if exists <local/pacman_ldconfig>
+  }
+
+  profile run {
+    include <abstractions/base>
+
+    capability net_admin,
+
+    @{bin}/systemd-run r,
+
+    include if exists <local/pacman_run>
   }
 
   include if exists <usr/pacman.d>

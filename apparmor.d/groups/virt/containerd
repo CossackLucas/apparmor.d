@@ -49,9 +49,9 @@ profile containerd @{exec_path} flags=(attach_disconnected) {
   @{sbin}/apparmor_parser         rPx,
   @{bin}/containerd-shim-runc-v2  rPx,
   @{bin}/kmod                     rPx,
-  @{bin}/unpigz                  rPUx,
-  /{usr/,}{local/,}{s,}bin/zfs    rPx,
-  @{bin}/mkfs.erofs              rPUx,
+  @{bin}/unpigz                   rPUx,
+  @{bin}/zfs                      rPx,
+  @{bin}/mkfs.erofs               rPUx,
 
   / r,
 

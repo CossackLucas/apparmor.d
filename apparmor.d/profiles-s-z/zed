@@ -6,7 +6,7 @@ abi <abi/5.0>,
 
 include <tunables/global>
 
-@{exec_path} = /{usr/,}{local/,}{s,}bin/zed
+@{exec_path} = @{bin}/zed
 profile zed @{exec_path} {
   include <abstractions/base>
   include <abstractions/disks-read>

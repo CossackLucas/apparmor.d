@@ -9,7 +9,12 @@ include <tunables/global>
 @{exec_path} = @{bin}/modprobed-db
 profile modprobed-db @{exec_path} {
   include <abstractions/base>
+  include <abstractions/cgroup-limits>
+  include <abstractions/consoles>
   include <abstractions/nameservice-strict>
+
+  capability dac_override,
+  capability dac_read_search,
 
   @{exec_path} mr,
 
@@ -22,6 +27,7 @@ profile modprobed-db @{exec_path} {
   @{bin}/{,e}grep      rix,
   @{bin}/logname       rix,
   @{bin}/md5sum        rix,
+  @{bin}/mkdir         rix,
   @{bin}/rm            rix,
   @{bin}/sed           rix,
   @{bin}/sort          rix,
@@ -31,16 +37,18 @@ profile modprobed-db @{exec_path} {
   /usr/share/modprobed-db/** r,
   /usr/share/terminfo/** r,
 
-  owner @{user_config_dirs}/modprobed-db.conf rw,
-  owner @{user_config_dirs}/modprobed.db rw,
+  owner @{user_config_dirs}/modprobed-db/ w,
+  owner @{user_config_dirs}/{,modprobed-db/}modprobed-db.conf rw,
+  owner @{user_config_dirs}/{,modprobed-db/}modprobed.db rw,
+
+  owner @{user_share_dirs}/modprobed-db/ w,
+  owner @{user_share_dirs}/modprobed-db/modprobed.db rw,
 
   owner @{tmp}/.inmem rw,
   owner @{tmp}/.potential_new_db rw,
 
         @{PROC}/modules r,
   owner @{PROC}/@{pid}/loginuid r,
-
-  /dev/tty rw,
 
   include if exists <local/modprobed-db>
 }

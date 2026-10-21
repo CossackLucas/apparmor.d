@@ -28,8 +28,9 @@ profile yt-dlp @{exec_path} {
   @{python_path} r,
 
   @{bin}/ r,
-  @{bin}/file    rix,
-  @{bin}/uname   rix,
+  @{bin}/file      rix,
+  @{sbin}/ldconfig rix,
+  @{bin}/uname     rix,
 
   @{bin}/ffmpeg  rPx,
   @{bin}/ffprobe rPx,
@@ -55,6 +56,9 @@ profile yt-dlp @{exec_path} {
 
   owner @{PROC}/@{pid}/fd/ r,
   owner @{PROC}/@{pid}/mounts r,
+
+  # Inherit Silencer
+  deny /dev/dri/renderD12[89] rw,
 
   include if exists <local/yt-dlp>
 }

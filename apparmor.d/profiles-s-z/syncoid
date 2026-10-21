@@ -6,7 +6,7 @@ abi <abi/5.0>,
 
 include <tunables/global>
 
-@{exec_path} = /{usr/,}{local/,}{s,}bin/syncoid
+@{exec_path} = @{bin}/syncoid
 profile syncoid @{exec_path} flags=(complain) {
   include <abstractions/base>
   include <abstractions/consoles>

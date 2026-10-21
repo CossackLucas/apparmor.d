@@ -22,6 +22,7 @@ profile deno @{exec_path} {
         @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/cpu.max r,
   owner @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/app.slice/cpu.max r,
 
+        @{PROC}/sys/kernel/osrelease r,
   owner @{PROC}/@{pid}/cgroup r,
   owner @{PROC}/@{pid}/mountinfo r,
 

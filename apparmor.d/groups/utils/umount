@@ -38,6 +38,7 @@ profile umount @{exec_path} {
   @{HOME}/*/ r,
   @{HOME}/*/*/ r,
   @{user_cache_dirs}/*/*/ r,
+  @{MOUNTS}/ r,
   @{MOUNTS}/*/ r,
   @{MOUNTS}/*/*/ r,
 

@@ -33,6 +33,7 @@ profile cups-backend-ipp @{exec_path} {
   /etc/cups/ppd/*.ppd r,
   /etc/cups/snmp.conf r,
   /etc/cups/ssl/* r,
+  /etc/cups/ssl/@{word}.crt{,.N} w,
   /etc/papersize r,
   /etc/paperspecs r,
 

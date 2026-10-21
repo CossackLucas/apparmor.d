@@ -30,6 +30,9 @@ profile pidof @{exec_path} flags=(attach_disconnected) {
   @{PROC}/sys/kernel/osrelease r,
   @{PROC}/uptime r,
 
+  # Inherit Silencer
+  deny @{user_share_dirs}/** rw,
+
   include if exists <local/pidof>
 }
 

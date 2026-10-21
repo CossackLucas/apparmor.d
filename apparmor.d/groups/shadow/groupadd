@@ -24,10 +24,12 @@ profile groupadd @{exec_path} flags=(attach_disconnected) {
   @{bin}/nscd rix,
 
   @{etc_ro}/login.defs r,
+  /etc/login.defs.d/{,*} r,
 
   /etc/{group,gshadow} rw,
   /etc/{group,gshadow}- w,
   /etc/{group,gshadow}.@{pid} w,
+  /etc/{group,gshadow}.cio@{rand6} rw,
   /etc/{group,gshadow}+ rw,
   /etc/group.lock wl -> /etc/group.@{pid},
   /etc/gshadow.lock wl -> /etc/gshadow.@{pid},

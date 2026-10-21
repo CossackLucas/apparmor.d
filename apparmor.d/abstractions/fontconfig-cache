@@ -35,8 +35,9 @@
   /var/cache/fontconfig/ r,
   /var/cache/fontconfig/CACHEDIR.TAG r,
   /var/cache/fontconfig/@{hex32}-@{arch}.cache-@{u8} r,
-  /var/cache/fontconfig/@{hex32}-le{32,64}{,d4}.cache-@{u8} r,
+  /var/cache/fontconfig/@{hex32}-le{32,64}{,d4}.cache-@{u8} rk,
   /var/cache/fontconfig/@{hex32}-le{32,64}{,d4}.cache-@{u8}.TMP-@{rand6} r,
+  /var/cache/fontconfig/@{hex32}-le{32,64}{,d4}.cache-@{u8}.NEW r,
 
   owner @{DESKTOP_HOME}/.fontconfig/ r,
   owner @{DESKTOP_HOME}/.fontconfig/@{hex32}-@{arch}.cache-@{u8} r,

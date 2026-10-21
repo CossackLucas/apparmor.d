@@ -63,6 +63,7 @@ profile systemd-logind @{exec_path} flags=(attach_disconnected,mediate_deleted) 
   /var/lib/systemd/linger/{,@{user}} rw,
 
   /dev/shm/ r,
+  /dev/shm/.org.chromium.Chromium.@{rand6} w,
   /dev/shm/sem.mp-@{word8} r,
   /dev/shm/pulse-shm-@{int} w,
   /dev/shm/qb-@{int}-@{int}-*/ rw,

@@ -123,6 +123,7 @@ profile fwupd @{exec_path} flags=(attach_disconnected) {
   @{sys}/firmware/efi/efivars/db-@{uuid} rw,
   @{sys}/firmware/efi/efivars/fwupd-* rw,
   @{sys}/firmware/efi/efivars/KEK-@{uuid} rw,
+  @{sys}/fs/cgroup/system.slice/fwupd.service/memory.pressure rw,
   @{sys}/kernel/security/lockdown r,
   @{sys}/kernel/security/tpm@{int}/binary_bios_measurements r,
   @{sys}/power/mem_sleep r,

@@ -11,6 +11,7 @@ profile pkill @{exec_path} {
   include <abstractions/base>
   include <abstractions/app/pgrep>
 
+  capability dac_read_search, # needed for usage with sudo
   capability kill,
 
   signal send,

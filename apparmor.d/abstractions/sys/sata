@@ -29,6 +29,7 @@
   @{sys}/devices/@{pci}/ata@{int}/host@{int}/**/block/@{sd}/queue/optimal_io_size r,
   @{sys}/devices/@{pci}/ata@{int}/host@{int}/**/block/@{sd}/queue/physical_block_size r,
   @{sys}/devices/@{pci}/ata@{int}/host@{int}/**/block/@{sd}/queue/rotational r,
+  @{sys}/devices/@{pci}/ata@{int}/host@{int}/**/block/@{sd}/queue/zoned r,
   @{sys}/devices/@{pci}/ata@{int}/host@{int}/**/block/@{sd}/power/ r,
   @{sys}/devices/@{pci}/ata@{int}/host@{int}/**/block/@{sd}/removable r,
   @{sys}/devices/@{pci}/ata@{int}/host@{int}/**/block/@{sd}/ro r,

@@ -64,6 +64,8 @@ profile kmod @{exec_path} flags=(attach_disconnected) {
 
   @{PROC}/kallsyms r,
 
+  @{att}/dev/pts/@{u8} rw, # file_inherit
+
   deny @{user_share_dirs}/gvfs-metadata/* r,
   deny unix (receive) type=stream,
 

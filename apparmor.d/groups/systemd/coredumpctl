@@ -44,6 +44,9 @@ profile coredumpctl @{exec_path} {
         @{PROC}/sys/fs/nr_open r,
   owner @{PROC}/@{pid}/cgroup r,
 
+  # Inherit Silencer
+  deny /dev/dri/renderD12[89] rw,
+
   profile gdb {
     include <abstractions/base>
     include <abstractions/consoles>
