@@ -58,6 +58,7 @@ profile pass @{exec_path} {
   @{bin}/qrencode        PUx,  # pass-otp
   @{bin}/tomb            PUx,  # pass-tomb
 
+  /usr/share/libalternatives/{,**} r,
   /usr/share/terminfo/** r,
 
   owner @{user_passwordstore_dirs}/{,**} rw,
