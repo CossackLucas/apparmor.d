@@ -159,6 +159,12 @@ profile kscreenlocker_greet @{exec_path} flags=(attach_disconnected,mediate_dele
     owner @{run}/faillock/@{user} rwk,
 
     @{PROC}/@{pids}/status r,
+    @{PROC}/@{pids}/loginuid r,
+
+    /dev/udmabuf rw, # file_inherit
+
+    # Inherit Silencer
+    deny /dev/dri/renderD12[89] rw,
 
     include if exists <local/kscreenlocker_greet_worker>
   }

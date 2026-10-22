@@ -1,0 +1,34 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{lib}/plasma-setup-xwayland
+profile plasma-setup-xwayland @{exec_path} flags=(mediate_deleted) {
+  include <abstractions/base>
+  include <abstractions/kde-base>
+  include <abstractions/X-strict>
+
+  @{exec_path} mr,
+
+  @{bin}/xrdb Px,
+
+  /usr/share/icons/*/cursors/* r,
+  /usr/share/icons/*/index.theme r,
+
+  owner @{HOME}/.icons/*/cursors/* r,
+  owner @{HOME}/.icons/*/index.theme r,
+
+  owner @{tmp}/#@{int} rw,
+  owner @{tmp}/plasma-setup-xwayland.@{rand6} wl -> @{tmp}/#@{int},
+
+        /dev/udmabuf rw, # file_inherit
+  owner /dev/pts/@{u8} rw, # file_inherit
+
+  include if exists <local/plasma-setup-xwayland>
+}
+
+# vim:syntax=apparmor

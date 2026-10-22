@@ -48,6 +48,9 @@ profile child-modprobe-nvidia flags=(attach_disconnected) {
 
   deny @{HOME}/** r,
 
+  /dev/pts/@{u8} rw, # file_inherit
+  /dev/udmabuf rw, # file_inherit
+
   profile kmod {
     include <abstractions/base>
     include <abstractions/app/kmod>
