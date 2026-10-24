@@ -1,0 +1,58 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/QOwnNotes
+profile QOwnNotes @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/desktop>
+  include <abstractions/kde-sonnet>
+  include <abstractions/nameservice-strict>
+  include <abstractions/ssl_certs>
+
+  network inet stream,
+  network inet dgram,
+  network inet6 dgram,
+  network netlink raw,
+
+  @{exec_path} mr,
+
+  audit @{open_path} Px -> child-open-browsers,
+  @{bin}/dbus-send Cx -> bus,
+
+  /usr/share/QOwnNotes/** r,
+
+  @{user_documents_dirs}/Notes/ rw,
+  @{user_documents_dirs}/Notes/** rwlk,
+
+  owner @{HOME}/.vimrc r,
+
+  owner @{user_config_dirs}/kioslaverc r,
+  owner @{user_config_dirs}/PBE/#@{int} rw,
+  owner @{user_config_dirs}/PBE/QOwnNotes.conf@{atomic} rwlk -> @{user_config_dirs}/PBE/#@{int},
+
+  owner @{user_share_dirs}/PBE/QOwnNotes/** rwlk -> @{user_share_dirs}/PBE/QOwnNotes/**,
+
+  owner @{tmp}/.@{rand6}/{,s} rw,
+  owner @{tmp}/qipc_sharedmemory_* rw,
+  owner @{tmp}/qipc_systemsem_* rw,
+  owner @{tmp}/???????????????????????????????????????????= w, # ToDo: SHA256 hash variable?
+
+  profile bus {
+    include <abstractions/base>
+    # include <abstractions/app/bus>
+    # include <abstractions/bus-system>
+
+    @{bin}/dbus-send r,
+
+    include if exists <local/QOwnNotes_bus>
+  }
+
+  include if exists <local/QOwnNotes>
+}
+
+# vim:syntax=apparmor
