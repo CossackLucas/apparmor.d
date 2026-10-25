@@ -1,0 +1,61 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/k3b
+profile k3b @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/disks-read>
+  include <abstractions/kde-strict>
+
+  network netlink raw,
+
+  signal send set=term peer=kioworker,
+
+  @{exec_path} mr,
+
+  @{bin}/cdrdao        ix -> k3b//null-@{bin}/cdrdao,
+  @{bin}/cdrecord      ix -> k3b//null-@{bin}/cdrecord,
+  @{bin}/cdrskin       ix -> k3b//null-@{bin}/cdrskin,
+  @{bin}/dvd+rw-format ix -> k3b//null-@{bin}/dvd+rw-format,
+  @{bin}/growisofs     ix -> k3b//null-@{bin}/growisofs,
+  @{bin}/mkisofs       ix -> k3b//null-@{bin}/mkisofs,
+  @{bin}/movix-conf    ix -> k3b//null-@{bin}/movix-conf,
+  @{bin}/movix-version ix -> k3b//null-@{bin}/movix-version,
+  @{bin}/readcd        ix -> k3b//null-@{bin}/readcd,
+  @{bin}/vcdxbuild     ix -> k3b//null-@{bin}/vcdxbuild,
+  @{bin}/vcdxminfo     ix -> k3b//null-@{bin}/vcdxminfo,
+  @{bin}/vcdxrip       ix -> k3b//null-@{bin}/vcdxrip,
+
+  #aa:exec kioworker
+
+  /etc/fstab r,
+
+  /usr/share/emovix/isolinux/isolinux.cfg r,
+  /usr/share/k3b/** r,
+  /usr/share/thumbnailers/{,*} r,
+
+  owner @{HOME}/[^.]*/ r,
+  owner @{HOME}/[^.]*/.directory r,
+
+  owner @{user_config_dirs}/emaildefaults@{atomic} rwlk -> @{user_config_dirs}/#@{int},
+
+  owner @{user_share_dirs}/user-places.xbel r,
+
+  owner @{run}/user/@{uid}/#@{int} rw,
+
+  owner @{run}/user/@{uid}/k3b@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
+
+        @{PROC}/sys/kernel/random/boot_id r,
+  owner @{PROC}/@{pid}/mountinfo r,
+
+  /dev/tty r,
+
+  include if exists <local/k3b>
+}
+
+# vim:syntax=apparmor
