@@ -123,6 +123,7 @@ profile xdg-desktop-portal @{exec_path} flags=(attach_disconnected) {
 
   owner @{tmp}/gtkprint@{rand6} r,
   owner @{tmp}/icon@{rand6} rw,
+  owner @{tmp}/Spectacle.@{rand6}/Screenshot_@{int8}_@{int6}.png r,
 
   owner @{att}@{run}/flatpak/doc/** r,
   owner @{run}/user/@{uid}/.flatpak/{,*/*} r,

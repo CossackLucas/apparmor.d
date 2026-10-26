@@ -1,0 +1,60 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/spectacle
+profile spectacle @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/audio-client>
+  include <abstractions/common/kde>
+  include <abstractions/nameservice-strict>
+  include <abstractions/sys/dmi>
+
+  signal send set=term peer=kioworker,
+
+  @{exec_path} mr,
+
+  audit @{open_path} Px -> child-open-browsers,
+
+  ##aa:exec kioworker
+
+  /usr/share/desktop-directories/{,*} r,
+  /usr/share/kf6/purpose/{,*} r,
+  /usr/share/tessdata/{,**} r,
+
+  @{bin}/ r,
+
+  owner @{user_pictures_dirs}/Screenshots/ w,
+  owner @{user_pictures_dirs}/Screenshots/** rwlk -> @{user_pictures_dirs}/Screenshots/**,
+  owner @{user_videos_dirs}/Screencasts/ rw,
+  owner @{user_videos_dirs}/Screencasts/Screencast_@{int8}_@{int6}.{webm,mp4,webp,gif} rw,
+
+  owner @{user_config_dirs}/kioslaverc r,
+  owner @{user_config_dirs}/klanguageoverridesrc@{atomic} rwlk -> @{user_config_dirs}/#@{int},
+
+  owner @{user_share_dirs}/recently-used.xbel rl -> @{user_share_dirs}/#@{int},
+
+        @{tmp}/ r,
+  owner @{tmp}/Spectacle.@{rand6}/ rw,
+  owner @{tmp}/Spectacle.@{rand6}/#@{int} rw,
+  owner @{tmp}/Spectacle.@{rand6}/lockfile rwk,
+  owner @{tmp}/Spectacle.@{rand6}/Screencast_@{int8}_@{int6}.{webm,mp4,webp,gif} rw,
+  owner @{tmp}/Spectacle.@{rand6}/Screenshot_@{int8}_@{int6}.@{image_ext} rwl -> @{tmp}/Spectacle.@{rand6}/#@{int},
+
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/spectacle@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
+
+  owner @{PROC}/@{pid}/mountinfo r,
+  owner @{PROC}/@{pid}/task/@{tid}/comm w,
+
+  /dev/rfkill r, # Sending via Bluetooth
+  /dev/tty r,
+
+  include if exists <local/spectacle>
+}
+
+# vim:syntax=apparmor

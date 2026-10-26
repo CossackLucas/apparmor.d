@@ -79,6 +79,7 @@ profile dbus-session flags=(attach_disconnected) {
   owner @{user_share_dirs}/dbus-1/services/{,**} r,
 
   owner @{tmp}/gtkprint@{rand6} r,
+  owner @{tmp}/Spectacle.@{rand6}/Screenshot_@{int8}_@{int6}.png r,
 
         @{run}/systemd/users/@{uid} r,
   owner @{run}/user/@{uid}/dbus-1/ rw,

@@ -220,6 +220,7 @@ profile plasmashell @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   # ToDo: test with other user
   owner @{tmp}/kup-daemon-user rw,
   owner @{tmp}/plasma-browser-integration_artwork_@{rand6}.@{image_ext} r,
+  owner @{tmp}/Spectacle.@{rand6}/Screenshot_@{int8}_@{int6}.png r,
 
         @{run}/mount/utab r,
   owner @{run}/user/@{uid}/#@{int} rw,
