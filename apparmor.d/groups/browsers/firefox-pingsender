@@ -11,6 +11,10 @@ include <tunables/global>
 @{lib_dirs} = @{lib}/@{name}/ /opt/@{name}/
 @{config_dirs} = @{HOME}/.mozilla/ @{user_config_dirs}/mozilla
 
+if ${PSD} {
+  @{config_dirs} += @{run}/user/@{uid}/psd/@{user}-firefox-*/
+}
+
 @{exec_path} = @{lib_dirs}/pingsender
 profile firefox-pingsender @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>

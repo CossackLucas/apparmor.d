@@ -104,6 +104,9 @@ ${RBAC} = false
 # Supported values are: wayland, x11, none
 @{DS} = wayland
 
+# Support for profile-sync-daemon
+${PSD} = true
+
 
 # Sysctl
 # ------

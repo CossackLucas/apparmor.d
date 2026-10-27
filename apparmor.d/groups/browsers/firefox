@@ -14,6 +14,10 @@ include <tunables/global>
 @{cache_dirs} = @{user_cache_dirs}/mozilla/
 @{path} = /org/mozilla/firefox
 
+if ${PSD} {
+  @{config_dirs} += @{run}/user/@{uid}/psd/@{user}-firefox-*/
+}
+
 @{exec_path} = @{bin}/@{name} @{lib_dirs}/@{name}
 profile firefox @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>
@@ -23,6 +27,10 @@ profile firefox @{exec_path} flags=(attach_disconnected) {
 
   signal send set=(term, kill) peer=firefox//&keepassxc-proxy,
   signal send set=term         peer=plasma-browser-integration-host,
+
+  if ${PSD} {
+    signal receive set=kill         peer=psd//pkill,
+  }
 
   unix type=seqpacket addr=@gecko-crash-helper-pipe.@{int},
 

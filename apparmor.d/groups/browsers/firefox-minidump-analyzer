@@ -14,6 +14,10 @@ include <tunables/global>
 @{config_dirs} = @{HOME}/.mozilla/
 @{cache_dirs} = @{user_cache_dirs}/mozilla/
 
+if ${PSD} {
+  @{config_dirs} += @{run}/user/@{uid}/psd/@{user}-firefox-*/
+}
+
 @{exec_path} = @{lib_dirs}/minidump-analyzer
 profile firefox-minidump-analyzer @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>

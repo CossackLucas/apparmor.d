@@ -13,10 +13,16 @@ include <tunables/global>
 @{config_dirs} = @{user_config_dirs}/@{name}
 @{cache_dirs} = @{user_cache_dirs}/@{name}
 
+if ${PSD} {
+  @{config_dirs} += @{run}/user/@{uid}/psd/@{user}-chromium/
+}
+
 @{exec_path} = @{lib_dirs}/@{name}
 profile chromium @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   include <abstractions/base>
   include <abstractions/app/chromium>
+
+  signal receive set=kill peer=psd//pkill,
 
   #aa:dbus own bus=session name=org.mpris.MediaPlayer2.chromium path=/org/mpris/MediaPlayer2
 
