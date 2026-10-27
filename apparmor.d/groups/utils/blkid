@@ -51,6 +51,8 @@ profile blkid @{exec_path} flags=(attach_disconnected) {
 
   # file_inherit
   deny @{run}/cloud-init/ds-identify.log w,
+  deny /var/tmp/dracut.@{rand6}/systemd-cat w,
+  deny /var/tmp/dracut.@{rand6}@{w}/systemd-cat w,
 
   include if exists <local/blkid>
 }

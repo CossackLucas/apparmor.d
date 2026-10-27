@@ -28,6 +28,10 @@ profile findmnt @{exec_path} flags=(attach_disconnected,complain) {
 
   @{PROC}/@{pids}/mountinfo r,
 
+  # Inherit Silencer
+  deny /var/tmp/dracut.@{rand6}/systemd-cat w,
+  deny /var/tmp/dracut.@{rand6}@{w}/systemd-cat w,
+
   include if exists <local/findmnt>
 }
 

@@ -156,6 +156,10 @@ profile dracut @{exec_path} flags=(attach_disconnected) {
     @{sys}/module/compression r,
     @{sys}/module/**/initstate r,
 
+    # Inherit Silencer
+    deny /var/tmp/dracut.@{rand6}/systemd-cat w,
+    deny /var/tmp/dracut.@{rand6}@{w}/systemd-cat w,
+
     include if exists <local/dracut_kmod>
   }
 
@@ -171,6 +175,10 @@ profile dracut @{exec_path} flags=(attach_disconnected) {
     @{bin}/* mr,
     @{sbin}/* mr,
     @{lib}/**  mr,
+
+    # Inherit Silencer
+    deny /var/tmp/dracut.@{rand6}/systemd-cat w,
+    deny /var/tmp/dracut.@{rand6}@{w}/systemd-cat w,
 
     include if exists <local/dracut_ldd>
   }
