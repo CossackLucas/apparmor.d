@@ -1,0 +1,50 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/krdpserver
+profile krdpserver @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/common/kde>
+  include <abstractions/nameservice-strict>
+  include <abstractions/sys/dmi>
+
+  #network accept inet6 stream port=5901, # failed af match
+  #network bind inet6 stream, # failed af match
+  #network create inet6 stream, # failed af match
+  #network getattr inet6 stream port=5901, # failed af match
+  #network getopt inet6 stream port=5901, # failed af match
+  #network getopt inet6 stream ip=::ffff:192.168.122.1 port=5901 peer=(ip=::ffff:192.168.122.30, port=35930), # failed af match
+  #network listen inet6 stream port=5901, # failed af match
+  #network receive inet6 stream ip=::ffff:192.168.122.1 port=5901 peer=(ip=::ffff:192.168.122.30, port=35930), # failed af match
+  #network send inet6 stream ip=::ffff:192.168.122.1 port=5901 peer=(ip=::ffff:192.168.122.30, port=35930), # failed af match
+  #network setopt inet6 stream, # failed af match
+  #network setopt inet6 stream ip=::ffff:192.168.122.1 port=5901 peer=(ip=::ffff:192.168.122.30, port=35930), # failed af match
+
+  network inet6 stream,
+
+  signal receive set=term peer=kdeconnect-daemon,
+
+  @{exec_path} mr,
+
+  /etc/krb5.conf r,
+  /etc/pipewire/client.conf.d/ r,
+
+  owner @{run}/user/@{uid}/krdp/ w,
+  owner @{run}/user/@{uid}/krdp/#@{int} rw,
+
+  owner @{run}/user/@{uid}/krdp/rdp-sam-@{rand6} rwl -> @{run}/user/@{uid}/krdp/#@{int},
+
+  owner @{PROC}/@{pid}/comm r,
+  owner @{PROC}/@{pid}/task/@{tid}/comm w,
+
+  /dev/tty r,
+
+  include if exists <local/krdpserver>
+}
+
+# vim:syntax=apparmor
