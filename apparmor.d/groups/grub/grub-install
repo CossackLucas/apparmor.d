@@ -34,7 +34,8 @@ profile grub-install @{exec_path} flags=(complain) {
   / r,
   @{efi}/ r,
   @{efi}/EFI/ r,
-  @{efi}/EFI/*/grubx*.efi rw,
+  @{efi}/EFI/GRUB/ w,
+  @{efi}/EFI/*/grub{x64,ARM,AA64}.efi rw, # https://uefi.org/specs/UEFI/2.10/03_Boot_Manager.html#removable-media-boot-behavior
   @{efi}/EFI/BOOT/{,**} rw,
   #aa:only ubuntu
   @{efi}/EFI/ubuntu/* w,

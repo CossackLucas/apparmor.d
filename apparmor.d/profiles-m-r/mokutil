@@ -9,14 +9,26 @@ include <tunables/global>
 @{exec_path} = @{bin}/mokutil
 profile mokutil @{exec_path} {
   include <abstractions/base>
+  include <abstractions/consoles>
+  include <abstractions/nameservice-strict>
 
+  capability linux_immutable,
   capability sys_admin,
 
   @{exec_path} mr,
 
+  /etc/uefi/certs/*.crt r,
+
   /var/lib/shim-signed/mok/MOK.der r,
 
-  @{sys}/firmware@{efi}/mok-variables/MokList* r,
+  # ToDo: what with cert dirs?
+  @{efi}/*.cer r,
+
+  @{sys}/firmware/efi/efivars/* r,
+  @{sys}/firmware/efi/efivars/Mok*-@{uuid} w,
+  @{sys}/firmware/efi/efivars/SbatPolicy-@{uuid} w,
+
+  @{sys}/firmware/efi/mok-variables/* r,
 
   @{PROC}/keys r,
 

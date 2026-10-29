@@ -10,29 +10,45 @@ include <tunables/global>
 @{exec_path} = @{sbin}/update-secureboot-policy
 profile update-secureboot-policy @{exec_path} {
   include <abstractions/base>
+  include <abstractions/cgroup-limits>
   include <abstractions/common/debconf>
+
+  capability dac_read_search,
 
   @{exec_path} mrix,
 
   @{bin}/cut           mrix,
-  @{bin}/{,e}grep        ix,
-  @{bin}/{,m,g}awk       ix,
+  @{bin}/{,e}grep      mrix,
+  @{bin}/{,m,g}awk     mrix,
   @{bin}/dpkg-trigger    Px,
-  @{bin}/find            ix,
-  @{bin}/hostname        Px,
-  @{bin}/id              ix,
-  @{bin}/mokutil         Px,
-  @{bin}/od              ix,
+  @{bin}/find          mrix,
+  @{bin}/hostname      mrPx,
+  @{bin}/id            mrix,
+  @{bin}/mokutil       mrPx,
+  @{bin}/od            mrix,
   @{bin}/openssl       mrix,
-  @{bin}/sort            ix,
+  @{bin}/sort          mrix,
   @{bin}/stty           mix,
-  @{bin}/touch           ix,
-  @{bin}/wc              ix,
+  @{bin}/touch         mrix,
+  @{bin}/wc            mrix,
+
+  /etc/shadow r,
 
   / r,
+  @{HOME}/ r, # ToDo: probably could be denied
 
   /var/lib/dkms/ r,
+  /var/lib/dkms/*/ r,
   /var/lib/shim-signed/dkms-list rw,
+  /var/lib/shim-signed/dkms-list.new w,
+  /var/lib/shim-signed/mok/.rnd rw,
+  /var/lib/shim-signed/mok/MOK.der rw,
+  /var/lib/shim-signed/mok/MOK.priv rw,
+
+  @{sys}/firmware@{efi}/efivars/ r,
+  @{sys}/firmware@{efi}/efivars/SecureBoot-@{uuid} r,
+
+  @{PROC}/@{pid}/cgroup r,
 
   include if exists <local/update-secureboot-policy>
 }

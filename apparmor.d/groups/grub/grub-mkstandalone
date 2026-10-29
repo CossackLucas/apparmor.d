@@ -13,6 +13,16 @@ profile grub-mkstandalone @{exec_path} {
 
   @{exec_path} mr,
 
+  /usr/share/grub/** r,
+
+  # https://uefi.org/specs/UEFI/2.10/03_Boot_Manager.html#removable-media-boot-behavior
+  @{efi}/EFI/GRUB/grub{x64,ARM,AA64}.efi w,
+  @{efi}/grub/grub.cfg r,
+
+  /tmp/grub.@{rand6}{,/} rw,
+  /tmp/grub.@{rand6}/@{efi}/ rw,
+  /tmp/grub.@{rand6}/@{efi}/grub/{,**} rw,
+
   include if exists <local/grub-mkstandalone>
 }
 
