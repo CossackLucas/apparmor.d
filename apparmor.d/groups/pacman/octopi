@@ -6,33 +6,37 @@ abi <abi/5.0>,
 
 include <tunables/global>
 
-@{exec_path} = @{bin}/octopi
-profile octopi @{exec_path} {
+@{exec_path}  = @{bin}/octopi
+@{exec_path} += @{bin}/octopi-{cachecleaner,notifier,repoeditor}
+profile octopi @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   include <abstractions/base>
   include <abstractions/audio-client>
+  include <abstractions/desktop>
   include <abstractions/disks-read>
-  include <abstractions/fonts-strict>
-  include <abstractions/icons>
-  include <abstractions/kde-base>
   include <abstractions/kde-globals-write>
   include <abstractions/nameservice-strict>
-  include <abstractions/qt>
+  include <abstractions/network-manager-observe>
   include <abstractions/qt-settings-write>
   include <abstractions/ssl_certs>
 
+  #network inet dgram ip=192.168.122.20 port=38836 peer=(ip=95.216.195.133), # failed af match
+  #network inet stream ip=127.0.0.1 port=12702, # failed af match
+  #network inet stream ip=192.168.122.20 port=37024 peer=(ip=95.216.195.133, port=80), # failed af match
+  #network inet stream ip=127.0.0.1 port=12703, # failed af match
+  #network inet stream ip=127.0.0.1 port=12703 peer=(ip=127.0.0.1, port=50122), # failed af match
   network inet dgram,
   network inet6 dgram, # failed af match
   network inet stream,
   network inet6 stream,
   network netlink dgram, # failed af match
-  network netlink raw, 
+  network netlink raw,
 
   signal send set=hup peer=unconfined, # shell
 
-  @{exec_path} mr,
+  @{exec_path} mrix,
 
-  #@{sh_path} Cx -> shell,
-  @{sh_path} Ux,
+  #@{shells_path} Cx -> shell,
+  @{shells_path} Ux,
   @{open_path} Cx -> open,
 
   @{bin}/cat         rix,
@@ -43,16 +47,16 @@ profile octopi @{exec_path} {
   @{bin}/gpgconf      Cx -> gpg,
   @{bin}/gpgsm        Cx -> gpg,
   @{bin}/head        rix,
+  @{bin}/id          rix,
   @{bin}/journalctl   Px -> child-journalctl-read,
   @{bin}/net          PUx,
-  @{bin}/octopi-cachecleaner Px,
-  @{bin}/octopi-repoeditor Px,
+  @{bin}/paccache Px,
   @{bin}/pacman       Px,
   @{bin}/pacman-conf  Px,
   @{bin}/ps           Px,
   @{bin}/qt-sudo      Cx -> sudo,
   @{bin}/uname        Px,
-  
+
   # supported AUR helpers
   @{bin}/pacaur PUx,
   @{bin}/paru   PUx,
@@ -66,7 +70,6 @@ profile octopi @{exec_path} {
   /usr/share/thumbnailers/{,*} r,
 
   /etc/lsb-release r,
-  /etc/machine-id r,
   /etc/pacman.conf r,
   /etc/pacman.d/{,*-}mirrorlist r,
 
@@ -78,7 +81,9 @@ profile octopi @{exec_path} {
   / r,
 
   owner @{HOME}/octopi-sysinfo-@{int10}.log rw,
+  owner @{user_ssh_dirs}/known_hosts r,
 
+  owner @{user_config_dirs}/kioslaverc r,
   owner @{user_config_dirs}/octopi/ rw,
   owner @{user_config_dirs}/octopi/** rwlk -> @{user_config_dirs}/octopi/#@{int},
 
@@ -90,14 +95,13 @@ profile octopi @{exec_path} {
         @{tmp}/ r,
   owner @{tmp}/#@{int} rw,
   owner @{tmp}/.temp_octopi_* rw,
+  owner @{tmp}/checkup-db-@{uid}/ r,
+  owner @{tmp}/checkup-db-@{uid}/sync/* r,
   owner @{tmp}/octopi.@{rand6} rwl -> @{tmp}/#@{int},
-  owner @{tmp}/qtsingleapp-Octopi-1d88-3e8 w,
-  owner @{tmp}/qtsingleapp-Octopi-1d88-3e8-lockfile rwk,
-  owner @{tmp}/qtsingleapp-CacheC-8d2f-3e8-lockfile w,
-  owner @{tmp}/qtsingleapp-Reposi-19ca-3e8-lockfile w,
+  owner @{tmp}/qtsingleapp-{Octopi,CacheC,Notifi,Reposi}-@{hex}-@{hex} w,
+  owner @{tmp}/qtsingleapp-{Octopi,CacheC,Notifi,Reposi}-@{hex}-@{hex}-lockfile rwk,
   owner @{tmp}/qipc_sharedmemory_orgarntoctopi@{hex} rw,
   owner @{tmp}/qipc_systemsem_orgarntoctopi@{hex} rw,
-
 
   owner @{PROC}/@{pid}/mountinfo r,
 
@@ -118,7 +122,7 @@ profile octopi @{exec_path} {
 
     owner @{run}/user/@{uid}/ r,
     owner @{run}/user/@{uid}/gnupg/ r,
-    
+
     include if exists <local/octopi_gpg>
   }
 
@@ -126,7 +130,7 @@ profile octopi @{exec_path} {
     include <abstractions/base>
     include <abstractions/consoles>
 
-    # ToDo: check!
+    # ToDo: check w/ dbus mediation
     capability dac_read_search,
     capability ipc_owner,
     capability sys_ptrace,
@@ -135,13 +139,16 @@ profile octopi @{exec_path} {
     #network inet stream ip=127.0.0.1 port=34252 peer=(ip=127.0.0.1, port=12701), # failed af match
 
     ptrace read peer=octopi,
-    ptrace read peer=octopi-cachecleaner,
 
     @{sh_path} rix,
 
+    @{bin}/killall  Px -> octopi//killall,
     @{bin}/paccache Px,
     @{bin}/pacman   Px,
     @{bin}/ps       Px,
+    @{bin}/rm      rix,
+
+    /var/lib/pacman/db.lck rw,
 
     # ToDo: decide if could be denied
     @{HOMEDIRS}/ r,
@@ -156,6 +163,27 @@ profile octopi @{exec_path} {
     @{PROC}/@{pids}/comm r,
 
     include if exists <local/octopi_helper>
+  }
+
+  profile killall {
+    include <abstractions/base>
+    include <abstractions/consoles>
+
+    capability kill,
+    capability sys_ptrace, # optional: no audit
+
+    ptrace read,
+
+    signal send set=term peer=pacman,
+
+    @{bin}/killall r,
+
+    @{PROC}/ r,
+    @{PROC}/@{pids}/ r,
+    @{PROC}/@{pids}/cmdline r,
+    @{PROC}/@{pids}/stat r,
+
+    include if exists <local/octopi_killall>
   }
 
   profile open {
@@ -178,7 +206,7 @@ profile octopi @{exec_path} {
 
     signal receive set=hup peer=octopi,
 
-    @{sh_path} r,
+    @{shells_path} r,
 
     include if exists <local/octopi_shell>
   }

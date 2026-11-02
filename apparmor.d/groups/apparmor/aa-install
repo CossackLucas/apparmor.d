@@ -41,6 +41,8 @@ profile aa-install @{exec_path} {
 
   owner /tmp/aa-install@{int}/{,**} rw,
 
+  @{sys}/fs/cgroup/user.slice/user-@{uid}.slice/user@@{uid}.service/app.slice/app-*@@{hex32}.service/cpu.max r,
+
   profile systemctl {
     include <abstractions/base>
     include <abstractions/app/systemctl>

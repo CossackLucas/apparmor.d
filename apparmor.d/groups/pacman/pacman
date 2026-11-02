@@ -42,6 +42,7 @@ profile pacman @{exec_path} flags=(attach_disconnected) {
 
   signal send,
   signal receive set=(term winch) peer=makepkg//sudo,
+  signal receive set=term         peer=octopi//killall,
   signal receive set=(term winch) peer=yay//sudo,
 
   @{exec_path} mrix,
