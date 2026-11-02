@@ -1,0 +1,72 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/octopi-notifier
+profile octopi-notifier @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/fonts-strict>
+  include <abstractions/icons>
+  include <abstractions/kde-base>
+  include <abstractions/nameservice-strict>
+  include <abstractions/qt>
+
+  network inet dgram,
+  #network inet dgram ip=192.168.122.20 port=38836 peer=(ip=95.216.195.133), # failed af match
+  network inet stream,
+  #network inet stream ip=127.0.0.1 port=12702, # failed af match
+  #network inet stream ip=192.168.122.20 port=37024 peer=(ip=95.216.195.133, port=80), # failed af match
+  network inet6 dgram,
+  network netlink dgram,
+  network netlink raw,
+
+  @{exec_path} mr,
+
+  @{bin}/checkupdates Px,
+  @{bin}/gpg          Cx -> gpg,
+  @{bin}/gpgconf      Cx -> gpg,
+  @{bin}/gpgsm        Cx -> gpg,
+  @{bin}/octopi       Px,
+  @{bin}/pacman      rix,
+  @{bin}/ps           Px,
+
+  /usr/share/qtermwidget6/color-schemes/{,**} r,
+
+  /etc/pacman.conf r,
+  /etc/pacman.d/{,*-}mirrorlist r,
+  /etc/machine-id r,
+
+  /var/lib/pacman/local/{,*/} r,
+  /var/lib/pacman/local/*/desc r,
+  /var/lib/pacman/local/ALPM_DB_VERSION r,
+  /var/lib/pacman/sync/* r,
+
+  owner @{user_config_dirs}/octopi/ rw,
+  owner @{user_config_dirs}/octopi/** rwlk -> @{user_config_dirs}/octopi/#@{int},
+
+        @{tmp}/ r,
+  owner @{tmp}/checkup-db-@{uid}/ r,
+  owner @{tmp}/checkup-db-@{uid}/sync/* r,
+  owner @{tmp}/qtsingleapp-Notifi-4c42-3e8 w,
+  owner @{tmp}/qtsingleapp-Notifi-4c42-3e8-lockfile rwk,
+
+  profile gpg {
+    include <abstractions/base>
+
+    @{bin}/gpg r,
+    @{bin}/gpgconf r,
+    @{bin}/gpgsm r,
+
+    /etc/pacman.d/gnupg/* r,
+
+    include if exists <local/octopi-notifier_gpg>
+  }
+
+  include if exists <local/octopi-notifier>
+}
+
+# vim:syntax=apparmor

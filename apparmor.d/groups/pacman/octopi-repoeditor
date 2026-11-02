@@ -1,0 +1,43 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/octopi-repoeditor
+profile octopi-repoeditor @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/audio-client>
+  include <abstractions/fonts-strict>
+  include <abstractions/icons>
+  include <abstractions/kde-base>
+  include <abstractions/qt>
+
+  @{exec_path} mr,
+
+  @{bin}/qt-sudo  Px -> octopi//sudo,
+
+  /usr/share/knotifications6/plasma_workspace.notifyrc r,
+
+  /etc/machine-id r,
+  /etc/pacman.conf r,
+
+  owner @{user_config_dirs}/octopi/ rw,
+  owner @{user_config_dirs}/octopi/** rwlk -> @{user_config_dirs}/octopi/#@{int},
+
+  owner @{tmp}/#@{int} rw,
+  owner @{tmp}/octopi-repoeditor.@{rand6} rwl -> @{tmp}/#@{int},
+
+  owner /tmp/qtsingleapp-Reposi-19ca-3e8 w,
+  owner /tmp/qtsingleapp-Reposi-19ca-3e8-lockfile rwk,
+
+  @{PROC}/sys/kernel/random/boot_id r,
+
+  /dev/tty r,
+
+  include if exists <local/octopi-repoeditor>
+}
+
+# vim:syntax=apparmor

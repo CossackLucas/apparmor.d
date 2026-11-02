@@ -1,0 +1,217 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/octopi
+profile octopi @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/audio-client>
+  include <abstractions/disks-read>
+  include <abstractions/fonts-strict>
+  include <abstractions/icons>
+  include <abstractions/kde-base>
+  include <abstractions/kde-globals-write>
+  include <abstractions/nameservice-strict>
+  include <abstractions/qt>
+  include <abstractions/qt-settings-write>
+  include <abstractions/ssl_certs>
+
+  network inet dgram,
+  network inet6 dgram, # failed af match
+  network inet stream,
+  network inet6 stream,
+  network netlink dgram, # failed af match
+  network netlink raw, 
+
+  signal send set=hup peer=unconfined, # shell
+
+  @{exec_path} mr,
+
+  #@{sh_path} Cx -> shell,
+  @{sh_path} Ux,
+  @{open_path} Cx -> open,
+
+  @{bin}/cat         rix,
+  @{bin}/checkupdates Px,
+  @{bin}/curl        rix,
+  @{bin}/diff        rix,
+  @{bin}/gpg          Cx -> gpg,
+  @{bin}/gpgconf      Cx -> gpg,
+  @{bin}/gpgsm        Cx -> gpg,
+  @{bin}/head        rix,
+  @{bin}/journalctl   Px -> child-journalctl-read,
+  @{bin}/net          PUx,
+  @{bin}/octopi-cachecleaner Px,
+  @{bin}/octopi-repoeditor Px,
+  @{bin}/pacman       Px,
+  @{bin}/pacman-conf  Px,
+  @{bin}/ps           Px,
+  @{bin}/qt-sudo      Cx -> sudo,
+  @{bin}/uname        Px,
+  
+  # supported AUR helpers
+  @{bin}/pacaur PUx,
+  @{bin}/paru   PUx,
+  @{bin}/pikaur PUx,
+  @{bin}/trizen PUx,
+  @{bin}/yay    Px,
+
+  #aa:exec kioworker
+
+  /usr/share/qtermwidget6/** r,
+  /usr/share/thumbnailers/{,*} r,
+
+  /etc/lsb-release r,
+  /etc/machine-id r,
+  /etc/pacman.conf r,
+  /etc/pacman.d/{,*-}mirrorlist r,
+
+  /var/lib/pacman/local/{,**} r,
+  /var/lib/pacman/sync/* r,
+
+  @{log}/pacman.log r,
+
+  / r,
+
+  owner @{HOME}/octopi-sysinfo-@{int10}.log rw,
+
+  owner @{user_config_dirs}/octopi/ rw,
+  owner @{user_config_dirs}/octopi/** rwlk -> @{user_config_dirs}/octopi/#@{int},
+
+  owner @{user_share_dirs}/user-places.xbel r,
+
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/octopi@{rand6}.@{int}.kioworker.socket rwl -> @{run}/user/@{uid}/#@{int},
+
+        @{tmp}/ r,
+  owner @{tmp}/#@{int} rw,
+  owner @{tmp}/.temp_octopi_* rw,
+  owner @{tmp}/octopi.@{rand6} rwl -> @{tmp}/#@{int},
+  owner @{tmp}/qtsingleapp-Octopi-1d88-3e8 w,
+  owner @{tmp}/qtsingleapp-Octopi-1d88-3e8-lockfile rwk,
+  owner @{tmp}/qtsingleapp-CacheC-8d2f-3e8-lockfile w,
+  owner @{tmp}/qtsingleapp-Reposi-19ca-3e8-lockfile w,
+  owner @{tmp}/qipc_sharedmemory_orgarntoctopi@{hex} rw,
+  owner @{tmp}/qipc_systemsem_orgarntoctopi@{hex} rw,
+
+
+  owner @{PROC}/@{pid}/mountinfo r,
+
+        /dev/ptmx rw,
+        /dev/tty r,
+  owner /dev/pts/@{u8} rw,
+
+  profile gpg {
+    include <abstractions/base>
+
+    @{bin}/gpg r,
+    @{bin}/gpgconf r,
+    @{bin}/gpgsm r,
+
+    /etc/pacman.d/ r,
+    /etc/pacman.d/gnupg/ r,
+    /etc/pacman.d/gnupg/* r,
+
+    owner @{run}/user/@{uid}/ r,
+    owner @{run}/user/@{uid}/gnupg/ r,
+    
+    include if exists <local/octopi_gpg>
+  }
+
+  profile helper {
+    include <abstractions/base>
+    include <abstractions/consoles>
+
+    # ToDo: check!
+    capability dac_read_search,
+    capability ipc_owner,
+    capability sys_ptrace,
+
+    network inet stream, # failed af match
+    #network inet stream ip=127.0.0.1 port=34252 peer=(ip=127.0.0.1, port=12701), # failed af match
+
+    ptrace read peer=octopi,
+    ptrace read peer=octopi-cachecleaner,
+
+    @{sh_path} rix,
+
+    @{bin}/paccache Px,
+    @{bin}/pacman   Px,
+    @{bin}/ps       Px,
+
+    # ToDo: decide if could be denied
+    @{HOMEDIRS}/ r,
+    @{HOME}/ r,
+
+    @{lib}/octopi/octphelper.log w,
+
+    @{tmp}/ r,
+    @{tmp}/.qt_temp_octopi_@{int} rw,
+
+    @{PROC}/ r,
+    @{PROC}/@{pids}/comm r,
+
+    include if exists <local/octopi_helper>
+  }
+
+  profile open {
+    include <abstractions/base>
+    include <abstractions/app/open>
+
+    owner @{tmp}/.temp_octopi_commit_diff r,
+    owner @{tmp}/.temp_octopi_*_PKGBUILD r,
+
+    owner @{PROC}/@{pid}/mountinfo r,
+
+    include if exists <local/octopi_open>
+  }
+
+  profile shell {
+    include <abstractions/base>
+    include <abstractions/consoles>
+    include <abstractions/nameservice-strict>
+    include <abstractions/shells>
+
+    signal receive set=hup peer=octopi,
+
+    @{sh_path} r,
+
+    include if exists <local/octopi_shell>
+  }
+
+  profile sudo {
+    include <abstractions/base>
+    include <abstractions/app/sudo>
+    include <abstractions/fonts-strict>
+    include <abstractions/icons>
+    include <abstractions/kde-base>
+    include <abstractions/qt>
+
+    @{sh_path}     rix,
+    @{bin}/chgrp   rix,
+    @{bin}/chmod   rix,
+    @{bin}/chown   rix,
+    @{bin}/cp      rix,
+    @{bin}/qt-sudo r,
+    @{bin}/sudo    rix,
+
+    @{lib}/octopi/octphelper Px -> octopi//helper,
+
+    /etc/pacman.conf rw,
+    /etc/pacman.conf.bak.@{int}_@{int6} w,
+
+    @{tmp}/octopi-repoeditor.@{rand6} r,
+
+    @{tmp}/octopi.@{rand6} r,
+
+    include if exists <local/octopi_sudo>
+  }
+
+  include if exists <local/octopi>
+}
+
+# vim:syntax=apparmor
