@@ -6,6 +6,9 @@ abi <abi/5.0>,
 
 include <tunables/global>
 
+@{chroot_dirs}  = /var/lib/archbuild/{core,extra}-@{arch}/
+@{chroot_dirs} += /var/lib/aurbuild/@{arch}/
+
 @{exec_path} = @{bin}/arch-nspawn
 profile arch-nspawn @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>
@@ -34,7 +37,7 @@ profile arch-nspawn @{exec_path} flags=(attach_disconnected) {
   @{bin}/tput          rix,
   @{bin}/unshare       rix,
 
-  /usr/share/devtools/lib/*.sh r,
+  /usr/share/devtools/** r,
   /usr/share/makepkg/util.sh r,
   /usr/share/makepkg/util/{,*.sh} r,
   /usr/share/terminfo/** r,
@@ -49,10 +52,10 @@ profile arch-nspawn @{exec_path} flags=(attach_disconnected) {
 
   /var/cache/pacman/pkg r,
 
-  /var/lib/aurbuild/@{arch}/@{user}/.arch-chroot r,
-  /var/lib/aurbuild/@{arch}/@{user}.lock w,
-  /var/lib/aurbuild/@{arch}/@{user}/etc/** rw,
-  /var/lib/aurbuild/@{arch}/@{user}/etc/pacman.d/gnupg/** rwlk,
+  @{chroot_dirs}/@{user}/.arch-chroot r,
+  @{chroot_dirs}/@{user}.lock w,
+  @{chroot_dirs}/@{user}/etc/** rw,
+  @{chroot_dirs}/@{user}/etc/pacman.d/gnupg/** rwlk,
 
   @{tmp}/.tmp@{rand6} r,
 

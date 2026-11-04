@@ -6,6 +6,9 @@ abi <abi/5.0>,
 
 include <tunables/global>
 
+@{chroot_dirs}  = /var/lib/archbuild/extra-@{arch}/
+@{chroot_dirs} += /var/lib/aurbuild/@{arch}/
+
 @{exec_path} = @{bin}/mkarchroot
 profile mkarchroot @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>
@@ -17,9 +20,9 @@ profile mkarchroot @{exec_path} flags=(attach_disconnected) {
 
   # ToDo: test
   mount options=(rw rprivate) -> /, # failed mntpnt match
-  mount options=(rw move) -> /var/lib/aurbuild/@{arch}/root/**/,
+  mount options=(rw move) -> @{chroot_dirs}/root/**/,
 
-  umount /var/lib/aurbuild/@{arch}/root/**/,
+  umount @{chroot_dirs}/root/**/,
 
   signal receive set=winch peer=paru//sudo,
 
@@ -47,18 +50,18 @@ profile mkarchroot @{exec_path} flags=(attach_disconnected) {
   /etc/pacman.d/gnupg/{,**} r,
   /etc/pacman.d/gnupg/trustdb.gpg w,
 
-  /var/lib/aurbuild/@{arch}/@{user}/@{bin}/** Cx -> new-root,
-  /var/lib/aurbuild/@{arch}/@{user}/usr/share/libalpm/scripts/** Cx -> new-root,
+  @{chroot_dirs}/@{user}/@{bin}/** Cx -> new-root,
+  @{chroot_dirs}/@{user}/usr/share/libalpm/scripts/** Cx -> new-root,
 
-  /usr/share/devtools/lib/*.sh r,
+  /usr/share/devtools/** r,
   /usr/share/makepkg/util.sh r,
   /usr/share/makepkg/util/{,*.sh} r,
   /usr/share/terminfo/** r,
 
-  /var/lib/aurbuild/@{arch}/@{user}.lock wk,
-  /var/lib/aurbuild/@{arch}/ r,
-  /var/lib/aurbuild/@{arch}/@{user}/ rw,
-  /var/lib/aurbuild/@{arch}/@{user}/** rwl -> /var/lib/aurbuild/@{arch}/@{user}/**,
+  @{chroot_dirs}/@{user}.lock wk,
+  @{chroot_dirs}/ r,
+  @{chroot_dirs}/@{user}/ rw,
+  @{chroot_dirs}/@{user}/** rwl -> @{chroot_dirs}/@{user}/**,
 
   @{att}@{run}/systemd/resolve/io.systemd.Resolve rw,
 
@@ -80,27 +83,28 @@ profile mkarchroot @{exec_path} flags=(attach_disconnected) {
     capability sys_admin,
     capability sys_chroot,
 
+    network create inet6 dgram, # failed af match
     network netlink raw,
 
     unix type=stream peer=(label=mkarchroot//pacman),
 
     ptrace read peer=@{p_systemd},
 
-    /var/lib/aurbuild/@{arch}/@{user}/@{bin}/** ix,
+    @{chroot_dirs}/@{user}/@{bin}/** ix,
 
-    /var/lib/aurbuild/@{arch}/@{user}/ rw,
-    /var/lib/aurbuild/@{arch}/@{user}/** r,
-    /var/lib/aurbuild/@{arch}/@{user}/usr/share/info/* w,
-    /var/lib/aurbuild/@{arch}/@{user}/etc/** rwlk -> /var/lib/aurbuild/@{arch}/@{user}/etc/**,
-    /var/lib/aurbuild/@{arch}/@{user}/var/** w,
-    /var/lib/aurbuild/@{arch}/@{user}/@{lib}/** mwl -> /var/lib/aurbuild/@{arch}/@{user}/@{lib}/**,
-    /var/lib/aurbuild/@{arch}/@{user}/@{log}/** w,
-    /var/lib/aurbuild/@{arch}/@{user}/root/.ssh/ w,
-    /var/lib/aurbuild/@{arch}/@{user}/tmp/** w,
-    /var/lib/aurbuild/@{arch}/@{user}/dev/tty rw,
+    @{chroot_dirs}/@{user}/ rw,
+    @{chroot_dirs}/@{user}/** r,
+    @{chroot_dirs}/@{user}/usr/share/info/* w,
+    @{chroot_dirs}/@{user}/etc/** rwlk -> @{chroot_dirs}/@{user}/etc/**,
+    @{chroot_dirs}/@{user}/var/** w,
+    @{chroot_dirs}/@{user}/@{lib}/** mwl -> @{chroot_dirs}/@{user}/@{lib}/**,
+    @{chroot_dirs}/@{user}/@{log}/** w,
+    @{chroot_dirs}/@{user}/root/.ssh/ w,
+    @{chroot_dirs}/@{user}/tmp/** w,
+    @{chroot_dirs}/@{user}/dev/tty rw,
 
     @{att}/dev/pts/@{u8} rw, # file_inherit
-    @{att}/var/lib/aurbuild/@{arch}/@{user}.lock w, # file_inherit
+    @{att}@{chroot_dirs}/@{user}.lock w, # file_inherit
 
     include if exists <local/mkarchroot_new-root>
   }
@@ -113,6 +117,7 @@ profile mkarchroot @{exec_path} flags=(attach_disconnected) {
     capability chown,
     capability dac_read_search,
     capability fsetid,
+    capability net_admin, # optional: no audit
     capability setfcap,
     capability sys_chroot,
 
@@ -141,16 +146,15 @@ profile mkarchroot @{exec_path} flags=(attach_disconnected) {
     @{bin}/gpgconf rix,
     @{bin}/gpgsm   rix,
 
-    /var/lib/aurbuild/@{arch}/@{user}/@{bin}/** Px -> mkarchroot//new-root,
-    /var/lib/aurbuild/@{arch}/@{user}/usr/share/libalpm/scripts/** Px -> mkarchroot//new-root,
+    @{chroot_dirs}/@{user}/@{bin}/** Px -> mkarchroot//new-root,
+    @{chroot_dirs}/@{user}/usr/share/libalpm/scripts/** Px -> mkarchroot//new-root,
 
     /etc/pacman.conf r,
-    /etc/pacman.d/{,*-}mirrorlist r,
-    /etc/pacman.d/gnupg/{,**} r,
+    /etc/pacman.d/{,**} r,
     /etc/pacman.d/gnupg/trustdb.gpg w,
 
     /var/cache/pacman/pkg/* r,
-    /var/lib/aurbuild/@{arch}/@{user}/** rwlk -> /var/lib/aurbuild/@{arch}/@{user}/**,
+    @{chroot_dirs}/@{user}/** rwlk -> @{chroot_dirs}/@{user}/**,
 
     @{log}/pacman.log w,
 
@@ -162,7 +166,7 @@ profile mkarchroot @{exec_path} flags=(attach_disconnected) {
 
     @{att}@{run}/systemd/resolve/io.systemd.Resolve rw,
     @{att}/dev/pts/@{u8} rw, # file_inherit
-    @{att}/var/lib/aurbuild/@{arch}/@{user}.lock w, # file_inherit
+    @{att}@{chroot_dirs}/@{user}.lock w, # file_inherit
 
     include if exists <local/mkarchroot_pacman>
   }

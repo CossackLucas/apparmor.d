@@ -6,6 +6,9 @@ abi <abi/5.0>,
 
 include <tunables/global>
 
+@{chroot_dirs}  = /var/lib/archbuild/{core,extra}-@{arch}/
+@{chroot_dirs} += /var/lib/aurbuild/@{arch}/
+
 @{exec_path} = @{bin}/makechrootpkg
 profile makechrootpkg @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>
@@ -31,8 +34,10 @@ profile makechrootpkg @{exec_path} flags=(attach_disconnected) {
   @{bin}/getent     rix,
   @{bin}/gettext    rix,
   @{bin}/mountpoint rix,
+  @{bin}/pacman     rix,
   @{bin}/pacman-conf Px,
   @{bin}/pacman-key  Px,
+  @{bin}/rsync       Cx -> rsync,
   @{bin}/sudo        Cx -> sudo,
   @{bin}/tput       rix,
 
@@ -44,20 +49,20 @@ profile makechrootpkg @{exec_path} flags=(attach_disconnected) {
   /etc/makepkg.conf r,
   /etc/makepkg.conf.d/{,**} r,
 
-  /var/lib/aurbuild/@{arch}/ r,
-  /var/lib/aurbuild/@{arch}/@{user}/{,**} r,
-  /var/lib/aurbuild/@{arch}/@{user}.lock wk,
-  /var/lib/aurbuild/@{arch}/@{user}/build/ rw,
-  /var/lib/aurbuild/@{arch}/@{user}/chrootbuild w,
-  /var/lib/aurbuild/@{arch}/@{user}/etc/** w,
-  /var/lib/aurbuild/@{arch}/@{user}/logdest/{,*.log} w,
-  /var/lib/aurbuild/@{arch}/@{user}/pkgdest/ w,
-  /var/lib/aurbuild/@{arch}/@{user}/srcdest/ w,
-  /var/lib/aurbuild/@{arch}/@{user}/srcpkgdest/ w,
-  /var/lib/aurbuild/@{arch}/@{user}/startdir/ w,
+  @{chroot_dirs}/ r,
+  @{chroot_dirs}/@{user}/{,**} r,
+  @{chroot_dirs}/@{user}.lock wk,
+  @{chroot_dirs}/@{user}/build/ rw,
+  @{chroot_dirs}/@{user}/chrootbuild w,
+  @{chroot_dirs}/@{user}/etc/** w,
+  @{chroot_dirs}/@{user}/logdest/{,*.log} w,
+  @{chroot_dirs}/@{user}/pkgdest/ w,
+  @{chroot_dirs}/@{user}/srcdest/ w,
+  @{chroot_dirs}/@{user}/srcpkgdest/ w,
+  @{chroot_dirs}/@{user}/startdir/ w,
 
-  @{user_cache_dirs}/paru/clone/*/ r,
-  @{user_cache_dirs}/paru/clone/*/*.log w,
+  @{user_pkg_dirs}/{,**} r,
+  @{user_pkg_dirs}/**.log w,
 
   @{tmp}/makechrootpkg.@{rand10}/{,**/} rw,
 
@@ -65,6 +70,25 @@ profile makechrootpkg @{exec_path} flags=(attach_disconnected) {
   @{PROC}/@{pids}/mountinfo r,
 
   /dev/pts/@{u8} rw,
+
+  profile rsync {
+    include <abstractions/base>
+    include <abstractions/nameservice-strict>
+
+    capability chown,
+    capability dac_override,
+    capability dac_read_search,
+    capability fowner,
+    capability fsetid,
+
+    @{bin}/rsync r,
+
+    @{chroot_dirs}/** rw,
+
+    /dev/pts/@{u8} rw, # file_inherit
+
+    include if exists <local/makechrootpkg_rsync>
+  }
 
   profile sudo flags=(attach_disconnected) {
     include <abstractions/base>
@@ -77,9 +101,9 @@ profile makechrootpkg @{exec_path} flags=(attach_disconnected) {
     @{bin}/makechrootpkg Px,
     @{bin}/makepkg       Px,
 
-    /var/lib/aurbuild/@{arch}/@{user}.lock w, # file_inherit
+    @{chroot_dirs}/@{user}.lock w, # file_inherit
 
-    owner @{user_cache_dirs}/paru/clone/*/PKGBUILD r,
+    owner @{user_pkg_dirs}/**/PKGBUILD r,
 
     include if exists <local/makechrootpkg_sudo>
   }
