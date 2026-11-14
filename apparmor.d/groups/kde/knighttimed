@@ -11,13 +11,17 @@ include <tunables/global>
 profile knighttimed @{exec_path} {
   include <abstractions/base>
   include <abstractions/bus-session>
+  include <abstractions/bus-system>
+  include <abstractions/bus/system/org.freedesktop.GeoClue2>
   include <abstractions/kde-base>
 
   @{exec_path} mr,
 
   owner @{user_config_dirs}/knighttimerc r,
 
-  owner @{user_state_dirs}/knighttimestaterc r,
+  owner @{user_state_dirs}/knighttimestaterc@{rand6} rwlk -> @{user_state_dirs}/#@{int},
+
+  @{PROC}/sys/kernel/random/boot_id r,
 
   /dev/tty r,
 

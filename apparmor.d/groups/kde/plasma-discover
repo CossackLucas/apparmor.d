@@ -17,6 +17,7 @@ profile plasma-discover @{exec_path} flags=(attach_disconnected,mediate_deleted)
   include <abstractions/dconf-write>
   include <abstractions/fontconfig-cache-write>
   include <abstractions/gvfs-metadata>
+  include <abstractions/kde-sonnet>
   include <abstractions/nameservice-strict>
   include <abstractions/network-manager-observe>
   include <abstractions/ssl_certs>

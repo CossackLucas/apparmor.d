@@ -20,6 +20,18 @@ profile plasmalogin @{exec_path} flags=(attach_disconnected,mediate_deleted) {
 
   signal send set=(kill,term) peer=plasmalogin-helper,
 
+  #aa:dbus own bus=system name=org.freedesktop.DisplayManager
+
+  dbus send bus=system path=/org/freedesktop/systemd1
+       interface=org.freedesktop.DBus.Properties
+       member=Get
+       peer=(name=org.freedesktop.systemd1, label="@{p_systemd}"),
+
+  dbus send bus=system path=/org/freedesktop/home1
+       interface=org.freedesktop.home1.Manager
+       member=GetUserRecordByName
+       peer=(name=org.freedesktop.home1, label="@{p_systemd_homed}"),
+
   @{exec_path} mr,
 
   @{lib}/plasmalogin-helper Px,

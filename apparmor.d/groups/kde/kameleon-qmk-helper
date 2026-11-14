@@ -7,13 +7,14 @@ abi <abi/5.0>,
 include <tunables/global>
 
 @{exec_path} = @{lib}/kf6/kameleon-qmk-helper
-profile kameleon-qmk-helper @{exec_path} {
+profile kameleon-qmk-helper @{exec_path} flags=(attach_disconnected) {
   include <abstractions/base>
   include <abstractions/bus-system>
+  include <abstractions/bus/system/org.freedesktop.PolicyKit1>
   include <abstractions/devices-usb-read>
   include <abstractions/sys/i2c>
 
-  #aa:dbus own bus=system name==org.kde.kameleon.qmk.helper
+  #aa:dbus own bus=system name=org.kde.kameleon.qmk.helper
 
   @{exec_path} mr,
 
