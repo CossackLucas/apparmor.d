@@ -62,23 +62,23 @@
   @{desktop_share_dirs}+=@{lightdm_share_dirs}
   @{desktop_state_dirs}+=@{lightdm_state_dirs}
 
-# } else if "cosmic" in @{DE} {
+} else if "cosmic" in @{DE} {
 
-#   # Full path of the Cosmic configuration directories
-#   @{COSMIC_HOME}=/var/lib/cosmic-greeter/
-#   @{cosmic_cache_dirs}=@{COSMIC_HOME}/.cache/
-#   @{cosmic_config_dirs}=@{COSMIC_HOME}/.config/
-#   @{cosmic_local_dirs}=@{COSMIC_HOME}/.local/
-#   @{cosmic_share_dirs}=@{COSMIC_HOME}/.local/share/
-#   @{cosmic_state_dirs}=@{COSMIC_HOME}/.local/state/
+   # Full path of the Cosmic configuration directories
+   @{COSMIC_HOME}=/var/lib/cosmic-greeter/
+   @{cosmic_cache_dirs}=@{COSMIC_HOME}/.cache/
+   @{cosmic_config_dirs}=@{COSMIC_HOME}/.config/
+   @{cosmic_local_dirs}=@{COSMIC_HOME}/.local/
+   @{cosmic_share_dirs}=@{COSMIC_HOME}/.local/share/
+   @{cosmic_state_dirs}=@{COSMIC_HOME}/.local/state/
 
-#   @{DESKTOP_HOME}+=@{COSMIC_HOME}
-#   @{desktop_cache_dirs}+=@{cosmic_cache_dirs}
-#   @{desktop_config_dirs}+=@{cosmic_config_dirs}
-#   @{desktop_local_dirs}+=@{cosmic_local_dirs}
-#   @{desktop_share_dirs}+=@{cosmic_share_dirs}
-#   @{desktop_state_dirs}+=@{cosmic_state_dirs}
+   @{DESKTOP_HOME}+=@{COSMIC_HOME}
+   @{desktop_cache_dirs}+=@{cosmic_cache_dirs}
+   @{desktop_config_dirs}+=@{cosmic_config_dirs}
+   @{desktop_local_dirs}+=@{cosmic_local_dirs}
+   @{desktop_share_dirs}+=@{cosmic_share_dirs}
+   @{desktop_state_dirs}+=@{cosmic_state_dirs}
 
-# }
+ }
 
 # vim:syntax=apparmor

@@ -1,0 +1,48 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/cosmic-session
+profile cosmic-session @{exec_path} flags=(attach_disconnected) {
+  include <abstractions/base>
+
+  signal send set=term peer=unconfined, # ToDo: remove when everything is profiled
+
+  @{exec_path} mr,
+
+  @{bin}/cosmic-app-library     PUx,
+  @{bin}/cosmic-bg              PUx,
+  @{bin}/cosmic-comp            Px,
+  @{bin}/cosmic-files-applet    PUx,
+  @{bin}/cosmic-greeter         Px,
+  @{bin}/cosmic-idle            PUx,
+  @{bin}/cosmic-launcher        PUx,
+  @{bin}/cosmic-notifications   PUx,
+  @{bin}/cosmic-osd             PUx,
+  @{bin}/cosmic-osk             PUx,
+  @{bin}/cosmic-panel           PUx,
+  @{bin}/cosmic-settings-daemon PUx,
+  @{bin}/cosmic-workspaces      PUx,
+  @{bin}/systemctl              Cx -> systemctl,
+
+  /dev/tty@{u8} rw, # file_inherit
+
+  @{att}/run/systemd/inhibit/@{int}.ref w,
+
+  profile systemctl flags=(attach_disconnected) {
+    include <abstractions/base>
+    include <abstractions/app/systemctl>
+
+    owner @{att}/dev/tty@{u8} rw,
+
+    include if exists <local/cosmic-session_systemctl>
+  }
+
+  include if exists <local/cosmic-session>
+}
+
+# vim:syntax=apparmor

@@ -1,0 +1,47 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/start-cosmic
+profile start-cosmic @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/consoles>
+  include <abstractions/nameservice-strict>
+  include <abstractions/shells>
+
+  @{exec_path} mrix,
+
+  @{shells_path}       rix,
+  @{bin}/cosmic-session Px,
+  @{bin}/cut           rix,
+  @{bin}/flatpak       rCx -> flatpak,
+  @{bin}/printenv      rix,
+  @{bin}/systemctl      Cx -> systemctl,
+
+  @{lib}/ r,
+
+  profile flatpak {
+    include <abstractions/base>
+
+    @{bin}/flatpak r,
+
+    /dev/tty@{u8} rw, # file_inherit
+
+    include if exists <local/start-cosmic_flatpak>
+  }
+
+  profile systemctl {
+    include <abstractions/base>
+    include <abstractions/app/systemctl>
+
+    include if exists <local/start-cosmic_systemctl>
+  }
+
+  include if exists <local/start-cosmic>
+}
+
+# vim:syntax=apparmor

@@ -1,0 +1,25 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/cosmic-greeter-start
+profile cosmic-greeter-start @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/consoles>
+
+  @{exec_path} mr,
+
+  @{sh_path} r,
+  @{bin}/cosmic-comp Px,
+  @{bin}/rm          ix,
+
+  owner @{run}/cosmic-greeter/cosmic/com.system76.CosmicSettingsDaemon/*/ r,
+
+  include if exists <local/cosmic-greeter-start>
+}
+
+# vim:syntax=apparmor

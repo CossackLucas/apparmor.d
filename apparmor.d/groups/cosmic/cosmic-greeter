@@ -1,0 +1,60 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/cosmic-greeter
+profile cosmic-greeter @{exec_path} flags=(attach_disconnected) {
+  include <abstractions/base>
+  include <abstractions/cgroup-limits>
+  include <abstractions/fonts-strict>
+  include <abstractions/icons>
+  include <abstractions/nameservice-strict>
+
+  @{exec_path} mr,
+
+  @{bin}/cosmic-osk   PUx,
+  @{bin}/cosmic-randr PUx,
+
+  /usr/share/backgrounds/cosmic/*.@{image_ext} r,
+  /usr/share/cosmic/com.system76.CosmicComp/*/input_touchpad r,
+  /usr/share/cosmic/com.system76.CosmicTheme.*/*/* r,
+  /usr/share/pixmaps/{,**} r,
+  /usr/share/wayland-sessions/{,*.desktop} r,
+  /usr/share/xkeyboard-config-2/{,**} r,
+
+  owner @{cosmic_config_dirs}/cosmic/com.system76.CosmicGreeter/*/ r,
+  owner @{cosmic_config_dirs}/cosmic/com.system76.CosmicGreeter/*/.atomicwrite@{rand6}/{,tmpfile.tmp} rw,
+  owner @{cosmic_config_dirs}/cosmic/com.system76.CosmicGreeter/*/last_user rw,
+  owner @{cosmic_config_dirs}/cosmic/com.system76.CosmicGreeter/*/users r,
+
+  owner @{cosmic_state_dirs}/cosmic/com.system76.CosmicOSK/*/ r,
+  owner @{cosmic_state_dirs}/cosmic/com.system76.CosmicOSK/*/.atomicwrite@{rand6}/{,tmpfile.tmp} rw,
+  owner @{cosmic_state_dirs}/cosmic/com.system76.CosmicOSK/*/always_shown rw,
+
+  owner @{user_config_dirs}/cosmic/com.system76.CosmicAppletTime/*/ r,
+  owner @{user_config_dirs}/cosmic/com.system76.CosmicComp/*/autotile_behavior r,
+  owner @{user_config_dirs}/cosmic/com.system76.CosmicComp/*/xkb_config r,
+  owner @{user_config_dirs}/cosmic/com.system76.CosmicTheme.*/*/{,**} r,
+  owner @{user_state_dirs}/cosmic-comp/outputs.ron r,
+  owner @{user_state_dirs}/cosmic/com.system76.CosmicBackground/*/ r,
+  owner @{user_state_dirs}/cosmic/com.system76.CosmicBackground/*/.atomicwrite@{rand6}/ r,
+  owner @{user_state_dirs}/cosmic/com.system76.CosmicBackground/*/wallpapers r,
+
+  owner @{run}/cosmic-greeter/cosmic/com.system76.CosmicSettingsDaemon/*/ r,
+  owner @{run}/cosmic-greeter/cosmic/com.system76.CosmicSettingsDaemon/*/.atomicwrite@{rand6}/{,tmpfile.tmp} rw,
+  owner @{run}/cosmic-greeter/cosmic/com.system76.CosmicSettingsDaemon/*/high_contrast w,
+  owner @{run}/cosmic-greeter/cosmic/com.system76.CosmicSettingsDaemon/*/invert_colors w,
+
+  @{att}@{run}/systemd/inhibit/@{int}.ref w,
+
+  owner       /dev/tty@{u8} rw,
+  owner @{att}/dev/tty@{u8} rw,
+
+  include if exists <local/cosmic-greeter>
+}
+
+# vim:syntax=apparmor

@@ -1,0 +1,91 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/cosmic-comp
+profile cosmic-comp @{exec_path} flags=(attach_disconnected) {
+  include <abstractions/base>
+  include <abstractions/graphics>
+  include <abstractions/icons>
+  include <abstractions/input>
+  include <abstractions/network/netlink>
+  include <abstractions/wayland-compositor>
+  include <abstractions/udev/usb>
+  include <abstractions/X-strict>
+
+  @{exec_path} mr,
+
+  @{bin}/cosmic-greeter Px,
+  @{bin}/systemctl      Cx -> systemctl,
+  @{bin}/Xwayland       Px,
+
+  priority=-1 audit @{bin}/** PUx,
+  priority=-1 audit @{lib}/** PUx,
+
+  /usr/share/cosmic/com.system76.CosmicComp/*/input_touchpad r,
+  /usr/share/cosmic/com.system76.CosmicSettings.Shortcuts/v1/* r,
+  /usr/share/cosmic/com.system76.CosmicSettings.WindowRules/*/tiling_exception_defaults r,
+  /usr/share/cosmic/com.system76.CosmicTheme.*/*/* r,
+  /usr/share/libinput/{,**} r,
+
+  owner @{cosmic_cache_dirs}/mesa_shader_cache/** r,
+
+  owner @{cosmic_config_dirs}/cosmic/com.system76.Cosmic*/*/ r,
+
+  owner @{cosmic_state_dirs}/cosmic-comp/outputs.ron rw,
+  owner @{cosmic_state_dirs}/cosmic-comp/a11y_screen_filter.ron rw,
+
+  owner @{user_config_dirs}/cosmic/com.system76.CosmicComp/*/ r,
+  owner @{user_config_dirs}/cosmic/com.system76.CosmicComp/*/autotile_behavior r,
+  owner @{user_config_dirs}/cosmic/com.system76.CosmicComp/*/xkb_config r,
+  owner @{user_config_dirs}/cosmic/com.system76.CosmicSettings.Shortcuts/*/ r,
+  owner @{user_config_dirs}/cosmic/com.system76.CosmicSettings.WindowRules/*/ r,
+  owner @{user_config_dirs}/cosmic/com.system76.CosmicTheme.*/*/{,**} r,
+  owner @{user_config_dirs}/cosmic/com.system76.CosmicTk/*/ r,
+  owner @{user_state_dirs}/cosmic-comp/outputs.ron rw,
+
+        @{run}/cosmic-greeter/cosmic/com.system76.CosmicSettingsDaemon/*/high_contrast r,
+        @{run}/cosmic-greeter/cosmic/com.system76.CosmicSettingsDaemon/*/invert_colors r,
+        @{run}/systemd/sessions/@{int} r,
+  owner @{run}/cosmic-greeter/cosmic/{,**} w,
+  owner @{run}/user/@{uid}/#@{int} rw,
+  owner @{run}/user/@{uid}/wayland-@{int} w,
+
+  @{run}/udev/data/+dmi:id r,             # for motherboard info
+  @{run}/udev/data/+drm:card@{int}-* r,   # For screen outputs
+  @{run}/udev/data/+pci:* r,              # Identifies all PCI devices (CPU, GPU, Network, Disks, USB, etc.)
+  @{run}/udev/data/+platform:* r,         # Identifies onboard devices (laptop/board model, power controllers, thermal sensors)
+
+  @{sys}/bus/ r,
+  @{sys}/devices/@{pci}/drm/card@{int}/{,**/}uevent r,
+  @{sys}/devices/@{pci}/usb@{int}/{,**/}uevent r,
+  @{sys}/devices/platform/i8042/{,**/}uevent r,
+  @{sys}/devices/platform/LNXPWRBN:00/uevent r,
+  @{sys}/devices/platform/pcspkr/uevent r,
+  @{sys}/devices/platform/uevent r,
+  @{sys}/devices/virtual/dmi/id/uevent r,
+
+  owner @{PROC}/@{pid}/cmdline r,
+  owner @{PROC}/@{pid}/comm r,
+
+        /dev/tty@{u8} rw, # file_inherit
+  @{att}/dev/dri/card@{u8} rw,
+  @{att}/dev/input/event@{u8} rw,
+
+  profile systemctl flags=(attach_disconnected) {
+    include <abstractions/base>
+    include <abstractions/app/systemctl>
+
+     owner @{att}/dev/tty@{u8} rw,
+
+    include if exists <local/cosmic-comp_systemctl>
+  }
+
+  include if exists <local/cosmic-comp>
+}
+
+# vim:syntax=apparmor
