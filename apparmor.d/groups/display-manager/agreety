@@ -1,0 +1,24 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/agreety
+profile agreety @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/consoles>
+
+  @{exec_path} mr,
+
+  /etc/issue r,
+
+  priority=-1 audit @{bin}/** PUx,
+  audit @{lib}/** PUx,
+
+  include if exists <local/agreety>
+}
+
+# vim:syntax=apparmor

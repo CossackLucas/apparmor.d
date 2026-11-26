@@ -36,12 +36,17 @@ profile hyprland @{exec_path} flags=(attach_disconnected) {
   @{exec_path} mr,
 
   /usr/share/hypr{,land}/{,*} r,
+  /usr/share/hyprlogin/hyprland-greeter.lua r,
   /usr/share/libinput/{,*} r,
   /usr/share/file/misc/magic.mgc r,
 
   /etc/os-release r,
 
   /var/cache/hyprpm/juan/split-monitor-workspaces/split-monitor-workspaces.so mr,
+
+  # used by hyprlogin
+  owner /.cache/ w,
+  owner /.local/ w,
 
   owner @{user_cache_dirs}/hyprland/{,**} rw,
   owner @{user_config_dirs}/hypr/ rw,

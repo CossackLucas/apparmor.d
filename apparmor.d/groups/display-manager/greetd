@@ -1,0 +1,112 @@
+# apparmor.d - Full set of apparmor profiles
+# Copyright (C) 2026 Łukasz Kozak <lakis.kozak@gmail.com>
+# SPDX-License-Identifier: GPL-2.0-only
+
+abi <abi/5.0>,
+
+include <tunables/global>
+
+@{exec_path} = @{bin}/greetd
+profile greetd @{exec_path} {
+  include <abstractions/base>
+  include <abstractions/authentication>
+  include <abstractions/consoles>
+  include <abstractions/nameservice-strict>
+  include <abstractions/network/netlink>
+
+  capability audit_write,
+  capability chown,
+  capability dac_override,
+  capability dac_read_search,
+  capability fowner,
+  capability ipc_lock,
+  capability kill,
+  capability net_admin,
+  capability setgid,
+  capability setuid,
+  capability sys_tty_config,
+
+  @{exec_path} mrix,
+
+  @{sh_path} rCx -> shells,
+
+  /etc/greetd/*.toml r,
+  /etc/profile r,
+  /etc/profile.d/{,*.sh} r,
+  /etc/shells r,
+
+  /etc/machine-id r,
+
+  /var/lib/lastlog/ r,
+  /var/lib/lastlog/lastlog2.db rwk,
+  /var/lib/lastlog/lastlog2.db-journal rw,
+
+  @{bin}/*_perl/ r,
+
+  @{run}/faillock/user rwk,
+  @{run}/greetd-@{int}.sock w,
+  @{run}/greetd.run w,
+
+  @{PROC}/@{pid}/loginuid w,
+  @{PROC}/@{pid}/uid_map r,
+
+  profile flatpak {
+    include <abstractions/base>
+
+    @{bin}/flatpak r,
+
+    /dev/tty@{u8} rw, # file_inherit
+
+    include if exists <local/greetd_flatpak>
+  }
+
+  profile shells {
+    include <abstractions/base>
+    include <abstractions/consoles>
+    include <abstractions/shells>
+
+    @{sh_path} r,
+
+    @{bin}/cat     rix,
+    @{bin}/env     rix,
+    @{bin}/find    rix,
+    @{bin}/flatpak rPx -> greetd//flatpak,
+    @{bin}/pidof   rPx,
+    @{bin}/tr      rix,
+    @{bin}/tty     rix,
+    @{bin}/xargs   rix,
+
+    @{bin}/agreety Px, # default greeter
+
+    if "cosmic" in @{DE} {
+      @{bin}/cosmic-greeter-start rPx,
+      @{bin}/start-cosmic Px,
+
+    } else if "kde" in @{DE} {
+      @{bin}/startplasma-wayland Px,
+      @{lib}/plasma-dbus-run-session-if-needed rix,
+
+    }
+
+    # Useable compositors
+    @{bin}/start-hyprland Px,
+
+    # ToDo: remove after tests!
+    priority=-1 audit @{bin}/** PUx,
+    priority=-1 audit @{lib}/** PUx,
+
+    /etc/debuginfod/{,*} r,
+
+    owner /var/lib/cosmic-greeter/ r,
+
+    owner @{HOME}/ r,
+
+    owner @{PROC}/@{pid}/fd/ r,
+
+    include if exists <local/greetd_shells>
+  }
+
+  include if exists <local/greetd>
+}
+
+# vim:syntax=apparmor
