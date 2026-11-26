@@ -17,7 +17,7 @@ profile timedatectl @{exec_path} {
   signal send set=cont peer=child-pager,
 
   #aa:dbus talk bus=system name=org.freedesktop.timedate1 label="@{p_systemd_timedated}"
-  #aa:dbus talk bus=system name=org.freedesktop.timesync1 label=systemd-timesyncd
+  #aa:dbus talk bus=system name=org.freedesktop.timesync1 label="@{p_systemd_timesyncd}"
 
   @{exec_path} mr,
 

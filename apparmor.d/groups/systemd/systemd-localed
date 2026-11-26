@@ -8,7 +8,7 @@ abi <abi/5.0>,
 include <tunables/global>
 
 @{exec_path} = @{lib}/systemd/systemd-localed
-profile systemd-localed @{exec_path} flags=(attach_disconnected) {
+profile systemd-localed @{exec_path} flags=(attach_disconnected,mediate_deleted) {
   include <abstractions/base>
   include <abstractions/bus-system>
   include <abstractions/consoles>
@@ -40,7 +40,7 @@ profile systemd-localed @{exec_path} flags=(attach_disconnected) {
   /etc/ r,
   /etc/.#locale.conf@{hex16} rw,
   /etc/.#locale.gen@{hex16} rw,
-  /etc/.#vconsole.conf* rw,
+  /etc/.#vconsole.conf* rwl,
   /etc/default/.#locale* rw,
   /etc/default/keyboard r,
   /etc/default/locale rw,
